@@ -1,5 +1,4 @@
 ########## MANDATORY VARIABLES
-custom_cache = "/home/custompkgs"
 chroot = "/home/stephen/Downloads/aur/chroot"
 pkg_dir = "/home/custompkgs"
 repo = "/home/custompkgs/custom.db.tar"
