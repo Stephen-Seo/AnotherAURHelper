@@ -82,8 +82,12 @@ For example, if your repo's name is `MyAURRepo`, then `repo` should be set to
 `.../MyAURRepo.db.tar`.
 
 You must also create symlinks such that `MyAURRepo.db` points to
-`MyAURRepo.db.tar` and `MyAURRepo.files` points to `MyAURRepo.files.tar`, and
-`MyAURRepo.db.sig` points to `MyAURRepo.db.tar.sig`.
+`MyAURRepo.db.tar` and `MyAURRepo.files` points to `MyAURRepo.files.tar`.
+
+The Python script should automatically make a relative (not absolute) symlink to
+`MyAURRepo.db.tar.sig` with the name `MyAURRepo.db.sig` after signing (which
+should happen after each package is built and signed). Note the name doesn't
+have to be `MyAURRepo`, but is based on the `repo` variable set in the config.
 
 To use the repository, you can add an entry to your `/etc/pacman.conf` with the
 following:
