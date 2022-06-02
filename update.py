@@ -814,11 +814,14 @@ def update_pkg_list(
                 text=True,
                 env={"GNUPGHOME": signing_gpg_dir},
             )
+            repo_sig_name = f"{repo}.sig"
+            if repo_sig_name.rfind("/") != -1:
+                repo_sig_name = repo_sig_name.rsplit(sep="/", maxsplit=1)[1]
             subprocess.run(
                 [
                     "/usr/bin/ln",
                     "-sf",
-                    str(os.path.join(pkg_out_dir, f"{repo}.sig")),
+                    repo_sig_name,
                     str(os.path.join(pkg_out_dir, f"{repo}")).removesuffix(".tar") + ".sig",
                 ]
             )
