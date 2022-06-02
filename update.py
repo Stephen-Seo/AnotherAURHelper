@@ -256,7 +256,9 @@ def check_pkg_build(pkg, editor):
 
 def check_pkg_version(pkgdir, pkg_state, repo, force_check_srcinfo):
     """Returns "fail", "install", or "done"."""
-    status, current_epoch, current_version = get_pkg_current_version(pkgdir, pkg_state, repo)
+    status, current_epoch, current_version = get_pkg_current_version(
+        pkgdir, pkg_state, repo
+    )
     if status != "fetched":
         return status
     elif current_version is None:
@@ -274,7 +276,9 @@ def check_pkg_version(pkgdir, pkg_state, repo, force_check_srcinfo):
         )
     )
 
-    return get_srcinfo_check_result(current_epoch, current_version, pkgdir, force_check_srcinfo)
+    return get_srcinfo_check_result(
+        current_epoch, current_version, pkgdir, force_check_srcinfo
+    )
 
 
 def get_srcinfo_version(pkgdir):
@@ -282,9 +286,7 @@ def get_srcinfo_version(pkgdir):
     if not os.path.exists(os.path.join(SCRIPT_DIR, pkgdir, ".SRCINFO")):
         log_print(f'ERROR: .SRCINFO does not exist for pkg "{pkgdir}"')
         return False, None, None, None
-    pkgver_reprog = re.compile(
-        "^\\s*pkgver\\s*=\\s*([a-zA-Z0-9._+-]+)\\s*$"
-    )
+    pkgver_reprog = re.compile("^\\s*pkgver\\s*=\\s*([a-zA-Z0-9._+-]+)\\s*$")
     pkgrel_reprog = re.compile("^\\s*pkgrel\\s*=\\s*([0-9.]+)\\s*$")
     pkgepoch_reprog = re.compile("^\\s*epoch\\s*=\\s*([0-9]+)\\s*$")
     pkgver = ""
@@ -318,9 +320,11 @@ def get_pkgbuild_version(pkgdir, force_check_srcinfo):
             break
     # TODO support split packages
     if force_check_srcinfo or user_input == "1":
-        srcinfo_fetch_success, pkgepoch, pkgver, pkgrel = get_srcinfo_version(pkgdir)
+        srcinfo_fetch_success, pkgepoch, pkgver, pkgrel = get_srcinfo_version(
+            pkgdir
+        )
         if not srcinfo_fetch_success:
-            log_print('ERROR: Failed to get pkg info from .SRCINFO')
+            log_print("ERROR: Failed to get pkg info from .SRCINFO")
             return False, None, None, None
     elif user_input == "2":
         try:
@@ -393,8 +397,12 @@ def get_pkgbuild_version(pkgdir, force_check_srcinfo):
         return False, None, None, None
 
 
-def get_srcinfo_check_result(current_epoch, current_version, pkgdir, force_check_srcinfo):
-    ver_success, pkgepoch, pkgver, pkgrel = get_pkgbuild_version(pkgdir, force_check_srcinfo)
+def get_srcinfo_check_result(
+    current_epoch, current_version, pkgdir, force_check_srcinfo
+):
+    ver_success, pkgepoch, pkgver, pkgrel = get_pkgbuild_version(
+        pkgdir, force_check_srcinfo
+    )
     if ver_success:
         if current_epoch is None and pkgepoch is not None:
             log_print(
@@ -410,14 +418,23 @@ def get_srcinfo_check_result(current_epoch, current_version, pkgdir, force_check
                 )
             )
             return "done"
-        elif current_epoch is not None and pkgepoch is not None and int(current_epoch) < int(pkgepoch):
+        elif (
+            current_epoch is not None
+            and pkgepoch is not None
+            and int(current_epoch) < int(pkgepoch)
+        ):
             log_print(
                 'Current installed version of "{}" is out of date (older epoch).'.format(
                     pkg_state[pkgdir]["pkg_name"]
                 )
             )
             return "install"
-        elif pkgver is not None and pkgrel is not None and version.parse(current_version) < version.parse(pkgver + "-" + pkgrel):
+        elif (
+            pkgver is not None
+            and pkgrel is not None
+            and version.parse(current_version)
+            < version.parse(pkgver + "-" + pkgrel)
+        ):
             log_print(
                 'Current installed version of "{}" is out of date (older version).'.format(
                     pkg_state[pkgdir]["pkg_name"]
@@ -438,6 +455,7 @@ def get_srcinfo_check_result(current_epoch, current_version, pkgdir, force_check
             )
         )
         return "fail"
+
 
 def get_pkg_current_version(pkgdir, pkg_state, repo):
     """Returns (status, epoch, version)"""
@@ -822,7 +840,10 @@ def update_pkg_list(
                     "/usr/bin/ln",
                     "-sf",
                     repo_sig_name,
-                    str(os.path.join(pkg_out_dir, f"{repo}")).removesuffix(".tar") + ".sig",
+                    str(os.path.join(pkg_out_dir, f"{repo}")).removesuffix(
+                        ".tar"
+                    )
+                    + ".sig",
                 ]
             )
         except subprocess.CalledProcessError:
@@ -1125,7 +1146,9 @@ if __name__ == "__main__":
             update_pkg_dir_count = 0
             update_pkg_dir_success = False
             while update_pkg_dir_count < 5:
-                (success, skip_on_same_ver) = update_pkg_dir(pkg_list[i], pkg_state)
+                (success, skip_on_same_ver) = update_pkg_dir(
+                    pkg_list[i], pkg_state
+                )
                 if success:
                     update_pkg_dir_success = True
                     break
@@ -1137,9 +1160,11 @@ if __name__ == "__main__":
                 print_state_info_and_get_update_list(pkg_state)
                 sys.exit(1)
         if skip_on_same_ver:
-            check_pkg_version_result = check_pkg_version(pkg_list[i], pkg_state, args_repo, True)
+            check_pkg_version_result = check_pkg_version(
+                pkg_list[i], pkg_state, args_repo, True
+            )
             if check_pkg_version_result != "install":
-                log_print(f'Pkg {pkg_list[i]} is up to date, skipping...')
+                log_print(f"Pkg {pkg_list[i]} is up to date, skipping...")
                 pkg_state[pkg_list[i]]["state"] = "up to date"
                 i += 1
                 continue
@@ -1168,7 +1193,9 @@ if __name__ == "__main__":
             if skip_on_same_ver and check_pkg_version_result is not None:
                 state_result = check_pkg_version_result
             else:
-                state_result = check_pkg_version(pkg_list[i], pkg_state, args_repo, False)
+                state_result = check_pkg_version(
+                    pkg_list[i], pkg_state, args_repo, False
+                )
             confirm_result_result = confirm_result(pkg_list[i], state_result)
             if confirm_result_result == "continue":
                 pkg_state[pkg_list[i]]["state"] = state_result
