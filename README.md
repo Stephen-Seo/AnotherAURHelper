@@ -34,7 +34,7 @@ script to run.
 
 Use `/usr/bin/mkarchroot` to create your CHROOT in a directory.
 
-    mkarchroot $HOME/mychroot base base-devel
+    mkarchroot $HOME/mychroot base base-devel ccache sccache
 
 You must refer to the CHROOT as `$HOME/mychroot` if you used the same name as in
 the previous example.
