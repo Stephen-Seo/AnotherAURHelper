@@ -30,6 +30,10 @@ signing_gpg_key_fp = "04D9E3A2880F6418EC4BA70EA0F3F8FAA2088E62"
 # sccache supports the additional "sccache_cache_size" variable, which can be
 # set to a string such as "5G". If "sccache_cache_size' is not specified, then
 # "5G" is used.
+#
+# If the package does not exist at https://aur.archlinux.org/<REPO>.git, a
+# custom url can be specified with "repo_path".
+# If the repo is not hosted via git at all, use 'repo_path="NO_REPO"'
 
 [[entry]]
 name = "arcanist-git"
