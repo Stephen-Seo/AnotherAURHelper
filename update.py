@@ -786,13 +786,13 @@ def update_pkg_list(
             pkg_state[pkg]["build_status"] = "add_fail"
             continue
 
-        log_print('Signing "custom.db"...')
+        log_print(f'Signing "{repo}"...')
         try:
             subprocess.run(
                 [
                     "/usr/bin/rm",
                     "-f",
-                    str(os.path.join(pkg_out_dir, "custom.db.sig")),
+                    str(os.path.join(pkg_out_dir, f"{repo}.sig")),
                 ]
             )
             subprocess.run(
@@ -806,7 +806,7 @@ def update_pkg_list(
                     "--default-key",
                     signing_gpg_key_fp,
                     "--detach-sign",
-                    str(os.path.join(pkg_out_dir, "custom.db")),
+                    str(os.path.join(pkg_out_dir, f"{repo}")),
                 ],
                 check=True,
                 input=signing_gpg_pass,
@@ -814,7 +814,7 @@ def update_pkg_list(
                 env={"GNUPGHOME": signing_gpg_dir},
             )
         except subprocess.CalledProcessError:
-            log_print('WARNING: Failed to sign "custom.db"')
+            log_print(f'WARNING: Failed to sign "{repo}"')
 
         pkg_state[pkg]["build_status"] = "success"
 
@@ -940,7 +940,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-e",
         "--editor",
-        default="vim",
+        default=None,
         help="editor to use when viewing PKGBUILDs",
         metavar="editor",
     )
@@ -1076,9 +1076,14 @@ if __name__ == "__main__":
                 args_signing_gpg_pass,
             ):
                 sys.exit(1)
+        if "editor" in d:
+            editor = d["editor"]
     else:
         log_print('ERROR: At least "--config" or "--pkg" must be specified')
         sys.exit(1)
+
+    if args.editor is not None:
+        editor = args.editor
 
     os.putenv("CHROOT", os.path.realpath(args_chroot))
     os.putenv("GNUPGHOME", os.path.realpath(args_gpg_home))
@@ -1123,7 +1128,7 @@ if __name__ == "__main__":
                 i += 1
                 continue
         else:
-            check_pkg_build_result = check_pkg_build(pkg_list[i], args.editor)
+            check_pkg_build_result = check_pkg_build(pkg_list[i], editor)
             if check_pkg_build_result == "ok":
                 pass
             elif check_pkg_build_result == "not_ok":

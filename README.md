@@ -82,7 +82,8 @@ For example, if your repo's name is `MyAURRepo`, then `repo` should be set to
 `.../MyAURRepo.db.tar`.
 
 You must also create symlinks such that `MyAURRepo.db` points to
-`MyAURRepo.db.tar` and `MyAURRepo.files` points to `MyAURRepo.files.tar`.
+`MyAURRepo.db.tar` and `MyAURRepo.files` points to `MyAURRepo.files.tar`, and
+`MyAURRepo.db.sig` points to `MyAURRepo.db.tar.sig`.
 
 To use the repository, you can add an entry to your `/etc/pacman.conf` with the
 following:
