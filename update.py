@@ -818,8 +818,8 @@ def update_pkg_list(
                 [
                     "/usr/bin/ln",
                     "-sf",
-                    str(os.path.join(pkg_out_dir, f"{repo}")),
-                    str(os.path.join(pkg_out_dir, f"{repo}")).removesuffix("tar.sig") + ".sig",
+                    str(os.path.join(pkg_out_dir, f"{repo}.sig")),
+                    str(os.path.join(pkg_out_dir, f"{repo}")).removesuffix(".tar") + ".sig",
                 ]
             )
         except subprocess.CalledProcessError:
