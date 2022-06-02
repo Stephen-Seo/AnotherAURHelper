@@ -34,6 +34,9 @@ signing_gpg_key_fp = "04D9E3A2880F6418EC4BA70EA0F3F8FAA2088E62"
 # If the package does not exist at https://aur.archlinux.org/<REPO>.git, a
 # custom url can be specified with "repo_path".
 # If the repo is not hosted via git at all, use 'repo_path="NO_REPO"'
+#
+# If the REPO_NAME in https://aur.archlinux.org/<REPO_NAME>.git is different
+# from "name", then it can be specified with the "pkg_name" variable.
 
 [[entry]]
 name = "arcanist-git"
