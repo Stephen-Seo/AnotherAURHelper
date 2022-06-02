@@ -70,6 +70,48 @@ every time you use the Python script.
 See the `example_config.toml` for more configuration. It should be commented
 enough for figuring out how to use it.
 
+# Setting up the Repository
+
+Create a directory for where you will store built packages and the repository.
+
+The name of the repo must be similar to the `repo` specified in the config.
+
+For example, if your repo's name is `MyAURRepo`, then `repo` should be set to
+`.../MyAURRepo.db.tar`.
+
+You must also create symlinks such that `MyAURRepo.db` points to
+`MyAURRepo.db.tar` and `MyAURRepo.files` points to `MyAURRepo.files.tar`.
+
+To use the repository, you can add an entry to your `/etc/pacman.conf` with the
+following:
+
+    [MyAURRepo]
+    SigLevel = Required TrustAll
+    Include = file:///home/MyAURRepoDirectory
+
+Note that `SigLevel` is set expecting the `MyAURRepo.db` file to be signed.
+
+# Making your system trust the new Repository
+
+Export the public key from your `signingGPGDirectory`.
+
+    GNUPGHOME=mySigningGNUPGDir gpg --export MySigningKeyName > $HOME/MySigningKey.pub
+
+Use `pacman-key` to add and trust it.
+
+    sudo pacman-key -a $HOME/MySigningKey.pub
+
+First check that the name is unique:
+
+    sudo pacman-key --finger MySigningKeyName
+
+Then trust it:
+
+    sudo pacman-key --lsign-key MySigningKeyName
+
+After these steps, `pacman` should now trust the packages and repository signed
+by the GPG key you set up.
+
 # Using the AUR Helper
 
 Typically, you will invoke:
