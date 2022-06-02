@@ -1,0 +1,319 @@
+########## MANDATORY VARIABLES
+custom_cache = "/home/custompkgs"
+chroot = "/home/stephen/Downloads/aur/chroot"
+pkg_dir = "/home/custompkgs"
+repo = "/home/custompkgs/custom.db.tar"
+dirs_dir = "/home/stephen/Downloads/aur"
+gpg_dir = "/home/stephen/Downloads/aur/checkingGPG"
+logs_dir = "/home/stephen/Downloads/aur/logs"
+signing_gpg_dir = "/home/stephen/Downloads/aur/signingGPG"
+signing_gpg_key_fp = "04D9E3A2880F6418EC4BA70EA0F3F8FAA2088E62"
+########## END OF MANDATORY VARIABLES
+
+# Each [[entry]] needs a "name".
+# it is expected that the name matches a repo's name at https://aur.archlinux.org/
+# For example, "aurutils" repo is fetched from https://aur.archlinux.org/aurutils.git
+#
+# It may be handy to specify "skip_branch_up_to_date" for packages that do not
+# build directly from a git repository (packages ending in "-git").
+# Packages with this setting will not prompt to check the PKGBUILD if the
+# .SRCINFO version is not newer than the current latest package in the custom
+# repo, and it will be skipped.
+#
+# For AUR dependencies, an "aur_deps" array needs to be specified.
+# AUR dependencies must appear before the package that depends on them in this
+# list. If building these dependencies for the first time, the dependent package
+# may fail checks until the dependencies are built and stored in the repo.
+#
+# There is support for "ccache" and "sccache".
+# Make a directory somewhere, then specify its path with the "ccache_dir"
+# or "sccache_dir" variables.
+# sccache supports the additional "sccache_cache_size" variable, which can be
+# set to a string such as "5G". If "sccache_cache_size' is not specified, then
+# "5G" is used.
+
+[[entry]]
+name = "arcanist-git"
+
+[[entry]]
+name = "aurutils"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "cef-minimal"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "cpufetch-git"
+
+[[entry]]
+name = "f3"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "flamegraph-git"
+
+[[entry]]
+name = "g810-led-git"
+
+[[entry]]
+name = "glfw-git"
+
+[[entry]]
+name = "gnome-icon-theme-symbolic"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "gnome-icon-theme"
+aur_deps = [
+    "gnome-icon-theme-symbolic"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "gnvim"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "perl-file-rename"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "icecat"
+aur_deps = [
+    "perl-file-rename"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "ion-git"
+
+[[entry]]
+name = "ly"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "nouveau-fw"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "ncurses5-compat-libs"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "opencl-amd"
+aur_deps = [
+    "ncurses5-compat-libs"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "epson-inkjet-printer-escpr"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "epson-inkjet-printer-escpr2"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "google-chrome"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "ifuse"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "libva-vdpau-driver-chromium"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mate-screensaver-hacks"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mcrcon"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "minecraft-launcher"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-environment"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-glm"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-lua"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-pkg-config"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-cmake"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-configure"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-zlib"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-libpng"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment",
+    "mingw-w64-configure",
+    "mingw-w64-zlib"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-make"
+aur_deps = [
+    "mingw-w64-environment"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-libsodium"
+aur_deps = [
+    "mingw-w64-environment",
+    "mingw-w64-configure",
+    "mingw-w64-pkg-config"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-glfw"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment",
+    "mingw-w64-cmake"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-raylib"
+aur_deps = [
+    "mingw-w64-pkg-config",
+    "mingw-w64-environment",
+    "mingw-w64-cmake",
+    "mingw-w64-glfw"
+]
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "mingw-w64-ldd"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "moonscript"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "nginx-mainline-mod-fancyindex"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "non-mixer-lv2-git"
+
+[[entry]]
+name = "obs-studio-git"
+aur_deps = [
+    "cef-minimal"
+]
+
+[[entry]]
+name = "obs-v4l2sink"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "pasystray-git"
+aur_deps = [
+    "gnome-icon-theme"
+]
+
+[[entry]]
+name = "pikaur"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "qjoypad"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "qt5-wayland-bugfixport-git"
+
+[[entry]]
+name = "quaternion"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "samsung-unified-driver"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "stdman"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "sunvox"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "wlroots-git"
+
+[[entry]]
+name = "swaybg-git"
+
+[[entry]]
+name = "sway-git"
+aur_deps = [
+    "wlroots-git",
+    "swaybg-git"
+]
+other_deps = [
+    "mesa"
+]
+
+[[entry]]
+name = "texlive-tikz-uml"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "ttf-clear-sans"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "umlet"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "ungoogled-chromium"
+ccache_dir = "/home/stephen/Downloads/aur/ccache_ungoogled_chromium"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "wev"
+skip_branch_up_to_date = true
+
+[[entry]]
+name = "wlhangul-git"
