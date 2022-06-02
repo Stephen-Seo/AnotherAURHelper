@@ -91,7 +91,9 @@ following:
     SigLevel = Required TrustAll
     Include = file:///home/MyAURRepoDirectory
 
-Note that `SigLevel` is set expecting the `MyAURRepo.db` file to be signed.
+Note that `SigLevel` is set expecting the `MyAURRepo.db` file to be signed (the
+Python script usually signs the `.db` file after a package has been successfully
+built).
 
 # Making your system trust the new Repository
 
