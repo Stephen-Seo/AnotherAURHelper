@@ -139,3 +139,11 @@ It may be helpful to periodically clear out the logs directory in between
 invocations of the AUR Helper script.
 
 It is recommended to use the script with a prepared config.
+
+# Other Notes
+
+By default, `makechrootpkg` does not verify integrity of files in the PKGBUILD.
+Use the `makechrootpkg_noskipinteg.hook` to modify the `makechrootpkg` script to
+not skip integrity checks.
+
+The hook must be placed in `/etc/pacman.d/hooks/`.
