@@ -22,6 +22,7 @@ AUR_GIT_REPO_PATH = "https://aur.archlinux.org"
 AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
 global GLOBAL_LOG_FILE
 GLOBAL_LOG_FILE = "log.txt"
+DEFAULT_EDITOR = "/usr/bin/nano"
 
 
 def log_print(string):
@@ -48,7 +49,7 @@ def ensure_pkg_dir_exists(pkg, pkg_state):
                 cwd=SCRIPT_DIR,
             )
         except subprocess.CalledProcessError:
-            print(
+            log_print(
                 'ERROR: Failed to git clone "{}" (tried repo path "{}")'.format(
                     pkg_dir, pkg_state[pkg]["repo_path"]
                 )
@@ -122,14 +123,14 @@ def update_pkg_dir(pkg, state):
                 selected_remote = remote.strip()
                 break
     except subprocess.CalledProcessError:
-        print(
+        log_print(
             'ERROR: Failed to update pkg dir of "{}" (getting branch\'s remote).'.format(
                 pkg
             )
         )
         return False, False
     if len(selected_remote) == 0:
-        print(
+        log_print(
             'ERROR: Failed to update pkg dir of "{}" (getting branch\'s remote).'.format(
                 pkg
             )
@@ -148,14 +149,14 @@ def update_pkg_dir(pkg, state):
         )
         current_branch_hash = result.stdout.strip()
     except subprocess.CalledProcessError:
-        print(
+        log_print(
             'ERROR: Failed to update pkg dir of "{}" (getting current branch\'s hash).'.format(
                 pkg
             )
         )
         return False, False
     if len(current_branch_hash.strip()) == 0:
-        print(
+        log_print(
             'ERROR: Failed to update pkg dir of "{}" (getting current branch\'s hash).'.format(
                 pkg
             )
@@ -174,14 +175,14 @@ def update_pkg_dir(pkg, state):
         )
         remote_branch_hash = result.stdout.strip()
     except subprocess.CalledProcessError:
-        print(
+        log_print(
             'ERROR: Failed to update pkg dir of "{}" (getting remote branch\'s hash).'.format(
                 pkg
             )
         )
         return False, False
     if len(remote_branch_hash.strip()) == 0:
-        print(
+        log_print(
             'ERROR: Failed to update pkg dir of "{}" (getting remote branch\'s hash).'.format(
                 pkg
             )
@@ -259,13 +260,13 @@ def check_pkg_version(pkgdir, pkg_state, repo, force_check_srcinfo):
     if status != "fetched":
         return status
     elif current_version is None:
-        print(
+        log_print(
             'ERROR: Failed to get version from package "{}".'.format(
                 pkg_state[pkgdir]["pkg_name"]
             )
         )
         return "fail"
-    print(
+    log_print(
         'Got version "{}:{}" for installed pkg "{}"'.format(
             current_epoch if current_epoch is not None else "0",
             current_version,
@@ -396,42 +397,42 @@ def get_srcinfo_check_result(current_epoch, current_version, pkgdir, force_check
     ver_success, pkgepoch, pkgver, pkgrel = get_pkgbuild_version(pkgdir, force_check_srcinfo)
     if ver_success:
         if current_epoch is None and pkgepoch is not None:
-            print(
+            log_print(
                 'Current installed version of "{}" is out of date (missing epoch).'.format(
                     pkg_state[pkgdir]["pkg_name"]
                 )
             )
             return "install"
         elif current_epoch is not None and pkgepoch is None:
-            print(
+            log_print(
                 'Current installed version of "{}" is up to date (has epoch).'.format(
                     pkg_state[pkgdir]["pkg_name"]
                 )
             )
             return "done"
         elif current_epoch is not None and pkgepoch is not None and int(current_epoch) < int(pkgepoch):
-            print(
+            log_print(
                 'Current installed version of "{}" is out of date (older epoch).'.format(
                     pkg_state[pkgdir]["pkg_name"]
                 )
             )
             return "install"
         elif pkgver is not None and pkgrel is not None and version.parse(current_version) < version.parse(pkgver + "-" + pkgrel):
-            print(
+            log_print(
                 'Current installed version of "{}" is out of date (older version).'.format(
                     pkg_state[pkgdir]["pkg_name"]
                 )
             )
             return "install"
         else:
-            print(
+            log_print(
                 'Current installed version of "{}" is up to date.'.format(
                     pkg_state[pkgdir]["pkg_name"]
                 )
             )
             return "done"
     else:
-        print(
+        log_print(
             'ERROR: Failed to get pkg_version of "{}"'.format(
                 pkg_state[pkgdir]["pkg_name"]
             )
@@ -440,7 +441,7 @@ def get_srcinfo_check_result(current_epoch, current_version, pkgdir, force_check
 
 def get_pkg_current_version(pkgdir, pkg_state, repo):
     """Returns (status, epoch, version)"""
-    print(
+    log_print(
         'Checking version of installed pkg "{}"...'.format(
             pkg_state[pkgdir]["pkg_name"]
         )
@@ -471,7 +472,7 @@ def get_pkg_current_version(pkgdir, pkg_state, repo):
             if not result_dict["version"] is None:
                 current_version = result_dict["version"]
         else:
-            print(
+            log_print(
                 "ERROR: Failed to get current version from repo for package {}".format(
                     pkg_state[pkgdir]["pkg_name"]
                 )
@@ -855,7 +856,7 @@ def get_latest_pkg(pkg, cache_dir):
 def confirm_result(pkg, state_result):
     """Returns "continue", "recheck", "force_build", or "abort"."""
     while True:
-        print(
+        log_print(
             'Got "{}" for pkg "{}", action: [C(ontinue), r(echeck), f(orce build),\
  s(kip), b(ack) a(abort)]'.format(
                 state_result, pkg
@@ -924,6 +925,7 @@ def test_gpg_passphrase(signing_gpg_dir, signing_key_fp, passphrase):
 
 
 if __name__ == "__main__":
+    editor = None
     parser = argparse.ArgumentParser(description="Update AUR pkgs")
     parser.add_argument(
         "--config", help="Info and pkg(s) to update in a .toml config"
@@ -974,7 +976,7 @@ if __name__ == "__main__":
             or not args.logs_dir
         )
     ):
-        print(
+        log_print(
             "ERROR: --pkg requires also --chroot, --pkg_dir, --repo, --gpg_dir, and --logs_dir"
         )
         sys.exit(1)
@@ -1084,6 +1086,9 @@ if __name__ == "__main__":
 
     if args.editor is not None:
         editor = args.editor
+
+    if editor is None:
+        editor = DEFAULT_EDITOR
 
     os.putenv("CHROOT", os.path.realpath(args_chroot))
     os.putenv("GNUPGHOME", os.path.realpath(args_gpg_home))
