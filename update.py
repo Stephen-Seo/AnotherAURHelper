@@ -814,6 +814,14 @@ def update_pkg_list(
                 text=True,
                 env={"GNUPGHOME": signing_gpg_dir},
             )
+            subprocess.run(
+                [
+                    "/usr/bin/ln",
+                    "-sf",
+                    str(os.path.join(pkg_out_dir, f"{repo}")),
+                    str(os.path.join(pkg_out_dir, f"{repo}")).removesuffix("tar.sig") + ".sig",
+                ]
+            )
         except subprocess.CalledProcessError:
             log_print(f'WARNING: Failed to sign "{repo}"')
 
