@@ -14,12 +14,14 @@ management. That must be done in the config. An example config is provided.
 
 The AUR Helper requires several things:
 
-  - A CHROOT to build in
+  - A CHROOT to build in.
   - A "checking GNUPG" directory that contains the GPG public keys that will be
-    checked when building the PKGBUILD
+    checked when building the PKGBUILD.
   - A "singing GNUPG" directory that contains the GPG private key that will sign
     the built packages and repository database.
-  - SUDO privileges to be able to use `makechrootpkg`
+  - SUDO privileges to be able to use `makechrootpkg`.
+  - `/etc/pacman.conf` must be configured to use the custom repository's
+    packages if `pacman -U` will not be used.
 
 ## Dependencies
 
