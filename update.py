@@ -312,7 +312,7 @@ def get_srcinfo_version(pkgdir):
 
 def get_pkgbuild_version(pkgdir, force_check_srcinfo):
     """Returns (success, epoch, version, release)"""
-    log_print('Getting PKGBUILD version of "{}"...'.format(pkgdir))
+    log_print(f'Getting version of "{pkgdir}"...')
     while True and not force_check_srcinfo:
         log_print("Use .SRCINFO or directly parse PKGBUILD?")
         user_input = input("1 for .SRCINFO, 2 for PKGBUILD > ")
