@@ -1,8 +1,10 @@
 ########## MANDATORY VARIABLES
 chroot = "/home/stephen/Downloads/aur/chroot"
-pkg_dir = "/home/custompkgs"
+# Location to place built packages
+pkg_out_dir = "/home/custompkgs"
 repo = "/home/custompkgs/custom.db.tar"
-dirs_dir = "/home/stephen/Downloads/aur"
+# Location to clone packages from AUR
+clones_dir = "/home/stephen/Downloads/aur"
 gpg_dir = "/home/stephen/Downloads/aur/checkingGPG"
 logs_dir = "/home/stephen/Downloads/aur/logs"
 signing_gpg_dir = "/home/stephen/Downloads/aur/signingGPG"
