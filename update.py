@@ -16,7 +16,7 @@ import shutil
 import getpass
 import tempfile
 
-SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+#SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 SUDO_PROC = False
 AUR_GIT_REPO_PATH = "https://aur.archlinux.org"
 AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
@@ -761,7 +761,7 @@ def update_pkg_list(
             pkg_state[pkg]["build_status"] = "success"
             continue
 
-        pkg_list = glob.glob(os.path.join(SCRIPT_DIR, pkg, "*.pkg.tar*"))
+        pkg_list = glob.glob(os.path.join(other_state['clonesdir'], pkg, "*.pkg.tar*"))
 
         log_print("Signing package...")
         for gpkg in pkg_list:
@@ -781,7 +781,7 @@ def update_pkg_list(
                 subprocess.run(
                     command_list,
                     check=True,
-                    cwd=os.path.join(SCRIPT_DIR, pkg),
+                    cwd=os.path.join(other_state['clonesdir'], pkg),
                     input=signing_gpg_pass,
                     text=True,
                     env={"GNUPGHOME": signing_gpg_dir},
