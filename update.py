@@ -1236,9 +1236,9 @@ if __name__ == "__main__":
                 pkg_state,
                 other_state,
                 args.no_update,
-                "" if args.no_store else args_signing_gpg_dir,
-                "" if args.no_store else args_signing_gpg_key_fp,
-                "" if args.no_store else args_signing_gpg_pass,
+                "" if args.no_store else other_state['signing_gpg_dir'],
+                "" if args.no_store else other_state['signing_gpg_key_fp'],
+                "" if args.no_store else other_state['signing_gpg_pass'],
                 args.no_store,
             )
         else:
