@@ -34,7 +34,7 @@ script to run.
 
 Use `/usr/bin/mkarchroot` to create your CHROOT in a directory.
 
-    mkarchroot $HOME/mychroot/root base base-devel ccache sccache
+    mkarchroot $HOME/mychroot/root base base-devel ccache sccache cmake ninja
 
 You must refer to the CHROOT as `$HOME/mychroot` if you used the same name as in
 the previous example.
@@ -49,12 +49,15 @@ GNUPG.
 
     GNUPGHOME=$HOME/myCheckingGNUPGDir gpg --recv-keys A_DEV_KEYS_FINGERPRINT
 
+Note that gpg may not automatically create the GNUPGHOME directory.
+
 ### Signing GNUPG
 
-You will need to set up a GPG public/private key pair. GNUPG always respects the
-`GNUPGHOME` environment variable as the `.gnupg` dir, so set the variable first,
-then set up your keys. The keys will be used to sign the packages you build and
-the custom repository that stores the package metadata.
+You will need to set up a GPG public/private key pair. GNUPG always respects
+the `GNUPGHOME` environment variable as the `.gnupg` dir, so set the variable
+first, create the directory, then set up your keys. The keys will be used to
+sign the packages you build and the custom repository that stores the package
+metadata.
 
 Set the `signing_gpg_key_fp` variable in the config to the output fingerprint
 from of:
