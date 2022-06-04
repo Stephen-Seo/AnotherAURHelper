@@ -1012,6 +1012,7 @@ if __name__ == "__main__":
 
     pkg_state = {}
     other_state = {}
+    other_state['logs_dir'] = None
     if args.pkg and not args.config:
         for pkg in args.pkg:
             pkg_state[pkg] = {}
@@ -1082,8 +1083,8 @@ if __name__ == "__main__":
         other_state['gpg_home'] = d["gpg_dir"]
         other_state['logs_dir'] = d["logs_dir"]
         other_state['clones_dir'] = d["clones_dir"]
-        if args_logs_dir is not None:
-            GLOBAL_LOG_FILE = args_logs_dir + "/update.py_logs"
+        if other_state['logs_dir'] is not None:
+            GLOBAL_LOG_FILE = other_state['logs_dir'] + "/update.py_logs"
             log_print(
                 f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}"
             )
@@ -1160,7 +1161,7 @@ if __name__ == "__main__":
                 sys.exit(1)
         if skip_on_same_ver:
             check_pkg_version_result = check_pkg_version(
-                pkg_list[i], pkg_state, args_repo, True, other_state
+                pkg_list[i], pkg_state, other_state['repo'], True, other_state
             )
             if check_pkg_version_result != "install":
                 log_print(f"Pkg {pkg_list[i]} is up to date, skipping...")
@@ -1192,7 +1193,7 @@ if __name__ == "__main__":
                 state_result = check_pkg_version_result
             else:
                 state_result = check_pkg_version(
-                    pkg_list[i], pkg_state, args_repo, False, other_state
+                    pkg_list[i], pkg_state, other_state['repo'], False, other_state
                 )
             confirm_result_result = confirm_result(pkg_list[i], state_result)
             if confirm_result_result == "continue":
