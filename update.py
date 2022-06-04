@@ -686,11 +686,11 @@ def update_pkg_list(
             cleanup_sccache(other_state['chroot'])
             setup_ccache(other_state['chroot'])
         else:
-            cleanup_ccache(chroot)
+            cleanup_ccache(other_state['chroot'])
             if "sccache_dir" in pkg_state[pkg]:
-                setup_sccache(chroot)
+                setup_sccache(other_state['chroot'])
             else:
-                cleanup_sccache(chroot)
+                cleanup_sccache(other_state['chroot'])
 
         command_list = [
             "makechrootpkg",
