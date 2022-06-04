@@ -15,6 +15,7 @@ import time
 import shutil
 import getpass
 import tempfile
+from pathlib import Path
 
 #SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 SUDO_PROC = False
@@ -848,6 +849,10 @@ def update_pkg_list(
 
         pkg_state[pkg]["build_status"] = "success"
 
+        log_print("Ensuring pkgs directory exists...")
+        if not os.path.exists(other_state['pkg_out_dir']):
+            pkg_out_dir_path = Path(other_state['pkg_out_dir'])
+            pkg_out_dir_path.mkdir(parents=True)
         log_print("Moving pkg to pkgs directory...")
         for f in pkg_list:
             log_print(f'Moving "{f}"...')
