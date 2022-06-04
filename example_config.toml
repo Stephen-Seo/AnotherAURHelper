@@ -1,9 +1,11 @@
 ########## MANDATORY VARIABLES
 chroot = "/home/stephen/Downloads/aur/chroot"
-# Location to place built packages
+# Location to place built packages.
 pkg_out_dir = "/home/custompkgs"
+# It is recommended to put the repo file in the "pkg_out_dir".
+# If the tar file doesn't already exist, it will be automatically created.
 repo = "/home/custompkgs/custom.db.tar"
-# Location to clone packages from AUR
+# Location to clone packages from AUR.
 clones_dir = "/home/stephen/Downloads/aur"
 gpg_dir = "/home/stephen/Downloads/aur/checkingGPG"
 logs_dir = "/home/stephen/Downloads/aur/logs"
