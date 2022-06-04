@@ -762,7 +762,7 @@ def update_pkg_list(
             pkg_state[pkg]["build_status"] = "success"
             continue
 
-        pkg_list = glob.glob(os.path.join(other_state['clonesdir'], pkg, "*.pkg.tar*"))
+        pkg_list = glob.glob(os.path.join(other_state['clones_dir'], pkg, "*.pkg.tar*"))
 
         log_print("Signing package...")
         for gpkg in pkg_list:
@@ -782,7 +782,7 @@ def update_pkg_list(
                 subprocess.run(
                     command_list,
                     check=True,
-                    cwd=os.path.join(other_state['clonesdir'], pkg),
+                    cwd=os.path.join(other_state['clones_dir'], pkg),
                     input=signing_gpg_pass,
                     text=True,
                     env={"GNUPGHOME": signing_gpg_dir},
