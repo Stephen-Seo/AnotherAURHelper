@@ -849,10 +849,6 @@ def update_pkg_list(
 
         pkg_state[pkg]["build_status"] = "success"
 
-        log_print("Ensuring pkgs directory exists...")
-        if not os.path.exists(other_state['pkg_out_dir']):
-            pkg_out_dir_path = Path(other_state['pkg_out_dir'])
-            pkg_out_dir_path.mkdir(parents=True)
         log_print("Moving pkg to pkgs directory...")
         for f in pkg_list:
             log_print(f'Moving "{f}"...')
@@ -956,6 +952,30 @@ def test_gpg_passphrase(signing_gpg_dir, signing_key_fp, passphrase):
             return False
     log_print("Verified passphrase works by signing dummy test file")
     return True
+
+
+def validate_and_verify_paths(other_state):
+    if not os.path.exists(other_state['chroot']):
+        log_print(f"ERROR: chroot at "{other_state['chroot']}" does not exist")
+        sys.exit(1)
+    log_print("Ensuring pkgs directory exists...")
+    if not os.path.exists(other_state['pkg_out_dir']):
+        pkg_out_dir_path = Path(other_state['pkg_out_dir'])
+        pkg_out_dir_path.mkdir(parents=True)
+    if not os.path.exists(other_state['gpg_home']):
+        log_print(f"ERROR: checkingGPG at "{other_state['gpg_home']}" does not exist")
+        sys.exit(1)
+    log_print("Ensuring logs directory exists...")
+    if other_state['logs_dir'] is None:
+        log_print('ERROR: "logs_dir" was not specified!')
+        sys.exit(1)
+    if not os.path.exists(other_state['logs_dir']):
+        logs_dir_path = Path(other_state['logs_dir'])
+        logs_dir_path.mkdir(parents=True)
+    log_print("Ensuring clones directory exists...")
+    if not os.path.exists(other_state['clones_dir']):
+        clones_dir_path = Path(other_state['clones_dir'])
+        clones_dir_path.mkdir(parents=True)
 
 
 if __name__ == "__main__":
@@ -1120,6 +1140,8 @@ if __name__ == "__main__":
     else:
         log_print('ERROR: At least "--config" or "--pkg" must be specified')
         sys.exit(1)
+
+    validate_and_verify_paths(other_state)
 
     if args.editor is not None:
         editor = args.editor
