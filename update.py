@@ -17,7 +17,7 @@ import getpass
 import tempfile
 from pathlib import Path
 
-#SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+# SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 SUDO_PROC = False
 AUR_GIT_REPO_PATH = "https://aur.archlinux.org"
 AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
@@ -34,7 +34,7 @@ def log_print(string):
 
 def ensure_pkg_dir_exists(pkg, pkg_state, other_state):
     log_print('Checking that dir for "{}" exists...'.format(pkg))
-    pkgdir = os.path.join(other_state['clones_dir'], pkg)
+    pkgdir = os.path.join(other_state["clones_dir"], pkg)
     if os.path.isdir(pkgdir):
         log_print('Dir for "{}" exists.'.format(pkg))
         return True
@@ -65,7 +65,7 @@ def ensure_pkg_dir_exists(pkg, pkg_state, other_state):
 def update_pkg_dir(pkg, pkg_state, other_state):
     log_print('Making sure pkg dir for "{}" is up to date...'.format(pkg))
 
-    pkgdir = os.path.join(other_state['clones_dir'], pkg)
+    pkgdir = os.path.join(other_state["clones_dir"], pkg)
     # fetch all
     try:
         subprocess.run(
@@ -193,9 +193,7 @@ def update_pkg_dir(pkg, pkg_state, other_state):
     # update current branch if not same commit
     if current_branch_hash != remote_branch_hash:
         try:
-            subprocess.run(
-                ["git", "pull"], check=True, cwd=pkgdir
-            )
+            subprocess.run(["git", "pull"], check=True, cwd=pkgdir)
         except subprocess.CalledProcessError:
             try:
                 subprocess.run(
@@ -222,12 +220,10 @@ def update_pkg_dir(pkg, pkg_state, other_state):
 
 def check_pkg_build(pkg, pkg_state, other_state, editor):
     """Returns "ok", "not_ok", "abort", or "force_build"."""
-    pkgdir = os.path.join(other_state['clones_dir'], pkg)
+    pkgdir = os.path.join(other_state["clones_dir"], pkg)
     log_print('Checking PKGBUILD for "{}"...'.format(pkg))
     try:
-        subprocess.run(
-            [editor, "PKGBUILD"], check=True, cwd=pkgdir
-        )
+        subprocess.run([editor, "PKGBUILD"], check=True, cwd=pkgdir)
     except subprocess.CalledProcessError:
         log_print('ERROR: Failed checking PKGBUILD for "{}"'.format(pkg))
         return "abort"
@@ -285,7 +281,9 @@ def check_pkg_version(pkg, pkg_state, repo, force_check_srcinfo, other_state):
 
 def get_srcinfo_version(pkg, other_state):
     """Returns (success_bool, pkgepoch, pkgver, pkgrel)"""
-    if not os.path.exists(os.path.join(other_state['clones_dir'], pkg, ".SRCINFO")):
+    if not os.path.exists(
+        os.path.join(other_state["clones_dir"], pkg, ".SRCINFO")
+    ):
         log_print(f'ERROR: .SRCINFO does not exist for pkg "{pkg}"')
         return False, None, None, None
     pkgver_reprog = re.compile("^\\s*pkgver\\s*=\\s*([a-zA-Z0-9._+-]+)\\s*$")
@@ -295,7 +293,8 @@ def get_srcinfo_version(pkg, other_state):
     pkgrel = ""
     pkgepoch = ""
     with open(
-        os.path.join(other_state['clones_dir'], pkg, ".SRCINFO"), encoding="UTF-8"
+        os.path.join(other_state["clones_dir"], pkg, ".SRCINFO"),
+        encoding="UTF-8",
     ) as fo:
         line = fo.readline()
         while len(line) > 0:
@@ -314,7 +313,7 @@ def get_srcinfo_version(pkg, other_state):
 
 def get_pkgbuild_version(pkg, force_check_srcinfo, other_state):
     """Returns (success, epoch, version, release)"""
-    pkgdir = os.path.join(other_state['clones_dir'], pkg)
+    pkgdir = os.path.join(other_state["clones_dir"], pkg)
     log_print(f'Getting version of "{pkg}"...')
     while True and not force_check_srcinfo:
         log_print("Use .SRCINFO or directly parse PKGBUILD?")
@@ -341,9 +340,7 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, other_state):
             )
         except subprocess.CalledProcessError:
             log_print(
-                'ERROR: Failed to run "makepkg --nobuild" in "{}".'.format(
-                    pkg
-                )
+                'ERROR: Failed to run "makepkg --nobuild" in "{}".'.format(pkg)
             )
             if os.path.exists(os.path.join(pkgdir, "src")):
                 shutil.rmtree(os.path.join(pkgdir, "src"))
@@ -394,9 +391,7 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, other_state):
     if pkgver is not None and pkgrel is not None:
         return True, pkgepoch, pkgver, pkgrel
     else:
-        log_print(
-            'ERROR: Failed to get PKGBUILD version of "{}".'.format(pkg)
-        )
+        log_print('ERROR: Failed to get PKGBUILD version of "{}".'.format(pkg))
         return False, None, None, None
 
 
@@ -674,30 +669,35 @@ def update_pkg_list(
         log_print("Updating the chroot...")
         try:
             subprocess.run(
-                ["arch-nspawn", "{}/root".format(other_state['chroot']), "pacman", "-Syu"],
+                [
+                    "arch-nspawn",
+                    "{}/root".format(other_state["chroot"]),
+                    "pacman",
+                    "-Syu",
+                ],
                 check=True,
             )
         except subprocess.CalledProcessError:
             log_print("ERROR: Failed to update the chroot")
             sys.exit(1)
     for pkg in pkgs:
-        pkgdir = os.path.join(other_state['clones_dir'], pkg)
+        pkgdir = os.path.join(other_state["clones_dir"], pkg)
         log_print(f'Building "{pkg}"...')
         if "ccache_dir" in pkg_state[pkg]:
-            cleanup_sccache(other_state['chroot'])
-            setup_ccache(other_state['chroot'])
+            cleanup_sccache(other_state["chroot"])
+            setup_ccache(other_state["chroot"])
         else:
-            cleanup_ccache(other_state['chroot'])
+            cleanup_ccache(other_state["chroot"])
             if "sccache_dir" in pkg_state[pkg]:
-                setup_sccache(other_state['chroot'])
+                setup_sccache(other_state["chroot"])
             else:
-                cleanup_sccache(other_state['chroot'])
+                cleanup_sccache(other_state["chroot"])
 
         command_list = [
             "makechrootpkg",
             "-c",
             "-r",
-            other_state['chroot'],
+            other_state["chroot"],
         ]
         post_command_list = [
             "--",
@@ -714,7 +714,9 @@ def update_pkg_list(
             command_list.insert(1, "-I")
             command_list.insert(2, dep_fullpath)
         for aur_dep in pkg_state[pkg]["aur_deps"]:
-            aur_dep_fullpath = get_latest_pkg(aur_dep,other_state['pkg_out_dir'])
+            aur_dep_fullpath = get_latest_pkg(
+                aur_dep, other_state["pkg_out_dir"]
+            )
             if not aur_dep_fullpath:
                 log_print('ERROR: Failed to get aur_dep "{}"'.format(aur_dep))
                 sys.exit(1)
@@ -737,10 +739,14 @@ def update_pkg_list(
         )
         # log_print(f"Using command list: {command_list + post_command_list}") # DEBUG
         with open(
-            os.path.join(other_state['logs_dir'], "{}_stdout_{}".format(pkg, nowstring)),
+            os.path.join(
+                other_state["logs_dir"], "{}_stdout_{}".format(pkg, nowstring)
+            ),
             "w",
         ) as log_stdout, open(
-            os.path.join(other_state['logs_dir'], "{}_stderr_{}".format(pkg, nowstring)),
+            os.path.join(
+                other_state["logs_dir"], "{}_stderr_{}".format(pkg, nowstring)
+            ),
             "w",
         ) as log_stderr:
             try:
@@ -762,7 +768,9 @@ def update_pkg_list(
             pkg_state[pkg]["build_status"] = "success"
             continue
 
-        pkg_list = glob.glob(os.path.join(other_state['clones_dir'], pkg, "*.pkg.tar*"))
+        pkg_list = glob.glob(
+            os.path.join(other_state["clones_dir"], pkg, "*.pkg.tar*")
+        )
 
         log_print("Signing package...")
         for gpkg in pkg_list:
@@ -782,7 +790,7 @@ def update_pkg_list(
                 subprocess.run(
                     command_list,
                     check=True,
-                    cwd=os.path.join(other_state['clones_dir'], pkg),
+                    cwd=os.path.join(other_state["clones_dir"], pkg),
                     input=signing_gpg_pass,
                     text=True,
                     env={"GNUPGHOME": signing_gpg_dir},
@@ -792,7 +800,7 @@ def update_pkg_list(
 
         log_print("Adding built pkgs to repo...")
         try:
-            command_list = ["repo-add", other_state['repo']]
+            command_list = ["repo-add", other_state["repo"]]
             for gpkg in pkg_list:
                 command_list.append(gpkg)
             subprocess.run(command_list, check=True)
@@ -809,7 +817,12 @@ def update_pkg_list(
                 [
                     "/usr/bin/rm",
                     "-f",
-                    str(os.path.join(other_state['pkg_out_dir'], f"{other_state['repo']}.sig")),
+                    str(
+                        os.path.join(
+                            other_state["pkg_out_dir"],
+                            f"{other_state['repo']}.sig",
+                        )
+                    ),
                 ]
             )
             subprocess.run(
@@ -823,7 +836,11 @@ def update_pkg_list(
                     "--default-key",
                     signing_gpg_key_fp,
                     "--detach-sign",
-                    str(os.path.join(other_state['pkg_out_dir'], f"{other_state['repo']}")),
+                    str(
+                        os.path.join(
+                            other_state["pkg_out_dir"], f"{other_state['repo']}"
+                        )
+                    ),
                 ],
                 check=True,
                 input=signing_gpg_pass,
@@ -838,9 +855,11 @@ def update_pkg_list(
                     "/usr/bin/ln",
                     "-sf",
                     repo_sig_name,
-                    str(os.path.join(other_state['pkg_out_dir'], f"{other_state['repo']}")).removesuffix(
-                        ".tar"
-                    )
+                    str(
+                        os.path.join(
+                            other_state["pkg_out_dir"], f"{other_state['repo']}"
+                        )
+                    ).removesuffix(".tar")
                     + ".sig",
                 ]
             )
@@ -852,13 +871,17 @@ def update_pkg_list(
         log_print("Moving pkg to pkgs directory...")
         for f in pkg_list:
             log_print(f'Moving "{f}"...')
-            os.rename(f, os.path.join(other_state['pkg_out_dir'], os.path.basename(f)))
+            os.rename(
+                f, os.path.join(other_state["pkg_out_dir"], os.path.basename(f))
+            )
             sig_name = f + ".sig"
             if os.path.exists(sig_name):
                 log_print(f'Moving "{sig_name}"...')
                 os.rename(
                     sig_name,
-                    os.path.join(other_state['pkg_out_dir'], os.path.basename(sig_name)),
+                    os.path.join(
+                        other_state["pkg_out_dir"], os.path.basename(sig_name)
+                    ),
                 )
 
     for pkg in pkgs:
@@ -955,29 +978,37 @@ def test_gpg_passphrase(signing_gpg_dir, signing_key_fp, passphrase):
 
 
 def validate_and_verify_paths(other_state):
-    if not os.path.exists(other_state['chroot']):
-        log_print(f"ERROR: chroot at "{other_state['chroot']}" does not exist")
+    if not os.path.exists(other_state["chroot"]):
+        log_print(
+            f"ERROR: chroot at \"{other_state['chroot']}\" does not exist"
+        )
         sys.exit(1)
     log_print("Ensuring pkgs directory exists...")
-    if not os.path.exists(other_state['pkg_out_dir']):
-        pkg_out_dir_path = Path(other_state['pkg_out_dir'])
+    if not os.path.exists(other_state["pkg_out_dir"]):
+        pkg_out_dir_path = Path(other_state["pkg_out_dir"])
         pkg_out_dir_path.mkdir(parents=True)
-    if not os.path.exists(other_state['gpg_home']):
-        log_print(f"ERROR: checkingGPG at "{other_state['gpg_home']}" does not exist")
+    if not os.path.exists(other_state["gpg_home"]):
+        log_print(
+            f"ERROR: checkingGPG at \"{other_state['gpg_home']}\" does not exist"
+        )
         sys.exit(1)
-    if 'signing_gpg_dir' in other_state and not os.path.exists(other_state['signing_gpg_dir']):
-        log_print(f"ERROR: signingGPG at "{other_state['signing_gpg_dir']}" does not exist")
+    if "signing_gpg_dir" in other_state and not os.path.exists(
+        other_state["signing_gpg_dir"]
+    ):
+        log_print(
+            f"ERROR: signingGPG at \"{other_state['signing_gpg_dir']}\" does not exist"
+        )
         sys.exit(1)
     log_print("Ensuring logs directory exists...")
-    if other_state['logs_dir'] is None:
+    if other_state["logs_dir"] is None:
         log_print('ERROR: "logs_dir" was not specified!')
         sys.exit(1)
-    if not os.path.exists(other_state['logs_dir']):
-        logs_dir_path = Path(other_state['logs_dir'])
+    if not os.path.exists(other_state["logs_dir"]):
+        logs_dir_path = Path(other_state["logs_dir"])
         logs_dir_path.mkdir(parents=True)
     log_print("Ensuring clones directory exists...")
-    if not os.path.exists(other_state['clones_dir']):
-        clones_dir_path = Path(other_state['clones_dir'])
+    if not os.path.exists(other_state["clones_dir"]):
+        clones_dir_path = Path(other_state["clones_dir"])
         clones_dir_path.mkdir(parents=True)
 
 
@@ -1040,35 +1071,37 @@ if __name__ == "__main__":
 
     pkg_state = {}
     other_state = {}
-    other_state['logs_dir'] = None
+    other_state["logs_dir"] = None
     if args.pkg and not args.config:
         for pkg in args.pkg:
             pkg_state[pkg] = {}
             pkg_state[pkg]["aur_deps"] = []
-        other_state['chroot'] = args.chroot
-        other_state['pkg_out_dir'] = args.pkg_dir
-        other_state['repo'] = args.repo
-        other_state['gpg_home'] = args.gpg_dir
-        other_state['logs_dir'] = args.logs_dir
+        other_state["chroot"] = args.chroot
+        other_state["pkg_out_dir"] = args.pkg_dir
+        other_state["repo"] = args.repo
+        other_state["gpg_home"] = args.gpg_dir
+        other_state["logs_dir"] = args.logs_dir
         if args_logs_dir is not None:
             GLOBAL_LOG_FILE = args_logs_dir + "/update.py_logs"
             log_print(
                 f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}"
             )
             log_print(f"Set GLOBAL_LOG_FILE to {GLOBAL_LOG_FILE}")
-        other_state['signing_gpg_dir'] = args.signing_gpg_dir
-        other_state['signing_gpg_key_fp'] = args.signing_gpg_key_fp
+        other_state["signing_gpg_dir"] = args.signing_gpg_dir
+        other_state["signing_gpg_key_fp"] = args.signing_gpg_key_fp
         if args_signing_gpg_key_fp is None:
             log_print(
                 'ERROR: Signing key fingerprint "signing_gpg_key_fp" not present in config'
             )
             sys.exit(1)
         if args_signing_gpg_dir is not None and not args.no_store:
-            other_state['signing_gpg_pass'] = getpass.getpass("gpg signing key pass: ")
+            other_state["signing_gpg_pass"] = getpass.getpass(
+                "gpg signing key pass: "
+            )
             if not test_gpg_passphrase(
-                other_state['signing_gpg_dir'],
-                other_state['signing_gpg_key_fp'],
-                other_state['signing_gpg_pass'],
+                other_state["signing_gpg_dir"],
+                other_state["signing_gpg_key_fp"],
+                other_state["signing_gpg_pass"],
             ):
                 sys.exit(1)
     elif args.config:
@@ -1105,14 +1138,14 @@ if __name__ == "__main__":
                 pkg_state[entry["name"]]["skip_branch_up_to_date"] = True
             else:
                 pkg_state[entry["name"]]["skip_branch_up_to_date"] = False
-        other_state['chroot'] = d["chroot"]
-        other_state['pkg_out_dir'] = d["pkg_out_dir"]
-        other_state['repo'] = d["repo"]
-        other_state['gpg_home'] = d["gpg_dir"]
-        other_state['logs_dir'] = d["logs_dir"]
-        other_state['clones_dir'] = d["clones_dir"]
-        if other_state['logs_dir'] is not None:
-            GLOBAL_LOG_FILE = other_state['logs_dir'] + "/update.py_logs"
+        other_state["chroot"] = d["chroot"]
+        other_state["pkg_out_dir"] = d["pkg_out_dir"]
+        other_state["repo"] = d["repo"]
+        other_state["gpg_home"] = d["gpg_dir"]
+        other_state["logs_dir"] = d["logs_dir"]
+        other_state["clones_dir"] = d["clones_dir"]
+        if other_state["logs_dir"] is not None:
+            GLOBAL_LOG_FILE = other_state["logs_dir"] + "/update.py_logs"
             log_print(
                 f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}"
             )
@@ -1129,13 +1162,15 @@ if __name__ == "__main__":
                 del pkg_state[to_remove]
 
         if "signing_gpg_dir" in d and not args.no_store:
-            other_state['signing_gpg_dir'] = d["signing_gpg_dir"]
-            other_state['signing_gpg_key_fp'] = d["signing_gpg_key_fp"]
-            other_state['signing_gpg_pass'] = getpass.getpass("gpg signing key pass: ")
+            other_state["signing_gpg_dir"] = d["signing_gpg_dir"]
+            other_state["signing_gpg_key_fp"] = d["signing_gpg_key_fp"]
+            other_state["signing_gpg_pass"] = getpass.getpass(
+                "gpg signing key pass: "
+            )
             if not test_gpg_passphrase(
-                other_state['signing_gpg_dir'],
-                other_state['signing_gpg_key_fp'],
-                other_state['signing_gpg_pass'],
+                other_state["signing_gpg_dir"],
+                other_state["signing_gpg_key_fp"],
+                other_state["signing_gpg_pass"],
             ):
                 sys.exit(1)
         if "editor" in d:
@@ -1152,13 +1187,15 @@ if __name__ == "__main__":
     if editor is None:
         editor = DEFAULT_EDITOR
 
-    os.putenv("CHROOT", os.path.realpath(other_state['chroot']))
-    os.putenv("GNUPGHOME", os.path.realpath(other_state['gpg_home']))
-    if not os.path.exists(other_state['logs_dir']):
-        os.makedirs(other_state['logs_dir'])
-    elif not os.path.isdir(other_state['logs_dir']):
+    os.putenv("CHROOT", os.path.realpath(other_state["chroot"]))
+    os.putenv("GNUPGHOME", os.path.realpath(other_state["gpg_home"]))
+    if not os.path.exists(other_state["logs_dir"]):
+        os.makedirs(other_state["logs_dir"])
+    elif not os.path.isdir(other_state["logs_dir"]):
         log_print(
-            'ERROR: logs_dir "{}" must be a directory'.format(other_state['logs_dir'])
+            'ERROR: logs_dir "{}" must be a directory'.format(
+                other_state["logs_dir"]
+            )
         )
         sys.exit(1)
     pkg_list = [temp_pkg_name for temp_pkg_name in pkg_state.keys()]
@@ -1191,14 +1228,16 @@ if __name__ == "__main__":
                 sys.exit(1)
         if skip_on_same_ver:
             check_pkg_version_result = check_pkg_version(
-                pkg_list[i], pkg_state, other_state['repo'], True, other_state
+                pkg_list[i], pkg_state, other_state["repo"], True, other_state
             )
             if check_pkg_version_result != "install":
                 log_print(f"Pkg {pkg_list[i]} is up to date, skipping...")
                 pkg_state[pkg_list[i]]["state"] = "up to date"
                 i += 1
                 continue
-        check_pkg_build_result = check_pkg_build(pkg_list[i], pkg_state, other_state, editor)
+        check_pkg_build_result = check_pkg_build(
+            pkg_list[i], pkg_state, other_state, editor
+        )
         if check_pkg_build_result == "ok":
             pass
         elif check_pkg_build_result == "not_ok":
@@ -1223,7 +1262,11 @@ if __name__ == "__main__":
                 state_result = check_pkg_version_result
             else:
                 state_result = check_pkg_version(
-                    pkg_list[i], pkg_state, other_state['repo'], False, other_state
+                    pkg_list[i],
+                    pkg_state,
+                    other_state["repo"],
+                    False,
+                    other_state,
                 )
             confirm_result_result = confirm_result(pkg_list[i], state_result)
             if confirm_result_result == "continue":
@@ -1266,9 +1309,9 @@ if __name__ == "__main__":
                 pkg_state,
                 other_state,
                 args.no_update,
-                "" if args.no_store else other_state['signing_gpg_dir'],
-                "" if args.no_store else other_state['signing_gpg_key_fp'],
-                "" if args.no_store else other_state['signing_gpg_pass'],
+                "" if args.no_store else other_state["signing_gpg_dir"],
+                "" if args.no_store else other_state["signing_gpg_key_fp"],
+                "" if args.no_store else other_state["signing_gpg_pass"],
                 args.no_store,
             )
         else:
