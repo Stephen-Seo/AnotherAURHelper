@@ -965,6 +965,9 @@ def validate_and_verify_paths(other_state):
     if not os.path.exists(other_state['gpg_home']):
         log_print(f"ERROR: checkingGPG at "{other_state['gpg_home']}" does not exist")
         sys.exit(1)
+    if 'signing_gpg_dir' in other_state and not os.path.exists(other_state['signing_gpg_dir']):
+        log_print(f"ERROR: signingGPG at "{other_state['signing_gpg_dir']}" does not exist")
+        sys.exit(1)
     log_print("Ensuring logs directory exists...")
     if other_state['logs_dir'] is None:
         log_print('ERROR: "logs_dir" was not specified!')
