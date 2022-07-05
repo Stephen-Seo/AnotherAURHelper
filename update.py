@@ -1200,12 +1200,15 @@ if __name__ == "__main__":
         sys.exit(1)
     pkg_list = [temp_pkg_name for temp_pkg_name in pkg_state.keys()]
     i = 0
+    furthest_checked = 0
+    going_back = False
     while i < len(pkg_list):
-        going_back = False
+        if i > furthest_checked:
+            furthest_checked = i
+        print(f"i is {i} and furthest_checked is {furthest_checked}")
         if not ensure_pkg_dir_exists(pkg_list[i], pkg_state, other_state):
             print_state_info_and_get_update_list(pkg_state)
             sys.exit(1)
-        skip = False
         if (
             "repo_path" not in pkg_state[pkg_list[i]]
             or pkg_state[pkg_list[i]]["repo_path"] != "NO_REPO"
@@ -1226,7 +1229,7 @@ if __name__ == "__main__":
                 log_print('Failed to update pkg dir for "{}"', pkg_list[i])
                 print_state_info_and_get_update_list(pkg_state)
                 sys.exit(1)
-        if skip_on_same_ver:
+        if skip_on_same_ver and i >= furthest_checked:
             check_pkg_version_result = check_pkg_version(
                 pkg_list[i], pkg_state, other_state["repo"], True, other_state
             )
@@ -1258,7 +1261,11 @@ if __name__ == "__main__":
             print_state_info_and_get_update_list(pkg_state)
             sys.exit(1)
         while True:
-            if skip_on_same_ver and check_pkg_version_result is not None:
+            if (
+                skip_on_same_ver
+                and check_pkg_version_result is not None
+                and i >= furthest_checked
+            ):
                 state_result = check_pkg_version_result
             else:
                 state_result = check_pkg_version(
@@ -1290,7 +1297,7 @@ if __name__ == "__main__":
                 print_state_info_and_get_update_list(pkg_state)
                 sys.exit(1)
         if going_back:
-            pass
+            going_back = False
         else:
             i += 1
 
