@@ -1205,7 +1205,6 @@ if __name__ == "__main__":
     while i < len(pkg_list):
         if i > furthest_checked:
             furthest_checked = i
-        print(f"i is {i} and furthest_checked is {furthest_checked}")
         if not ensure_pkg_dir_exists(pkg_list[i], pkg_state, other_state):
             print_state_info_and_get_update_list(pkg_state)
             sys.exit(1)
