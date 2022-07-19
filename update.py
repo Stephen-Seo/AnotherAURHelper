@@ -125,16 +125,12 @@ def update_pkg_dir(pkg, pkg_state, other_state):
                 break
     except subprocess.CalledProcessError:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting branch\'s remote).'.format(
-                pkg
-            )
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).'
         )
         return False, False
     if len(selected_remote) == 0:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting branch\'s remote).'.format(
-                pkg
-            )
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).'
         )
         return False, False
 
@@ -151,16 +147,12 @@ def update_pkg_dir(pkg, pkg_state, other_state):
         current_branch_hash = result.stdout.strip()
     except subprocess.CalledProcessError:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting current branch\'s hash).'.format(
-                pkg
-            )
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current branch\'s hash).'
         )
         return False, False
     if len(current_branch_hash.strip()) == 0:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting current branch\'s hash).'.format(
-                pkg
-            )
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current branch\'s hash).'
         )
         return False, False
 
@@ -177,16 +169,12 @@ def update_pkg_dir(pkg, pkg_state, other_state):
         remote_branch_hash = result.stdout.strip()
     except subprocess.CalledProcessError:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting remote branch\'s hash).'.format(
-                pkg
-            )
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).'
         )
         return False, False
     if len(remote_branch_hash.strip()) == 0:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting remote branch\'s hash).'.format(
-                pkg
-            )
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).'
         )
         return False, False
 
@@ -275,7 +263,12 @@ def check_pkg_version(pkg, pkg_state, repo, force_check_srcinfo, other_state):
     )
 
     return get_srcinfo_check_result(
-        current_epoch, current_version, pkg, force_check_srcinfo, other_state
+        current_epoch,
+        current_version,
+        pkg,
+        force_check_srcinfo,
+        pkg_state,
+        other_state,
     )
 
 
@@ -311,7 +304,7 @@ def get_srcinfo_version(pkg, other_state):
     return True, pkgepoch, pkgver, pkgrel
 
 
-def get_pkgbuild_version(pkg, force_check_srcinfo, other_state):
+def get_pkgbuild_version(pkg, force_check_srcinfo, pkg_state, other_state):
     """Returns (success, epoch, version, release)"""
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
     log_print(f'Getting version of "{pkg}"...')
@@ -331,16 +324,41 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, other_state):
     elif user_input == "2":
         try:
             log_print(
-                'Running "makepkg --nobuild" to ensure pkgver in PKGBUILD is updated...'
+                'Running "makechrootpkg ... --nobuild" to ensure pkgver in PKGBUILD is updated...'
             )
+            command_list = [
+                "makechrootpkg",
+                "-c",
+                "-r",
+                other_state["chroot"],
+            ]
+            post_command_list = ["--", "-s", "-r", "-c", "--nobuild"]
+            for dep in pkg_state[pkg]["other_deps"]:
+                dep_fullpath = get_latest_pkg(dep, "/var/cache/pacman/pkg")
+                if not dep_fullpath:
+                    log_print('ERROR: Failed to get dep "{}"'.format(dep))
+                    sys.exit(1)
+                command_list.insert(1, "-I")
+                command_list.insert(2, dep_fullpath)
+            for aur_dep in pkg_state[pkg]["aur_deps"]:
+                aur_dep_fullpath = get_latest_pkg(
+                    aur_dep, other_state["pkg_out_dir"]
+                )
+                if not aur_dep_fullpath:
+                    log_print(
+                        'ERROR: Failed to get aur_dep "{}"'.format(aur_dep)
+                    )
+                    sys.exit(1)
+                command_list.insert(1, "-I")
+                command_list.insert(2, aur_dep_fullpath)
             subprocess.run(
-                ["makepkg", "-c", "--nobuild", "-s", "-r"],
+                command_list + post_command_list,
                 check=True,
                 cwd=pkgdir,
             )
         except subprocess.CalledProcessError:
             log_print(
-                'ERROR: Failed to run "makepkg --nobuild" in "{}".'.format(pkg)
+                f'ERROR: Failed to run "makechrootpkg ... --nobuild" in "{pkg}".'
             )
             if os.path.exists(os.path.join(pkgdir, "src")):
                 shutil.rmtree(os.path.join(pkgdir, "src"))
@@ -396,10 +414,15 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, other_state):
 
 
 def get_srcinfo_check_result(
-    current_epoch, current_version, pkg, force_check_srcinfo, other_state
+    current_epoch,
+    current_version,
+    pkg,
+    force_check_srcinfo,
+    pkg_state,
+    other_state,
 ):
     ver_success, pkgepoch, pkgver, pkgrel = get_pkgbuild_version(
-        pkg, force_check_srcinfo, other_state
+        pkg, force_check_srcinfo, pkg_state, other_state
     )
     if ver_success:
         if current_epoch is None and pkgepoch is not None:
