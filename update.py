@@ -679,7 +679,6 @@ def update_pkg_list(
     pkgs,
     pkg_state,
     other_state,
-    no_update,
     signing_gpg_dir,
     signing_gpg_key_fp,
     signing_gpg_pass,
@@ -688,21 +687,6 @@ def update_pkg_list(
     if not get_sudo_privileges():
         log_print("ERROR: Failed to get sudo privileges")
         sys.exit(1)
-    if not no_update:
-        log_print("Updating the chroot...")
-        try:
-            subprocess.run(
-                [
-                    "arch-nspawn",
-                    "{}/root".format(other_state["chroot"]),
-                    "pacman",
-                    "-Syu",
-                ],
-                check=True,
-            )
-        except subprocess.CalledProcessError:
-            log_print("ERROR: Failed to update the chroot")
-            sys.exit(1)
     for pkg in pkgs:
         pkgdir = os.path.join(other_state["clones_dir"], pkg)
         log_print(f'Building "{pkg}"...')
@@ -1221,6 +1205,23 @@ if __name__ == "__main__":
             )
         )
         sys.exit(1)
+
+    if not args.no_update:
+        log_print("Updating the chroot...")
+        try:
+            subprocess.run(
+                [
+                    "arch-nspawn",
+                    "{}/root".format(other_state["chroot"]),
+                    "pacman",
+                    "-Syu",
+                ],
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            log_print("ERROR: Failed to update the chroot")
+            sys.exit(1)
+
     pkg_list = [temp_pkg_name for temp_pkg_name in pkg_state.keys()]
     i = 0
     furthest_checked = 0
@@ -1337,7 +1338,6 @@ if __name__ == "__main__":
                 pkgs_to_update,
                 pkg_state,
                 other_state,
-                args.no_update,
                 "" if args.no_store else other_state["signing_gpg_dir"],
                 "" if args.no_store else other_state["signing_gpg_key_fp"],
                 "" if args.no_store else other_state["signing_gpg_pass"],
