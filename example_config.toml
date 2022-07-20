@@ -259,7 +259,8 @@ skip_branch_up_to_date = true
 [[entry]]
 name = "pasystray-git"
 aur_deps = [
-    "gnome-icon-theme"
+    "gnome-icon-theme",
+    "gnome-icon-theme-symbolic"
 ]
 
 [[entry]]
