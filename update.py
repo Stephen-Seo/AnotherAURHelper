@@ -21,15 +21,17 @@ from pathlib import Path
 SUDO_PROC = False
 AUR_GIT_REPO_PATH = "https://aur.archlinux.org"
 AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
-global GLOBAL_LOG_FILE
 GLOBAL_LOG_FILE = "log.txt"
 DEFAULT_EDITOR = "/usr/bin/nano"
 
 
-def log_print(string):
-    print(string)
+def log_print(*args, **kwargs):
+    if "file" in kwargs:
+        kwargs["file"] = sys.stdout
+    print(*args, **kwargs)
     with open(GLOBAL_LOG_FILE, "a", encoding="utf-8") as lf:
-        print(string, file=lf)
+        kwargs["file"] = lf
+        print(*args, **kwargs)
 
 
 def ensure_pkg_dir_exists(pkg, pkg_state, other_state):
