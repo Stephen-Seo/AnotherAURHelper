@@ -64,7 +64,13 @@ def ensure_pkg_dir_exists(pkg, pkg_state, other_state):
         pkg_state[pkg]["repo_path"] = AUR_GIT_REPO_PATH_TEMPLATE.format(pkg)
         try:
             subprocess.run(
-                ["git", "clone", pkg_state[pkg]["repo_path"], pkgdir],
+                (
+                    "/usr/bin/env",
+                    "git",
+                    "clone",
+                    pkg_state[pkg]["repo_path"],
+                    pkgdir,
+                ),
                 check=True,
             )
         except subprocess.CalledProcessError:
@@ -104,7 +110,7 @@ def update_pkg_dir(pkg, pkg_state, other_state):
     # fetch all
     try:
         subprocess.run(
-            ["git", "fetch", "-p", "--all"],
+            ("/usr/bin/env", "git", "fetch", "-p", "--all"),
             check=True,
             cwd=pkgdir,
         )
@@ -118,7 +124,7 @@ def update_pkg_dir(pkg, pkg_state, other_state):
     remotes = []
     try:
         result = subprocess.run(
-            ["git", "remote"],
+            ("/usr/bin/env", "git", "remote"),
             check=True,
             cwd=pkgdir,
             capture_output=True,
@@ -145,7 +151,7 @@ def update_pkg_dir(pkg, pkg_state, other_state):
     selected_remote = None
     try:
         result = subprocess.run(
-            ["git", "status", "-sb", "--porcelain"],
+            ("/usr/bin/env", "git", "status", "-sb", "--porcelain"),
             check=True,
             cwd=pkgdir,
             capture_output=True,
@@ -172,7 +178,7 @@ def update_pkg_dir(pkg, pkg_state, other_state):
     current_branch_hash = None
     try:
         result = subprocess.run(
-            ["git", "log", "-1", "--format=format:%H"],
+            ("/usr/bin/env", "git", "log", "-1", "--format=format:%H"),
             check=True,
             cwd=pkgdir,
             capture_output=True,
@@ -194,7 +200,14 @@ def update_pkg_dir(pkg, pkg_state, other_state):
     remote_branch_hash = None
     try:
         result = subprocess.run(
-            ["git", "log", "-1", "--format=format:%H", selected_remote],
+            (
+                "/usr/bin/env",
+                "git",
+                "log",
+                "-1",
+                "--format=format:%H",
+                selected_remote,
+            ),
             check=True,
             cwd=pkgdir,
             capture_output=True,
@@ -215,16 +228,18 @@ def update_pkg_dir(pkg, pkg_state, other_state):
     # update current branch if not same commit
     if current_branch_hash != remote_branch_hash:
         try:
-            subprocess.run(["git", "pull"], check=True, cwd=pkgdir)
+            subprocess.run(
+                ("/usr/bin/env", "git", "pull"), check=True, cwd=pkgdir
+            )
         except subprocess.CalledProcessError:
             try:
                 subprocess.run(
-                    ["git", "restore", "."],
+                    ("/usr/bin/env", "git", "restore", "."),
                     check=True,
                     cwd=pkgdir,
                 )
                 subprocess.run(
-                    ["git", "pull"],
+                    ("/usr/bin/env", "git", "pull"),
                     check=True,
                     cwd=pkgdir,
                 )
@@ -248,7 +263,9 @@ def check_pkg_build(pkg, pkg_state, other_state, editor):
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
     log_print('Checking PKGBUILD for "{}"...'.format(pkg))
     try:
-        subprocess.run([editor, "PKGBUILD"], check=True, cwd=pkgdir)
+        subprocess.run(
+            ("/usr/bin/env", editor, "PKGBUILD"), check=True, cwd=pkgdir
+        )
     except subprocess.CalledProcessError:
         log_print('ERROR: Failed checking PKGBUILD for "{}"'.format(pkg))
         return "abort"
@@ -383,6 +400,7 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, pkg_state, other_state):
                 'Running "makechrootpkg ... --nobuild" to ensure pkgver in PKGBUILD is updated...'
             )
             command_list = [
+                "/usr/bin/env",
                 "makechrootpkg",
                 "-c",
                 "-r",
@@ -394,8 +412,8 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, pkg_state, other_state):
                 if not dep_fullpath:
                     log_print('ERROR: Failed to get dep "{}"'.format(dep))
                     sys.exit(1)
-                command_list.insert(1, "-I")
-                command_list.insert(2, dep_fullpath)
+                command_list.insert(2, "-I")
+                command_list.insert(3, dep_fullpath)
             for aur_dep in pkg_state[pkg]["aur_deps"]:
                 aur_dep_fullpath = get_latest_pkg(
                     aur_dep, other_state["pkg_out_dir"]
@@ -405,8 +423,8 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, pkg_state, other_state):
                         'ERROR: Failed to get aur_dep "{}"'.format(aur_dep)
                     )
                     sys.exit(1)
-                command_list.insert(1, "-I")
-                command_list.insert(2, aur_dep_fullpath)
+                command_list.insert(2, "-I")
+                command_list.insert(3, aur_dep_fullpath)
             subprocess.run(
                 command_list + post_command_list,
                 check=True,
@@ -428,11 +446,12 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, pkg_state, other_state):
 
         # TODO maybe sandbox sourcing the PKGBUILD
         pkgbuild_output = subprocess.run(
-            [
+            (
+                "/usr/bin/env",
                 "bash",
                 "-c",
                 f"source {os.path.join(pkgdir, 'PKGBUILD')}; echo \"pkgver=$pkgver\"; echo \"pkgrel=$pkgrel\"; echo \"epoch=$epoch\"",
-            ],
+            ),
             capture_output=True,
             text=True,
         )
@@ -558,13 +577,17 @@ def get_pkg_current_version(pkg, pkg_state, repo):
     current_version = None
     try:
         result = subprocess.run(
-            "tar -tf {} | grep '{}.*/$'".format(
-                repo, pkg_state[pkg]["pkg_name"]
+            (
+                "/usr/bin/env",
+                "bash",
+                "-c"
+                "tar -tf {} | grep '{}.*/$'".format(
+                    repo, pkg_state[pkg]["pkg_name"]
+                ),
             ),
             check=True,
             capture_output=True,
             encoding="UTF-8",
-            shell=True,
         )
         reprog = re.compile(
             "^{}-(?P<epoch>[0-9]+:)?(?P<version>[^-/: ]*-[0-9]+)/$".format(
@@ -600,11 +623,11 @@ def get_sudo_privileges():
     if not SUDO_PROC:
         log_print("sudo -v")
         try:
-            subprocess.run(["sudo", "-v"], check=True)
+            subprocess.run(("/usr/bin/env", "sudo", "-v"), check=True)
         except subprocess.CalledProcessError:
             return False
         SUDO_PROC = subprocess.Popen(
-            ["while true; do sudo -v; sleep 2m; done"], shell=True
+            "while true; do sudo -v; sleep 2m; done", shell=True
         )
         atexit.register(cleanup_sudo, sudo_proc=SUDO_PROC)
         return True
@@ -631,32 +654,32 @@ def create_executable_script(dest_filename, script_contents):
         tempf_name = tempf.name
     try:
         subprocess.run(
-            [
+            (
                 "/usr/bin/env",
                 "sudo",
                 "cp",
                 tempf_name,
                 dest_filename,
-            ],
+            ),
             check=True,
         )
         subprocess.run(
-            [
+            (
                 "/usr/bin/env",
                 "sudo",
                 "chmod",
                 "a+rx",
                 dest_filename,
-            ],
+            ),
             check=True,
         )
         subprocess.run(
-            [
+            (
                 "/usr/bin/env",
                 "rm",
                 "-f",
                 tempf_name,
-            ],
+            ),
             check=True,
         )
     except subprocess.CalledProcessError:
@@ -673,13 +696,14 @@ def setup_ccache(chroot):
     # set up ccache stuff
     try:
         subprocess.run(
-            [
+            (
+                "/usr/bin/env",
                 "sudo",
                 "sed",
                 "-i",
                 "/^BUILDENV=/s/!ccache/ccache/",
                 f"{chroot}/root/etc/makepkg.conf",
-            ],
+            ),
             check=True,
         )
     except subprocess.CalledProcessError:
@@ -693,13 +717,14 @@ def cleanup_ccache(chroot):
     # cleanup ccache stuff
     try:
         subprocess.run(
-            [
+            (
+                "/usr/bin/env",
                 "sudo",
                 "sed",
                 "-i",
                 "/^BUILDENV=/s/ ccache/ !ccache/",
                 f"{chroot}/root/etc/makepkg.conf",
-            ],
+            ),
             check=True,
         )
     except subprocess.CalledProcessError:
@@ -750,7 +775,8 @@ def cleanup_sccache(chroot):
     # cleanup sccache stuff
     try:
         subprocess.run(
-            [
+            (
+                "/usr/bin/env",
                 "sudo",
                 "rm",
                 "-f",
@@ -762,7 +788,7 @@ def cleanup_sccache(chroot):
                 f"{chroot}/root/usr/local/bin/clang",
                 f"{chroot}/root/usr/local/bin/clang++",
                 f"{chroot}/root/usr/local/bin/rustc",
-            ],
+            ),
             check=False,
         )
     except BaseException:
@@ -798,6 +824,7 @@ def update_pkg_list(
                 cleanup_sccache(other_state["chroot"])
 
         command_list = [
+            "/usr/bin/env",
             "makechrootpkg",
             "-c",
             "-r",
@@ -815,8 +842,8 @@ def update_pkg_list(
             if not dep_fullpath:
                 log_print('ERROR: Failed to get dep "{}"'.format(dep))
                 sys.exit(1)
-            command_list.insert(1, "-I")
-            command_list.insert(2, dep_fullpath)
+            command_list.insert(2, "-I")
+            command_list.insert(3, dep_fullpath)
         for aur_dep in pkg_state[pkg]["aur_deps"]:
             aur_dep_fullpath = get_latest_pkg(
                 aur_dep, other_state["pkg_out_dir"]
@@ -824,15 +851,15 @@ def update_pkg_list(
             if not aur_dep_fullpath:
                 log_print('ERROR: Failed to get aur_dep "{}"'.format(aur_dep))
                 sys.exit(1)
-            command_list.insert(1, "-I")
-            command_list.insert(2, aur_dep_fullpath)
+            command_list.insert(2, "-I")
+            command_list.insert(3, aur_dep_fullpath)
         if "ccache_dir" in pkg_state[pkg]:
-            command_list.insert(1, "-d")
-            command_list.insert(2, f'{pkg_state[pkg]["ccache_dir"]}:/ccache')
+            command_list.insert(2, "-d")
+            command_list.insert(3, f'{pkg_state[pkg]["ccache_dir"]}:/ccache')
             post_command_list.insert(1, "CCACHE_DIR=/ccache")
         elif "sccache_dir" in pkg_state[pkg]:
-            command_list.insert(1, "-d")
-            command_list.insert(2, f'{pkg_state[pkg]["sccache_dir"]}:/sccache')
+            command_list.insert(2, "-d")
+            command_list.insert(3, f'{pkg_state[pkg]["sccache_dir"]}:/sccache')
             post_command_list.insert(1, "SCCACHE_DIR=/sccache")
             post_command_list.insert(
                 2, f'SCCACHE_CACHE_SIZE={pkg_state[pkg]["sccache_cache_size"]}'
@@ -918,7 +945,7 @@ def update_pkg_list(
         log_print(f'Signing "{other_state["repo"]}"...')
         try:
             subprocess.run(
-                [
+                (
                     "/usr/bin/rm",
                     "-f",
                     str(
@@ -927,11 +954,12 @@ def update_pkg_list(
                             f"{other_state['repo']}.sig",
                         )
                     ),
-                ]
+                )
             )
             subprocess.run(
-                [
-                    "/usr/bin/gpg",
+                (
+                    "/usr/bin/env",
+                    "gpg",
                     "--batch",
                     "--passphrase-fd",
                     "0",
@@ -942,10 +970,10 @@ def update_pkg_list(
                     "--detach-sign",
                     str(
                         os.path.join(
-                            other_state["pkg_out_dir"], f"{other_state['repo']}"
+                            other_state["pkg_out_dir"], other_state["repo"]
                         )
                     ),
-                ],
+                ),
                 check=True,
                 input=signing_gpg_pass,
                 text=True,
@@ -955,17 +983,18 @@ def update_pkg_list(
             if repo_sig_name.rfind("/") != -1:
                 repo_sig_name = repo_sig_name.rsplit(sep="/", maxsplit=1)[1]
             subprocess.run(
-                [
-                    "/usr/bin/ln",
+                (
+                    "/usr/bin/env",
+                    "ln",
                     "-sf",
                     repo_sig_name,
                     str(
                         os.path.join(
-                            other_state["pkg_out_dir"], f"{other_state['repo']}"
+                            other_state["pkg_out_dir"], other_state["repo"]
                         )
                     ).removesuffix(".tar")
                     + ".sig",
-                ]
+                )
             )
         except subprocess.CalledProcessError:
             log_print(f'WARNING: Failed to sign "{other_state["repo"]}"')
@@ -1067,7 +1096,8 @@ def test_gpg_passphrase(signing_gpg_dir, signing_key_fp, passphrase):
         tempnf.flush()
         try:
             subprocess.run(
-                [
+                (
+                    "/usr/bin/env",
                     "gpg",
                     "--batch",
                     "--passphrase-fd",
@@ -1078,7 +1108,7 @@ def test_gpg_passphrase(signing_gpg_dir, signing_key_fp, passphrase):
                     signing_key_fp,
                     "--detach-sign",
                     tempnf.name,
-                ],
+                ),
                 check=True,
                 input=passphrase,
                 text=True,
@@ -1320,12 +1350,13 @@ if __name__ == "__main__":
         log_print("Updating the chroot...")
         try:
             subprocess.run(
-                [
+                (
+                    "/usr/bin/env",
                     "arch-nspawn",
                     "{}/root".format(other_state["chroot"]),
                     "pacman",
                     "-Syu",
-                ],
+                ),
                 check=True,
             )
         except subprocess.CalledProcessError:
