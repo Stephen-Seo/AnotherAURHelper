@@ -650,6 +650,15 @@ def create_executable_script(dest_filename, script_contents):
             ],
             check=True,
         )
+        subprocess.run(
+            [
+                "/usr/bin/env",
+                "rm",
+                "-f",
+                tempf_name,
+            ],
+            check=True,
+        )
     except subprocess.CalledProcessError:
         log_print(
             f'ERROR: Failed to create executable script "{dest_filename}"'
