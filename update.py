@@ -618,7 +618,7 @@ def cleanup_sudo(sudo_proc):
 
 
 def create_executable_script(dest_filename, script_contents):
-    """Creates a script to be run with sudo to set up a custom command.
+    """Creates a script via use of sudo to be executed later.
 
     This is currently used to set up sccache by placing custom commands in
     "/usr/local/bin" for gcc and friends."""
@@ -627,40 +627,26 @@ def create_executable_script(dest_filename, script_contents):
     with tempfile.NamedTemporaryFile(
         mode="w", encoding="utf-8", delete=False
     ) as tempf:
-        print(
-            """#!/usr/bin/env python3
-import os
-import stat
-import argparse
-
-def create_executable_script(dest_filename, script_contents):
-    with open(dest_filename, mode='w', encoding='utf-8') as f:
-        f.write(script_contents)
-    os.chmod(dest_filename, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR
-                          | stat.S_IRGRP | stat.S_IXGRP
-                          | stat.S_IROTH | stat.S_IXOTH)
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Set new file with execute permissions")
-    parser.add_argument("--dest_filename")
-    parser.add_argument("--script_contents")
-    args = parser.parse_args()
-
-    create_executable_script(args.dest_filename, args.script_contents)
-""",
-            file=tempf,
-        )
+        print(script_contents, file=tempf)
         tempf_name = tempf.name
     try:
         subprocess.run(
             [
-                "sudo",
                 "/usr/bin/env",
-                "python3",
+                "sudo",
+                "cp",
                 tempf_name,
-                "--dest_filename",
                 dest_filename,
-                "--script_contents",
-                script_contents,
+            ],
+            check=True,
+        )
+        subprocess.run(
+            [
+                "/usr/bin/env",
+                "sudo",
+                "chmod",
+                "a+rx",
+                dest_filename,
             ],
             check=True,
         )
