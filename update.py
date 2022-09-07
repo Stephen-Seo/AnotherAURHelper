@@ -733,6 +733,9 @@ export PATH=${PATH/:\/usr\/local\/bin/}
             f"{chroot}/root/usr/local/bin/c++", sccache_script
         )
         or not create_executable_script(
+            f"{chroot}/root/usr/local/bin/cpp", sccache_script
+        )
+        or not create_executable_script(
             f"{chroot}/root/usr/local/bin/clang", sccache_script
         )
         or not create_executable_script(
@@ -760,6 +763,7 @@ def cleanup_sccache(chroot):
                 f"{chroot}/root/usr/local/bin/g++",
                 f"{chroot}/root/usr/local/bin/cc",
                 f"{chroot}/root/usr/local/bin/c++",
+                f"{chroot}/root/usr/local/bin/cpp",
                 f"{chroot}/root/usr/local/bin/clang",
                 f"{chroot}/root/usr/local/bin/clang++",
                 f"{chroot}/root/usr/local/bin/rustc",
