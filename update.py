@@ -580,7 +580,7 @@ def get_pkg_current_version(pkg, pkg_state, repo):
             (
                 "/usr/bin/env",
                 "bash",
-                "-c"
+                "-c",
                 "tar -tf {} | grep '{}.*/$'".format(
                     repo, pkg_state[pkg]["pkg_name"]
                 ),
