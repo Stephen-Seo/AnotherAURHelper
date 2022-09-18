@@ -16,6 +16,7 @@ import shutil
 import getpass
 import tempfile
 from pathlib import Path
+from typing import Any, Union
 
 # SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 SUDO_PROC = False
@@ -36,7 +37,11 @@ def log_print(*args, **kwargs):
         print(*args, **kwargs)
 
 
-def ensure_pkg_dir_exists(pkg, pkg_state, other_state):
+def ensure_pkg_dir_exists(
+    pkg: str,
+    pkg_state: dict[str, Any],
+    other_state: dict[str, Union[None, str]],
+):
     """Ensures that an AUR-pkg-dir exists, returning False on failure.
 
     If no such directory exists, this script attempts to clone it from the AUR.
@@ -88,7 +93,11 @@ def ensure_pkg_dir_exists(pkg, pkg_state, other_state):
     return False
 
 
-def update_pkg_dir(pkg, pkg_state, other_state):
+def update_pkg_dir(
+    pkg: str,
+    pkg_state: dict[str, Any],
+    other_state: dict[str, Union[None, str]],
+):
     """Updates the pkg by invoking "git pull".
 
     If "git pull" failes, it is retried after invoking "git restore .".
@@ -255,7 +264,12 @@ def update_pkg_dir(pkg, pkg_state, other_state):
     return True, False
 
 
-def check_pkg_build(pkg, pkg_state, other_state, editor):
+def check_pkg_build(
+    pkg: str,
+    pkg_state: dict[str, Any],
+    other_state: dict[str, Union[None, str]],
+    editor: str,
+):
     """Opens the PKGBUILD in the editor, then prompts the user for an action.
 
     Returns "ok", "not_ok", "abort", or "force_build"."""
@@ -294,7 +308,13 @@ def check_pkg_build(pkg, pkg_state, other_state, editor):
             continue
 
 
-def check_pkg_version(pkg, pkg_state, repo, force_check_srcinfo, other_state):
+def check_pkg_version(
+    pkg: str,
+    pkg_state: dict[str, Any],
+    repo: str,
+    force_check_srcinfo: bool,
+    other_state: dict[str, Union[None, str]],
+):
     """Gets the installed version and pkg version and checks them.
 
     Returns "fail" (on failure), "install" (pkg is newer), or "done"
@@ -330,7 +350,7 @@ def check_pkg_version(pkg, pkg_state, repo, force_check_srcinfo, other_state):
     )
 
 
-def get_srcinfo_version(pkg, other_state):
+def get_srcinfo_version(pkg: str, other_state: dict[str, Union[None, str]]):
     """Parses .SRCINFO for verison information.
 
     Returns (success_bool, pkgepoch, pkgver, pkgrel)
@@ -369,7 +389,12 @@ def get_srcinfo_version(pkg, other_state):
     return True, pkgepoch, pkgver, pkgrel
 
 
-def get_pkgbuild_version(pkg, force_check_srcinfo, pkg_state, other_state):
+def get_pkgbuild_version(
+    pkg: str,
+    force_check_srcinfo: bool,
+    pkg_state: dict[str, Any],
+    other_state: dict[str, Union[None, str]],
+):
     """Gets the version of the pkg from .SRCINFO or PKGBUILD.
 
     Returns (success, epoch, version, release).
@@ -482,12 +507,12 @@ def get_pkgbuild_version(pkg, force_check_srcinfo, pkg_state, other_state):
 
 
 def get_srcinfo_check_result(
-    current_epoch,
-    current_version,
-    pkg,
-    force_check_srcinfo,
-    pkg_state,
-    other_state,
+    current_epoch: Union[str, None],
+    current_version: str,
+    pkg: str,
+    force_check_srcinfo: bool,
+    pkg_state: dict[str, Any],
+    other_state: dict[str, Union[None, str]],
 ):
     """Checks the version of the pkg against the currently installed version.
 
@@ -554,7 +579,7 @@ def get_srcinfo_check_result(
         return "fail"
 
 
-def get_pkg_current_version(pkg, pkg_state, repo):
+def get_pkg_current_version(pkg: str, pkg_state: dict[str, Any], repo: str):
     """Fetches the version info and returns status of fetching and the version.
 
     Returns (status, epoch, version)
@@ -640,7 +665,7 @@ def cleanup_sudo(sudo_proc):
     sudo_proc.terminate()
 
 
-def create_executable_script(dest_filename, script_contents):
+def create_executable_script(dest_filename: str, script_contents: str):
     """Creates a script via use of sudo to be executed later.
 
     This is currently used to set up sccache by placing custom commands in
@@ -690,7 +715,7 @@ def create_executable_script(dest_filename, script_contents):
     return True
 
 
-def setup_ccache(chroot):
+def setup_ccache(chroot: str):
     """Sets up the chroot for ccache."""
 
     # set up ccache stuff
@@ -711,7 +736,7 @@ def setup_ccache(chroot):
         sys.exit(1)
 
 
-def cleanup_ccache(chroot):
+def cleanup_ccache(chroot: str):
     """Unsets up the chroot for ccache."""
 
     # cleanup ccache stuff
@@ -732,7 +757,7 @@ def cleanup_ccache(chroot):
         sys.exit(1)
 
 
-def setup_sccache(chroot):
+def setup_sccache(chroot: str):
     """Sets up sccache for the chroot."""
 
     sccache_script = """#!/usr/bin/env sh
@@ -769,7 +794,7 @@ export PATH=${PATH/:\/usr\/local\/bin/}
         sys.exit(1)
 
 
-def cleanup_sccache(chroot):
+def cleanup_sccache(chroot: str):
     """Unsets up sccache for the chroot."""
 
     # cleanup sccache stuff
@@ -796,13 +821,13 @@ def cleanup_sccache(chroot):
 
 
 def update_pkg_list(
-    pkgs,
-    pkg_state,
-    other_state,
-    signing_gpg_dir,
-    signing_gpg_key_fp,
-    signing_gpg_pass,
-    no_store,
+    pkgs: list[str],
+    pkg_state: dict[str, Any],
+    other_state: dict[str, Union[None, str]],
+    signing_gpg_dir: str,
+    signing_gpg_key_fp: str,
+    signing_gpg_pass: str,
+    no_store: bool,
 ):
     """For each package to build: builds it, signs it, and moves it to
     "pkg_out_dir"."""
@@ -1021,7 +1046,7 @@ def update_pkg_list(
         log_print(f'"{pkg}" status: {pkg_state[pkg]["build_status"]}')
 
 
-def get_latest_pkg(pkg, cache_dir):
+def get_latest_pkg(pkg: str, cache_dir: str):
     """Gets the latest pkg from the specified "cache_dir" and return its
     filename."""
 
@@ -1042,7 +1067,7 @@ def get_latest_pkg(pkg, cache_dir):
         return None
 
 
-def confirm_result(pkg, state_result):
+def confirm_result(pkg: str, state_result: str):
     """Prompts the user the action to take for a pkg after checking its
     PKGBUILD.
 
@@ -1073,7 +1098,7 @@ def confirm_result(pkg, state_result):
             continue
 
 
-def print_state_info_and_get_update_list(pkg_state):
+def print_state_info_and_get_update_list(pkg_state: dict[str, Any]):
     """Prints the current "checked" state of all pkgs in the config."""
 
     to_update = []
@@ -1088,7 +1113,9 @@ def print_state_info_and_get_update_list(pkg_state):
     return to_update
 
 
-def test_gpg_passphrase(signing_gpg_dir, signing_key_fp, passphrase):
+def test_gpg_passphrase(
+    signing_gpg_dir: str, signing_key_fp: str, passphrase: str
+):
     """Checks if the given gpg passphrase works with the gpg signing key."""
 
     with tempfile.NamedTemporaryFile() as tempnf:
@@ -1122,7 +1149,7 @@ def test_gpg_passphrase(signing_gpg_dir, signing_key_fp, passphrase):
     return True
 
 
-def validate_and_verify_paths(other_state):
+def validate_and_verify_paths(other_state: dict[str, Union[None, str]]):
     """Checks and validates/ensures that certain directories exist."""
 
     if not os.path.exists(other_state["chroot"]):
