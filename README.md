@@ -14,9 +14,9 @@ management. That must be done in the config. An example config is provided.
 
 Sometimes if a package prompts a user to select between alternate package
 dependencies, makechrootpkg will fail to select one by default (it will
-constantly output "y" to stdin when a selection requires an integer). This means
-you will need to check the logs as it is building a package to make sure this
-kind of soft-lock doesn't happen. Use `tail -f LOG_FILE.log` for example. If
+constantly output "y" to stdin when a selection requires an integer). This
+means you will need to check the logs as it is building a package to make sure
+this kind of soft-lock doesn't happen. Use `tail -f LOG_FILE` for example. If
 such a soft-lock happens, Ctrl-C the helper, and explicitly set a dependency in
 the TOML config file in a "other\_deps" array for the package like so:
 
