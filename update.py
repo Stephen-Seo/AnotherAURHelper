@@ -29,7 +29,7 @@ IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 class ArchPkgVersion:
     """Holds a version (typically of an ArchLinux package) for comparison."""
 
-    def __init__(self, version_str):
+    def __init__(self, version_str: str):
         self.versions = []
         self.pkgver = 0
         end_dash_idx = version_str.rfind("-")
@@ -73,7 +73,7 @@ class ArchPkgVersion:
                 self.versions.append(tuple(subversion))
         self.versions = tuple(self.versions)
 
-    def compare_with(self, other_self):
+    def compare_with(self, other_self: "ArchPkgVersion"):
         """Returns -1 if self is less than other_self, 0 if they are equal, and
         1 if self is greater than other_self."""
         self_count = len(self.versions)
@@ -149,37 +149,37 @@ class ArchPkgVersion:
                 else:
                     return 0
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any):
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) == 0
         else:
             return False
 
-    def __ne__(self, other):
+    def __ne__(self, other: Any):
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) != 0
         else:
             return False
 
-    def __lt__(self, other):
+    def __lt__(self, other: Any):
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) < 0
         else:
             return False
 
-    def __le__(self, other):
+    def __le__(self, other: Any):
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) <= 0
         else:
             return False
 
-    def __gt__(self, other):
+    def __gt__(self, other: Any):
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) > 0
         else:
             return False
 
-    def __ge__(self, other):
+    def __ge__(self, other: Any):
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) >= 0
         else:
