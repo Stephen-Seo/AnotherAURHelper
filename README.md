@@ -47,8 +47,7 @@ The AUR Helper requires several things:
 
 The `devtools` package is required.
 
-The `python-packaging` and `python-toml` packages are required for the Python
-script to run.
+The `python-toml` package is required for the Python script to run.
 
 ## Create the CHROOT
 

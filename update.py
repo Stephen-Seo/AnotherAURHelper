@@ -6,7 +6,6 @@ import sys
 import argparse
 import subprocess
 import re
-from packaging import version
 import atexit
 import glob
 import toml
@@ -147,58 +146,38 @@ class ArchPkgVersion:
                     return 0
 
     def __eq__(self, other):
-        if isinstance(other, version.Version):
-            other = ArchPkgVersion(str(other))
-
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) == 0
         else:
             return False
 
     def __ne__(self, other):
-        if isinstance(other, version.Version):
-            other = ArchPkgVersion(str(other))
-
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) != 0
         else:
             return False
 
     def __lt__(self, other):
-        if isinstance(other, version.Version):
-            other = ArchPkgVersion(str(other))
-
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) < 0
         else:
             return False
 
     def __le__(self, other):
-        if isinstance(other, version.Version):
-            other = ArchPkgVersion(str(other))
-
         if isinstance(other, ArchPkgVersion):
-            result = self.compare_with(other)
-            return result <= 0
+            return self.compare_with(other) <= 0
         else:
             return False
 
     def __gt__(self, other):
-        if isinstance(other, version.Version):
-            other = ArchPkgVersion(str(other))
-
         if isinstance(other, ArchPkgVersion):
             return self.compare_with(other) > 0
         else:
             return False
 
     def __ge__(self, other):
-        if isinstance(other, version.Version):
-            other = ArchPkgVersion(str(other))
-
         if isinstance(other, ArchPkgVersion):
-            result = self.compare_with(other)
-            return result >= 0
+            return self.compare_with(other) >= 0
         else:
             return False
 
@@ -696,17 +675,6 @@ def get_pkgbuild_version(
         return False, None, None, None
 
 
-def version_parse_checked(version_str: str):
-    try:
-        return version.parse(version_str)
-    except version.InvalidVersion:
-        self_version = ArchPkgVersion(version_str)
-        log_print(
-            f'WARNING: version.parse("{version_str}") failed to parse! Defaulting to self-defined version "{self_version}".'
-        )
-        return self_version
-
-
 def get_srcinfo_check_result(
     current_epoch: Union[str, None],
     current_version: str,
@@ -755,8 +723,8 @@ def get_srcinfo_check_result(
         elif (
             pkgver is not None
             and pkgrel is not None
-            and version_parse_checked(current_version)
-            < version_parse_checked(pkgver + "-" + pkgrel)
+            and ArchPkgVersion(current_version)
+            < ArchPkgVersion(pkgver + "-" + pkgrel)
         ):
             log_print(
                 'Current installed version of "{}" is out of date (older version).'.format(
