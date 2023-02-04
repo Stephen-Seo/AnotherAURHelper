@@ -27,19 +27,19 @@ DEFAULT_EDITOR = "/usr/bin/nano"
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 
 
-class ArchPkgVersion():
+class ArchPkgVersion:
     def __init__(self, version_str):
         self.versions = []
         self.pkgver = 0
-        end_dash_idx = version_str.rfind('-')
+        end_dash_idx = version_str.rfind("-")
         if end_dash_idx != -1:
             try:
-                self.pkgver = int(version_str[end_dash_idx+1:])
+                self.pkgver = int(version_str[end_dash_idx + 1 :])
             except ValueError:
-                self.pkgver = version_str[end_dash_idx+1:]
+                self.pkgver = version_str[end_dash_idx + 1 :]
             version_str = version_str[:end_dash_idx]
 
-        for sub in version_str.split('.'):
+        for sub in version_str.split("."):
             if IS_DIGIT_REGEX.match(sub) is not None:
                 self.versions.append(int(sub))
             else:
@@ -92,12 +92,18 @@ class ArchPkgVersion():
                         try:
                             if self.versions[i][j] < other_self.versions[i][j]:
                                 return -1
-                            elif self.versions[i][j] > other_self.versions[i][j]:
+                            elif (
+                                self.versions[i][j] > other_self.versions[i][j]
+                            ):
                                 return 1
                         except TypeError:
-                            if str(self.versions[i][j]) < str(other_self.versions[i][j]):
+                            if str(self.versions[i][j]) < str(
+                                other_self.versions[i][j]
+                            ):
                                 return -1
-                            elif str(self.versions[i][j]) > str(other_self.versions[i][j]):
+                            elif str(self.versions[i][j]) > str(
+                                other_self.versions[i][j]
+                            ):
                                 return 1
                     if self_subcount < other_subcount:
                         return -1
@@ -205,7 +211,7 @@ class ArchPkgVersion():
             else:
                 self_str += str(self.versions[idx])
             if idx + 1 < len(self.versions):
-                self_str += '.'
+                self_str += "."
         self_str += "-" + str(self.pkgver)
         return self_str
 
@@ -695,7 +701,9 @@ def version_parse_checked(version_str: str):
         return version.parse(version_str)
     except version.InvalidVersion:
         self_version = ArchPkgVersion(version_str)
-        log_print(f'WARNING: version.parse(\"{version_str}\") failed to parse! Defaulting to self-defined version \"{self_version}\".')
+        log_print(
+            f'WARNING: version.parse("{version_str}") failed to parse! Defaulting to self-defined version "{self_version}".'
+        )
         return self_version
 
 
