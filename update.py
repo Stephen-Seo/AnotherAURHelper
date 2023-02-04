@@ -32,7 +32,7 @@ class ArchPkgVersion:
         self.versions = []
         self.pkgver = 0
         end_dash_idx = version_str.rfind("-")
-        if end_dash_idx != -1:
+        if end_dash_idx != -1 and end_dash_idx + 1 < len(version_str):
             try:
                 self.pkgver = int(version_str[end_dash_idx + 1 :])
             except ValueError:
