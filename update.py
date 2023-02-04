@@ -27,6 +27,8 @@ IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 
 
 class ArchPkgVersion:
+    """Holds a version (typically of an ArchLinux package) for comparison."""
+
     def __init__(self, version_str):
         self.versions = []
         self.pkgver = 0
@@ -72,6 +74,8 @@ class ArchPkgVersion:
         self.versions = tuple(self.versions)
 
     def compare_with(self, other_self):
+        """Returns -1 if self is less than other_self, 0 if they are equal, and
+        1 if self is greater than other_self."""
         self_count = len(self.versions)
         other_count = len(other_self.versions)
         if other_count < self_count:
