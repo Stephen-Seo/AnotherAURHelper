@@ -24,7 +24,7 @@ AUR_GIT_REPO_PATH = "https://aur.archlinux.org"
 AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
 GLOBAL_LOG_FILE = "log.txt"
 DEFAULT_EDITOR = "/usr/bin/nano"
-ENDS_WITH_DIGIT_REGEX = re.compile("^(.*?)([0-9]+)$")
+IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 
 
 class ArchPkgVersion():
@@ -40,18 +40,37 @@ class ArchPkgVersion():
             version_str = version_str[:end_dash_idx]
 
         for sub in version_str.split('.'):
-            try:
-                integer = int(sub)
-                self.versions.append(integer)
-            except ValueError:
-                match = ENDS_WITH_DIGIT_REGEX.match(sub)
-                if match is not None:
-                    subversion = []
-                    subversion.append(match.groups()[0])
-                    subversion.append(int(match.groups()[1]))
-                    self.versions.append(tuple(subversion))
-                else:
-                    self.versions.append(sub)
+            if IS_DIGIT_REGEX.match(sub) is not None:
+                self.versions.append(int(sub))
+            else:
+                subversion = []
+                string = None
+                integer = None
+                for char in sub:
+                    if IS_DIGIT_REGEX.match(char) is not None:
+                        if string is not None:
+                            subversion.append(string)
+                            string = None
+                        if integer is None:
+                            integer = int(char)
+                        else:
+                            integer = integer * 10 + int(char)
+                    else:
+                        if integer is not None:
+                            subversion.append(integer)
+                            integer = None
+                        if string is None:
+                            string = char
+                        else:
+                            string = string + char
+                if string is not None:
+                    subversion.append(string)
+                    string = None
+                if integer is not None:
+                    subversion.append(integer)
+                    integer = None
+                self.versions.append(tuple(subversion))
+        self.versions = tuple(self.versions)
 
     def compare_with(self, other_self):
         self_count = len(self.versions)
@@ -120,7 +139,6 @@ class ArchPkgVersion():
                     return 1
                 else:
                     return 0
-
 
     def __eq__(self, other):
         if isinstance(other, version.Version):
