@@ -6,7 +6,6 @@ import sys
 import argparse
 import subprocess
 import re
-from packaging import version
 import atexit
 import glob
 import toml
@@ -24,6 +23,180 @@ AUR_GIT_REPO_PATH = "https://aur.archlinux.org"
 AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
 GLOBAL_LOG_FILE = "log.txt"
 DEFAULT_EDITOR = "/usr/bin/nano"
+IS_DIGIT_REGEX = re.compile("^[0-9]+$")
+
+
+class ArchPkgVersion:
+    """Holds a version (typically of an ArchLinux package) for comparison."""
+
+    def __init__(self, version_str: str):
+        self.versions = []
+        self.pkgver = 0
+        end_dash_idx = version_str.rfind("-")
+        if end_dash_idx != -1 and end_dash_idx + 1 < len(version_str):
+            try:
+                self.pkgver = int(version_str[end_dash_idx + 1 :])
+            except ValueError:
+                self.pkgver = version_str[end_dash_idx + 1 :]
+            version_str = version_str[:end_dash_idx]
+
+        for sub in version_str.split("."):
+            if IS_DIGIT_REGEX.match(sub) is not None:
+                self.versions.append(int(sub))
+            else:
+                subversion = []
+                string = None
+                integer = None
+                for char in sub:
+                    if IS_DIGIT_REGEX.match(char) is not None:
+                        if string is not None:
+                            subversion.append(string)
+                            string = None
+                        if integer is None:
+                            integer = int(char)
+                        else:
+                            integer = integer * 10 + int(char)
+                    else:
+                        if integer is not None:
+                            subversion.append(integer)
+                            integer = None
+                        if string is None:
+                            string = char
+                        else:
+                            string = string + char
+                if string is not None:
+                    subversion.append(string)
+                    string = None
+                if integer is not None:
+                    subversion.append(integer)
+                    integer = None
+                self.versions.append(tuple(subversion))
+        self.versions = tuple(self.versions)
+
+    def compare_with(self, other_self: "ArchPkgVersion"):
+        """Returns -1 if self is less than other_self, 0 if they are equal, and
+        1 if self is greater than other_self."""
+        self_count = len(self.versions)
+        other_count = len(other_self.versions)
+        if other_count < self_count:
+            count = other_count
+        else:
+            count = self_count
+        for i in range(count):
+            if type(self.versions[i]) is tuple:
+                if type(other_self.versions[i]) is tuple:
+                    self_subcount = len(self.versions[i])
+                    other_subcount = len(other_self.versions[i])
+                    if other_subcount < self_subcount:
+                        subcount = other_subcount
+                    else:
+                        subcount = self_subcount
+                    for j in range(subcount):
+                        try:
+                            if self.versions[i][j] < other_self.versions[i][j]:
+                                return -1
+                            elif (
+                                self.versions[i][j] > other_self.versions[i][j]
+                            ):
+                                return 1
+                        except TypeError:
+                            if str(self.versions[i][j]) < str(
+                                other_self.versions[i][j]
+                            ):
+                                return -1
+                            elif str(self.versions[i][j]) > str(
+                                other_self.versions[i][j]
+                            ):
+                                return 1
+                    if self_subcount < other_subcount:
+                        return -1
+                    elif self_subcount > other_subcount:
+                        return 1
+                else:
+                    # self is tuple but other is not
+                    return 1
+            elif type(other_self.versions[i]) is tuple:
+                # other is tuple but self is not
+                return -1
+            else:
+                try:
+                    if self.versions[i] < other_self.versions[i]:
+                        return -1
+                    elif self.versions[i] > other_self.versions[i]:
+                        return 1
+                except TypeError:
+                    if str(self.versions[i]) < str(other_self.versions[i]):
+                        return -1
+                    elif str(self.versions[i]) > str(other_self.versions[i]):
+                        return 1
+        if self_count < other_count:
+            return -1
+        elif self_count > other_count:
+            return 1
+        else:
+            try:
+                if self.pkgver < other_self.pkgver:
+                    return -1
+                elif self.pkgver > other_self.pkgver:
+                    return 1
+                else:
+                    return 0
+            except TypeError:
+                if str(self.pkgver) < str(other_self.pkgver):
+                    return -1
+                elif str(self.pkgver) > str(other_self.pkgver):
+                    return 1
+                else:
+                    return 0
+
+    def __eq__(self, other: Any):
+        if isinstance(other, ArchPkgVersion):
+            return self.compare_with(other) == 0
+        else:
+            return False
+
+    def __ne__(self, other: Any):
+        if isinstance(other, ArchPkgVersion):
+            return self.compare_with(other) != 0
+        else:
+            return False
+
+    def __lt__(self, other: Any):
+        if isinstance(other, ArchPkgVersion):
+            return self.compare_with(other) < 0
+        else:
+            return False
+
+    def __le__(self, other: Any):
+        if isinstance(other, ArchPkgVersion):
+            return self.compare_with(other) <= 0
+        else:
+            return False
+
+    def __gt__(self, other: Any):
+        if isinstance(other, ArchPkgVersion):
+            return self.compare_with(other) > 0
+        else:
+            return False
+
+    def __ge__(self, other: Any):
+        if isinstance(other, ArchPkgVersion):
+            return self.compare_with(other) >= 0
+        else:
+            return False
+
+    def __str__(self):
+        self_str = ""
+        for idx in range(len(self.versions)):
+            if type(self.versions[idx]) is tuple:
+                for sub in self.versions[idx]:
+                    self_str += str(sub)
+            else:
+                self_str += str(self.versions[idx])
+            if idx + 1 < len(self.versions):
+                self_str += "."
+        self_str += "-" + str(self.pkgver)
+        return self_str
 
 
 def log_print(*args, **kwargs):
@@ -554,8 +727,8 @@ def get_srcinfo_check_result(
         elif (
             pkgver is not None
             and pkgrel is not None
-            and version.parse(current_version)
-            < version.parse(pkgver + "-" + pkgrel)
+            and ArchPkgVersion(current_version)
+            < ArchPkgVersion(pkgver + "-" + pkgrel)
         ):
             log_print(
                 'Current installed version of "{}" is out of date (older version).'.format(
