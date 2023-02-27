@@ -1066,6 +1066,12 @@ def update_pkg_list(
         nowstring = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y-%m-%d_%H-%M-%S_%Z"
         )
+        if "link_cargo_registry" in pkg_state[pkg]:
+            command_list.insert(2, "-d")
+            command_list.insert(
+                3,
+                f'{os.environ["HOME"]}/.cargo/registry:/build/.cargo/registry',
+            )
         # log_print(f"Using command list: {command_list + post_command_list}") # DEBUG
         with open(
             os.path.join(
@@ -1276,7 +1282,7 @@ def print_state_info_and_get_update_list(pkg_state: dict[str, Any]):
 
     to_update = []
     log_print("package state:")
-    for (pkg_name, pkg_dict) in pkg_state.items():
+    for pkg_name, pkg_dict in pkg_state.items():
         if "state" in pkg_dict:
             log_print(f"    {pkg_name:40}: {pkg_dict['state']}")
             if pkg_dict["state"] == "install":
@@ -1485,6 +1491,12 @@ if __name__ == "__main__":
                 pkg_state[entry["name"]]["skip_branch_up_to_date"] = True
             else:
                 pkg_state[entry["name"]]["skip_branch_up_to_date"] = False
+            if (
+                "link_cargo_registry" in entry
+                and type(entry["link_cargo_registry"]) is bool
+                and entry["link_cargo_registry"]
+            ):
+                pkg_state[entry["name"]]["link_cargo_registry"] = True
         other_state["chroot"] = d["chroot"]
         other_state["pkg_out_dir"] = d["pkg_out_dir"]
         other_state["repo"] = d["repo"]
