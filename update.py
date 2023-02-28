@@ -1072,6 +1072,11 @@ def update_pkg_list(
                 3,
                 f'{os.environ["HOME"]}/.cargo/registry:/build/.cargo/registry',
             )
+            command_list.insert(4, "-d")
+            command_list.insert(
+                5,
+                f'{os.environ["HOME"]}/.cargo/git:/build/.cargo/git',
+            )
         # log_print(f"Using command list: {command_list + post_command_list}") # DEBUG
         with open(
             os.path.join(
