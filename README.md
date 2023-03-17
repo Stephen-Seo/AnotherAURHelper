@@ -182,4 +182,4 @@ is no longer necessary to modify the `/usr/bin/makechrootpkg` because the
 integrity checks are done separately.
 
 If the hook was used previously, remove it from `/etc/pacman.d/hooks` and
-reinstall devtools.
+reinstall `devtools`.
