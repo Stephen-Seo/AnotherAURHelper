@@ -1010,7 +1010,6 @@ def update_pkg_list(
         sys.exit(1)
     for pkg in pkgs:
         pkgdir = os.path.join(other_state["clones_dir"], pkg)
-        log_print(f'Building "{pkg}"...')
         if "ccache_dir" in pkg_state[pkg]:
             cleanup_sccache(other_state["chroot"])
             setup_ccache(other_state["chroot"])
@@ -1021,6 +1020,24 @@ def update_pkg_list(
             else:
                 cleanup_sccache(other_state["chroot"])
 
+        # check integrity
+        log_print(f"Checking files of {pkg} before building it...")
+        try:
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "makepkg",
+                    "--verifysource"
+                ),
+                check=True,
+                cwd=pkgdir,
+            )
+        except:
+            log_print(f"ERROR: Failed to verify pkg \"{pkg}\"")
+            pkg_state[pkg]["build_status"] = "fail"
+            continue
+
+        log_print(f'Building "{pkg}"...')
         command_list = [
             "/usr/bin/env",
             "makechrootpkg",
@@ -1302,7 +1319,11 @@ def test_gpg_passphrase(
 ):
     """Checks if the given gpg passphrase works with the gpg signing key."""
 
-    with tempfile.NamedTemporaryFile() as tempnf:
+    local_share_dir = os.path.join(os.environ["HOME"], ".local", "share")
+    local_share_dir_path = Path(local_share_dir)
+    if not local_share_dir_path.exists():
+        local_share_dir_path.mkdir(parents=True)
+    with tempfile.NamedTemporaryFile(dir=local_share_dir) as tempnf:
         tempnf.write(b"Test file content")
         tempnf.flush()
         try:

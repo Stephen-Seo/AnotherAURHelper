@@ -173,12 +173,10 @@ It is recommended to use the script with a prepared config.
 
 # Other Notes
 
-By default, `makechrootpkg` does not verify integrity of files in the PKGBUILD.
-Use the `makechrootpkg_noskipinteg.hook` to modify the `makechrootpkg` script to
-not skip integrity checks.
+~~By default, `makechrootpkg` does not verify integrity of files in the
+PKGBUILD. Use the `makechrootpkg_noskipinteg.hook` to modify the
+`makechrootpkg` script to not skip integrity checks.~~
 
-The hook must be placed in `/etc/pacman.d/hooks/`.
-
-Note that the hook only takes effect when `devtools` is updated. If you want to
-activate the hook immediately, you can reinstall `devtools` with
-`pacman -S devtools`.
+`update.py` now does integrity checks before building with `makechrootpkg`. It
+is no longer necessary to modify the `/usr/bin/makechrootpkg` because the
+integrity checks are done separately.
