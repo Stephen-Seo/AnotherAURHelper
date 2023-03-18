@@ -1024,18 +1024,9 @@ def update_pkg_list(
         log_print(f"Checking files of {pkg} before building it...")
         try:
             subprocess.run(
-                (
-                    "/usr/bin/env",
-                    "arch-nspawn",
-                    os.path.join(other_state["chroot"], os.environ["USER"]),
-                    f"--bind={pkgdir}:/source",
-                    f"--bind={other_state['gpg_home']}:/build/.gnupg",
-                    "--chdir=/source",
-                    "--user=builduser",
-                    "/usr/bin/makepkg",
-                    "--verifysource",
-                ),
+                ("/usr/bin/env", "makepkg", "--verifysource"),
                 check=True,
+                cwd=pkgdir,
             )
         except:
             log_print(f'ERROR: Failed to verify pkg "{pkg}"')
