@@ -98,6 +98,7 @@ skip_branch_up_to_date = true
 
 [[entry]]
 name = "ion-git"
+link_cargo_registry = true
 
 [[entry]]
 name = "ly"

@@ -183,3 +183,12 @@ integrity checks are done separately.
 
 If the hook was used previously, remove it from `/etc/pacman.d/hooks` and
 reinstall `devtools`.
+
+## `link_cargo_registry`
+
+If you have `.cargo/registry` and `.cargo/git` in your home directory, and you
+don't want to re-download the Rust registry every time you update a Rust
+package, you can specify `link_cargo_registry = true` for a package in your
+config (see `ion-git` in the `example_config.toml`) and that will bind-mount
+these two directories into the chroot, which will share your local Rust cache
+with the chroot.
