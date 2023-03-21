@@ -1021,7 +1021,7 @@ def update_pkg_list(
                 cleanup_sccache(other_state["chroot"])
 
         # check integrity
-        log_print(f"Checking files of {pkg} before building it...")
+        log_print(f'Checking files of "{pkg}" before building it...')
         try:
             subprocess.run(
                 ("/usr/bin/env", "makepkg", "--verifysource"),
