@@ -1254,6 +1254,15 @@ def update_pkg_list(
                 )
                 pkg_state[pkg]["build_status"] = "fail"
                 continue
+            except BaseException:
+                log_print(
+                    'ERROR: Failed to build pkg "{}" in chroot (unknown Exception)'.format(
+                        pkg
+                    ),
+                    other_state=other_state,
+                )
+                pkg_state[pkg]["build_status"] = "fail"
+                continue
 
         if no_store:
             pkg_state[pkg]["build_status"] = "success"
