@@ -203,7 +203,11 @@ class ArchPkgVersion:
 def log_print(*args, **kwargs):
     """Prints to stdout, then logs to GLOBAL_LOG_FILE."""
 
-    if "other_state" in kwargs and "is_timed" in kwargs["other_state"]:
+    if (
+        "other_state" in kwargs
+        and "is_timed" in kwargs["other_state"]
+        and kwargs["other_state"]["is_timed"]
+    ):
         t = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y-%m-%d_%H-%M-%S_%Z"
         )
