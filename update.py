@@ -14,6 +14,7 @@ import time
 import shutil
 import getpass
 import tempfile
+import threading
 from pathlib import Path
 from typing import Any, Union
 
@@ -202,6 +203,17 @@ class ArchPkgVersion:
 def log_print(*args, **kwargs):
     """Prints to stdout, then logs to GLOBAL_LOG_FILE."""
 
+    if "other_state" in kwargs and "is_timed" in kwargs["other_state"]:
+        t = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d_%H-%M-%S_%Z"
+        )
+        print(t, end=" ")
+        with open(GLOBAL_LOG_FILE, "a", encoding="utf-8") as lf:
+            print(t, end=" ", file=lf)
+
+    if "other_state" in kwargs:
+        del kwargs["other_state"]
+
     if "file" in kwargs:
         kwargs["file"] = sys.stdout
     print(*args, **kwargs)
@@ -230,13 +242,19 @@ def ensure_pkg_dir_exists(
     returns False.
     """
 
-    log_print('Checking that dir for "{}" exists...'.format(pkg))
+    log_print(
+        'Checking that dir for "{}" exists...'.format(pkg),
+        other_state=other_state,
+    )
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
     if os.path.isdir(pkgdir):
-        log_print('Dir for "{}" exists.'.format(pkg))
+        log_print('Dir for "{}" exists.'.format(pkg), other_state=other_state)
         return True
     elif os.path.exists(pkgdir):
-        log_print('"{}" exists but is not a dir'.format(pkgdir))
+        log_print(
+            '"{}" exists but is not a dir'.format(pkgdir),
+            other_state=other_state,
+        )
         return False
     elif "repo_path" not in pkg_state[pkg]:
         pkg_state[pkg]["repo_path"] = AUR_GIT_REPO_PATH_TEMPLATE.format(pkg)
@@ -255,13 +273,17 @@ def ensure_pkg_dir_exists(
             log_print(
                 'ERROR: Failed to git clone "{}" (tried repo path "{}")'.format(
                     pkgdir, pkg_state[pkg]["repo_path"]
-                )
+                ),
+                other_state=other_state,
             )
             return False
-        log_print('Created dir for "{}".'.format(pkg))
+        log_print('Created dir for "{}".'.format(pkg), other_state=other_state)
         return True
     elif pkg_state[pkg]["repo_path"] == "NO_REPO":
-        log_print('"{}" does not exist, but NO_REPO specified for repo_path')
+        log_print(
+            '"{}" does not exist, but NO_REPO specified for repo_path',
+            other_state=other_state,
+        )
         return False
     return False
 
@@ -286,7 +308,10 @@ def update_pkg_dir(
     if an update was fetched).
     """
 
-    log_print('Making sure pkg dir for "{}" is up to date...'.format(pkg))
+    log_print(
+        'Making sure pkg dir for "{}" is up to date...'.format(pkg),
+        other_state=other_state,
+    )
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
     # fetch all
@@ -298,7 +323,8 @@ def update_pkg_dir(
         )
     except subprocess.CalledProcessError:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (fetching).'.format(pkg)
+            'ERROR: Failed to update pkg dir of "{}" (fetching).'.format(pkg),
+            other_state=other_state,
         )
         return False, False
 
@@ -317,7 +343,8 @@ def update_pkg_dir(
         log_print(
             'ERROR: Failed to update pkg dir of "{}" (getting remotes).'.format(
                 pkg
-            )
+            ),
+            other_state=other_state,
         )
         return False, False
     remotes = list(filter(lambda s: len(s) > 0, remotes))
@@ -325,7 +352,8 @@ def update_pkg_dir(
         log_print(
             'ERROR: Failed to update pkg dir of "{}" (getting remotes).'.format(
                 pkg
-            )
+            ),
+            other_state=other_state,
         )
         return False, False
 
@@ -347,12 +375,14 @@ def update_pkg_dir(
                     break
     except subprocess.CalledProcessError:
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).'
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).',
+            other_state=other_state,
         )
         return False, False
     if selected_remote is None or not isinstance(selected_remote, str):
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).'
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).',
+            other_state=other_state,
         )
         return False, False
 
@@ -369,12 +399,14 @@ def update_pkg_dir(
         current_branch_hash = result.stdout.strip()
     except subprocess.CalledProcessError:
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current branch\'s hash).'
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current branch\'s hash).',
+            other_state=other_state,
         )
         return False, False
     if current_branch_hash is None or not isinstance(current_branch_hash, str):
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current branch\'s hash).'
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current branch\'s hash).',
+            other_state=other_state,
         )
         return False, False
 
@@ -398,12 +430,14 @@ def update_pkg_dir(
         remote_branch_hash = result.stdout.strip()
     except subprocess.CalledProcessError:
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).'
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).',
+            other_state=other_state,
         )
         return False, False
     if remote_branch_hash is None or not isinstance(remote_branch_hash, str):
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).'
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).',
+            other_state=other_state,
         )
         return False, False
 
@@ -427,13 +461,14 @@ def update_pkg_dir(
                 )
             except subprocess.CalledProcessError:
                 log_print(
-                    'ERROR: Failed to update pkg dir of "{}".'.format(pkg)
+                    'ERROR: Failed to update pkg dir of "{}".'.format(pkg),
+                    other_state=other_state,
                 )
                 return False, False
     elif pkg_state[pkg]["skip_branch_up_to_date"]:
-        log_print(f'"{pkg}" is up to date')
+        log_print(f'"{pkg}" is up to date', other_state=other_state)
         return True, True
-    log_print('Updated pkg dir for "{}"'.format(pkg))
+    log_print('Updated pkg dir for "{}"'.format(pkg), other_state=other_state)
     return True, False
 
 
@@ -448,27 +483,35 @@ def check_pkg_build(
     Returns "ok", "not_ok", "abort", or "force_build"."""
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
-    log_print('Checking PKGBUILD for "{}"...'.format(pkg))
+    log_print(
+        'Checking PKGBUILD for "{}"...'.format(pkg), other_state=other_state
+    )
     try:
         subprocess.run(
             ("/usr/bin/env", editor, "PKGBUILD"), check=True, cwd=pkgdir
         )
     except subprocess.CalledProcessError:
-        log_print('ERROR: Failed checking PKGBUILD for "{}"'.format(pkg))
+        log_print(
+            'ERROR: Failed checking PKGBUILD for "{}"'.format(pkg),
+            other_state=other_state,
+        )
         return "abort"
     while True:
         log_print(
-            "PKGBUILD okay? [Y/n/c(heck again)/a(bort)/f(orce build)/b(ack)]"
+            "PKGBUILD okay? [Y/n/c(heck again)/a(bort)/f(orce build)/b(ack)]",
+            other_state=other_state,
         )
         user_input = sys.stdin.buffer.readline().decode().strip().lower()
         if user_input == "y" or len(user_input) == 0:
-            log_print("User decided PKGBUILD is ok")
+            log_print("User decided PKGBUILD is ok", other_state=other_state)
             return "ok"
         elif user_input == "n":
-            log_print("User decided PKGBUILD is not ok")
+            log_print(
+                "User decided PKGBUILD is not ok", other_state=other_state
+            )
             return "not_ok"
         elif user_input == "c":
-            log_print("User will check PKGBUILD again")
+            log_print("User will check PKGBUILD again", other_state=other_state)
             return check_pkg_build(pkg, pkg_state, other_state, editor)
         elif user_input == "a":
             return "abort"
@@ -477,7 +520,9 @@ def check_pkg_build(
         elif user_input == "b":
             return "back"
         else:
-            log_print("ERROR: User gave invalid input...")
+            log_print(
+                "ERROR: User gave invalid input...", other_state=other_state
+            )
             continue
 
 
@@ -502,7 +547,8 @@ def check_pkg_version(
         log_print(
             'ERROR: Failed to get version from package "{}".'.format(
                 pkg_state[pkg]["pkg_name"]
-            )
+            ),
+            other_state=other_state,
         )
         return "fail"
     log_print(
@@ -510,7 +556,8 @@ def check_pkg_version(
             current_epoch if current_epoch is not None else "0",
             current_version,
             pkg_state[pkg]["pkg_name"],
-        )
+        ),
+        other_state=other_state,
     )
 
     return get_srcinfo_check_result(
@@ -535,7 +582,10 @@ def get_srcinfo_version(pkg: str, other_state: dict[str, Union[None, str]]):
     if not os.path.exists(
         os.path.join(other_state["clones_dir"], pkg, ".SRCINFO")
     ):
-        log_print(f'ERROR: .SRCINFO does not exist for pkg "{pkg}"')
+        log_print(
+            f'ERROR: .SRCINFO does not exist for pkg "{pkg}"',
+            other_state=other_state,
+        )
         return False, None, None, None
     pkgver_reprog = re.compile("^\\s*pkgver\\s*=\\s*([a-zA-Z0-9._+-]+)\\s*$")
     pkgrel_reprog = re.compile("^\\s*pkgrel\\s*=\\s*([0-9.]+)\\s*$")
@@ -578,9 +628,11 @@ def get_pkgbuild_version(
     None."""
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
-    log_print(f'Getting version of "{pkg}"...')
+    log_print(f'Getting version of "{pkg}"...', other_state=other_state)
     while True and not force_check_srcinfo:
-        log_print("Use .SRCINFO or directly parse PKGBUILD?")
+        log_print(
+            "Use .SRCINFO or directly parse PKGBUILD?", other_state=other_state
+        )
         user_input = input("1 for .SRCINFO, 2 for PKGBUILD > ")
         if user_input == "1" or user_input == "2":
             break
@@ -590,12 +642,16 @@ def get_pkgbuild_version(
             pkg, other_state
         )
         if not srcinfo_fetch_success:
-            log_print("ERROR: Failed to get pkg info from .SRCINFO")
+            log_print(
+                "ERROR: Failed to get pkg info from .SRCINFO",
+                other_state=other_state,
+            )
             return False, None, None, None
     elif user_input == "2":
         try:
             log_print(
-                'Running "makechrootpkg ... --nobuild" to ensure pkgver in PKGBUILD is updated...'
+                'Running "makechrootpkg ... --nobuild" to ensure pkgver in PKGBUILD is updated...',
+                other_state=other_state,
             )
             command_list = [
                 "/usr/bin/env",
@@ -608,7 +664,10 @@ def get_pkgbuild_version(
             for dep in pkg_state[pkg]["other_deps"]:
                 dep_fullpath = get_latest_pkg(dep, "/var/cache/pacman/pkg")
                 if not dep_fullpath:
-                    log_print('ERROR: Failed to get dep "{}"'.format(dep))
+                    log_print(
+                        'ERROR: Failed to get dep "{}"'.format(dep),
+                        other_state=other_state,
+                    )
                     sys.exit(1)
                 command_list.insert(2, "-I")
                 command_list.insert(3, dep_fullpath)
@@ -618,7 +677,8 @@ def get_pkgbuild_version(
                 )
                 if not aur_dep_fullpath:
                     log_print(
-                        'ERROR: Failed to get aur_dep "{}"'.format(aur_dep)
+                        'ERROR: Failed to get aur_dep "{}"'.format(aur_dep),
+                        other_state=other_state,
                     )
                     sys.exit(1)
                 command_list.insert(2, "-I")
@@ -630,7 +690,8 @@ def get_pkgbuild_version(
             )
         except subprocess.CalledProcessError:
             log_print(
-                f'ERROR: Failed to run "makechrootpkg ... --nobuild" in "{pkg}".'
+                f'ERROR: Failed to run "makechrootpkg ... --nobuild" in "{pkg}".',
+                other_state=other_state,
             )
             if os.path.exists(os.path.join(pkgdir, "src")):
                 shutil.rmtree(os.path.join(pkgdir, "src"))
@@ -669,13 +730,16 @@ def get_pkgbuild_version(
         if match:
             pkgepoch = match.group(1)
     else:
-        log_print("ERROR: Unreachable code")
+        log_print("ERROR: Unreachable code", other_state=other_state)
         return False, None, None, None
 
     if pkgver is not None and pkgrel is not None:
         return True, pkgepoch, pkgver, pkgrel
     else:
-        log_print('ERROR: Failed to get PKGBUILD version of "{}".'.format(pkg))
+        log_print(
+            'ERROR: Failed to get PKGBUILD version of "{}".'.format(pkg),
+            other_state=other_state,
+        )
         return False, None, None, None
 
 
@@ -703,14 +767,16 @@ def get_srcinfo_check_result(
             log_print(
                 'Current installed version of "{}" is out of date (missing epoch).'.format(
                     pkg_state[pkg]["pkg_name"]
-                )
+                ),
+                other_state=other_state,
             )
             return "install"
         elif current_epoch is not None and pkgepoch is None:
             log_print(
                 'Current installed version of "{}" is up to date (has epoch).'.format(
                     pkg_state[pkg]["pkg_name"]
-                )
+                ),
+                other_state=other_state,
             )
             return "done"
         elif (
@@ -721,7 +787,8 @@ def get_srcinfo_check_result(
             log_print(
                 'Current installed version of "{}" is out of date (older epoch).'.format(
                     pkg_state[pkg]["pkg_name"]
-                )
+                ),
+                other_state=other_state,
             )
             return "install"
         elif (
@@ -733,21 +800,24 @@ def get_srcinfo_check_result(
             log_print(
                 'Current installed version of "{}" is out of date (older version).'.format(
                     pkg_state[pkg]["pkg_name"]
-                )
+                ),
+                other_state=other_state,
             )
             return "install"
         else:
             log_print(
                 'Current installed version of "{}" is up to date.'.format(
                     pkg_state[pkg]["pkg_name"]
-                )
+                ),
+                other_state=other_state,
             )
             return "done"
     else:
         log_print(
             'ERROR: Failed to get pkg_version of "{}"'.format(
                 pkg_state[pkg]["pkg_name"]
-            )
+            ),
+            other_state=other_state,
         )
         return "fail"
 
@@ -769,7 +839,8 @@ def get_pkg_current_version(pkg: str, pkg_state: dict[str, Any], repo: str):
     log_print(
         'Checking version of installed pkg "{}"...'.format(
             pkg_state[pkg]["pkg_name"]
-        )
+        ),
+        other_state=other_state,
     )
     current_epoch = None
     current_version = None
@@ -804,11 +875,15 @@ def get_pkg_current_version(pkg: str, pkg_state: dict[str, Any], repo: str):
             log_print(
                 "ERROR: Failed to get current version from repo for package {}".format(
                     pkg_state[pkg]["pkg_name"]
-                )
+                ),
+                other_state=other_state,
             )
             return "fail", None, None
     except subprocess.CalledProcessError:
-        log_print("Package not found, assuming building first time.")
+        log_print(
+            "Package not found, assuming building first time.",
+            other_state=other_state,
+        )
         return "install", None, None
     return "fetched", current_epoch, current_version
 
@@ -819,7 +894,7 @@ def get_sudo_privileges():
 
     global SUDO_PROC
     if not SUDO_PROC:
-        log_print("sudo -v")
+        log_print("sudo -v", other_state=other_state)
         try:
             subprocess.run(("/usr/bin/env", "sudo", "-v"), check=True)
         except subprocess.CalledProcessError:
@@ -905,7 +980,10 @@ def setup_ccache(chroot: str):
             check=True,
         )
     except subprocess.CalledProcessError:
-        log_print("ERROR: Failed to enable ccache in makepkg.conf")
+        log_print(
+            "ERROR: Failed to enable ccache in makepkg.conf",
+            other_state=other_state,
+        )
         sys.exit(1)
 
 
@@ -926,7 +1004,10 @@ def cleanup_ccache(chroot: str):
             check=True,
         )
     except subprocess.CalledProcessError:
-        log_print("ERROR: Failed to disable ccache in makepkg.conf")
+        log_print(
+            "ERROR: Failed to disable ccache in makepkg.conf",
+            other_state=other_state,
+        )
         sys.exit(1)
 
 
@@ -963,7 +1044,10 @@ export PATH=${PATH/:\/usr\/local\/bin/}
             f"{chroot}/root/usr/local/bin/rustc", sccache_script
         )
     ):
-        log_print("ERROR: Failed to set up sccache wrapper scripts")
+        log_print(
+            "ERROR: Failed to set up sccache wrapper scripts",
+            other_state=other_state,
+        )
         sys.exit(1)
 
 
@@ -990,7 +1074,21 @@ def cleanup_sccache(chroot: str):
             check=False,
         )
     except BaseException:
-        log_print("WARNING: Failed to cleanup sccache files")
+        log_print(
+            "WARNING: Failed to cleanup sccache files", other_state=other_state
+        )
+
+
+def prepend_timestamp_stream(handle, output_file):
+    while True:
+        line = handle.readline()
+        if len(line) == 0:
+            break
+        nowstring = datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%d_%H-%M-%S_%Z "
+        )
+        output_file.write(nowstring + line)
+        output_file.flush()
 
 
 def update_pkg_list(
@@ -1006,7 +1104,9 @@ def update_pkg_list(
     "pkg_out_dir"."""
 
     if not get_sudo_privileges():
-        log_print("ERROR: Failed to get sudo privileges")
+        log_print(
+            "ERROR: Failed to get sudo privileges", other_state=other_state
+        )
         sys.exit(1)
     for pkg in pkgs:
         pkgdir = os.path.join(other_state["clones_dir"], pkg)
@@ -1021,7 +1121,10 @@ def update_pkg_list(
                 cleanup_sccache(other_state["chroot"])
 
         # check integrity
-        log_print(f'Checking files of "{pkg}" before building it...')
+        log_print(
+            f'Checking files of "{pkg}" before building it...',
+            other_state=other_state,
+        )
         try:
             subprocess.run(
                 ("/usr/bin/env", "makepkg", "--verifysource"),
@@ -1029,11 +1132,13 @@ def update_pkg_list(
                 cwd=pkgdir,
             )
         except:
-            log_print(f'ERROR: Failed to verify pkg "{pkg}"')
+            log_print(
+                f'ERROR: Failed to verify pkg "{pkg}"', other_state=other_state
+            )
             pkg_state[pkg]["build_status"] = "fail"
             continue
 
-        log_print(f'Building "{pkg}"...')
+        log_print(f'Building "{pkg}"...', other_state=other_state)
         command_list = [
             "/usr/bin/env",
             "makechrootpkg",
@@ -1051,7 +1156,10 @@ def update_pkg_list(
         for dep in pkg_state[pkg]["other_deps"]:
             dep_fullpath = get_latest_pkg(dep, "/var/cache/pacman/pkg")
             if not dep_fullpath:
-                log_print('ERROR: Failed to get dep "{}"'.format(dep))
+                log_print(
+                    'ERROR: Failed to get dep "{}"'.format(dep),
+                    other_state=other_state,
+                )
                 sys.exit(1)
             command_list.insert(2, "-I")
             command_list.insert(3, dep_fullpath)
@@ -1060,7 +1168,10 @@ def update_pkg_list(
                 aur_dep, other_state["pkg_out_dir"]
             )
             if not aur_dep_fullpath:
-                log_print('ERROR: Failed to get aur_dep "{}"'.format(aur_dep))
+                log_print(
+                    'ERROR: Failed to get aur_dep "{}"'.format(aur_dep),
+                    other_state=other_state,
+                )
                 sys.exit(1)
             command_list.insert(2, "-I")
             command_list.insert(3, aur_dep_fullpath)
@@ -1090,29 +1201,56 @@ def update_pkg_list(
                 5,
                 f'{os.environ["HOME"]}/.cargo/git:/build/.cargo/git',
             )
-        # log_print(f"Using command list: {command_list + post_command_list}") # DEBUG
+        # log_print(f"Using command list: {command_list + post_command_list}", other_state=other_state) # DEBUG
         with open(
             os.path.join(
                 other_state["logs_dir"], "{}_stdout_{}".format(pkg, nowstring)
             ),
-            "w",
+            mode="w",
+            encoding="utf-8",
         ) as log_stdout, open(
             os.path.join(
                 other_state["logs_dir"], "{}_stderr_{}".format(pkg, nowstring)
             ),
-            "w",
+            mode="w",
+            encoding="utf-8",
         ) as log_stderr:
             try:
-                subprocess.run(
-                    command_list + post_command_list,
-                    check=True,
-                    cwd=pkgdir,
-                    stdout=log_stdout,
-                    stderr=log_stderr,
-                )
+                if other_state["is_log_timed"]:
+                    p1 = subprocess.Popen(
+                        command_list + post_command_list,
+                        cwd=pkgdir,
+                        text=True,
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                    )
+                    tout = threading.Thread(
+                        target=prepend_timestamp_stream,
+                        args=[p1.stdout, log_stdout],
+                    )
+                    terr = threading.Thread(
+                        target=prepend_timestamp_stream,
+                        args=[p1.stderr, log_stderr],
+                    )
+
+                    tout.start()
+                    terr.start()
+
+                    p1.wait()
+                    tout.join()
+                    terr.join()
+                else:
+                    subprocess.run(
+                        command_list + post_command_list,
+                        check=True,
+                        cwd=pkgdir,
+                        stdout=log_stdout,
+                        stderr=log_stderr,
+                    )
             except subprocess.CalledProcessError:
                 log_print(
-                    'ERROR: Failed to build pkg "{}" in chroot'.format(pkg)
+                    'ERROR: Failed to build pkg "{}" in chroot'.format(pkg),
+                    other_state=other_state,
                 )
                 pkg_state[pkg]["build_status"] = "fail"
                 continue
@@ -1125,7 +1263,7 @@ def update_pkg_list(
             os.path.join(other_state["clones_dir"], pkg, "*.pkg.tar*")
         )
 
-        log_print("Signing package...")
+        log_print("Signing package...", other_state=other_state)
         for gpkg in pkg_list:
             try:
                 command_list = [
@@ -1149,9 +1287,12 @@ def update_pkg_list(
                     env={"GNUPGHOME": signing_gpg_dir},
                 )
             except subprocess.CalledProcessError:
-                log_print(f'ERROR: Failed to sign pkg "{pkg}"')
+                log_print(
+                    f'ERROR: Failed to sign pkg "{pkg}"',
+                    other_state=other_state,
+                )
 
-        log_print("Adding built pkgs to repo...")
+        log_print("Adding built pkgs to repo...", other_state=other_state)
         try:
             command_list = ["repo-add", other_state["repo"]]
             for gpkg in pkg_list:
@@ -1159,12 +1300,15 @@ def update_pkg_list(
             subprocess.run(command_list, check=True)
         except subprocess.CalledProcessError:
             log_print(
-                'ERROR: Failed to add built pkg(s) "{}" to repo.'.format(pkg)
+                'ERROR: Failed to add built pkg(s) "{}" to repo.'.format(pkg),
+                other_state=other_state,
             )
             pkg_state[pkg]["build_status"] = "add_fail"
             continue
 
-        log_print(f'Signing "{other_state["repo"]}"...')
+        log_print(
+            f'Signing "{other_state["repo"]}"...', other_state=other_state
+        )
         try:
             subprocess.run(
                 (
@@ -1219,19 +1363,22 @@ def update_pkg_list(
                 )
             )
         except subprocess.CalledProcessError:
-            log_print(f'WARNING: Failed to sign "{other_state["repo"]}"')
+            log_print(
+                f'WARNING: Failed to sign "{other_state["repo"]}"',
+                other_state=other_state,
+            )
 
         pkg_state[pkg]["build_status"] = "success"
 
-        log_print("Moving pkg to pkgs directory...")
+        log_print("Moving pkg to pkgs directory...", other_state=other_state)
         for f in pkg_list:
-            log_print(f'Moving "{f}"...')
+            log_print(f'Moving "{f}"...', other_state=other_state)
             os.rename(
                 f, os.path.join(other_state["pkg_out_dir"], os.path.basename(f))
             )
             sig_name = f + ".sig"
             if os.path.exists(sig_name):
-                log_print(f'Moving "{sig_name}"...')
+                log_print(f'Moving "{sig_name}"...', other_state=other_state)
                 os.rename(
                     sig_name,
                     os.path.join(
@@ -1240,7 +1387,10 @@ def update_pkg_list(
                 )
 
     for pkg in pkgs:
-        log_print(f'"{pkg}" status: {pkg_state[pkg]["build_status"]}')
+        log_print(
+            f'"{pkg}" status: {pkg_state[pkg]["build_status"]}',
+            other_state=other_state,
+        )
 
 
 def get_latest_pkg(pkg: str, cache_dir: str):
@@ -1275,7 +1425,8 @@ def confirm_result(pkg: str, state_result: str):
             'Got "{}" for pkg "{}", action: [C(ontinue), r(echeck), f(orce build),\
  s(kip), b(ack) a(abort)]'.format(
                 state_result, pkg
-            )
+            ),
+            other_state=other_state,
         )
         user_input = sys.stdin.buffer.readline().decode().strip().lower()
         if user_input == "c" or len(user_input) == 0:
@@ -1291,7 +1442,7 @@ def confirm_result(pkg: str, state_result: str):
         elif user_input == "a":
             return "abort"
         else:
-            log_print("Got invalid input")
+            log_print("Got invalid input", other_state=other_state)
             continue
 
 
@@ -1299,14 +1450,19 @@ def print_state_info_and_get_update_list(pkg_state: dict[str, Any]):
     """Prints the current "checked" state of all pkgs in the config."""
 
     to_update = []
-    log_print("package state:")
+    log_print("package state:", other_state=other_state)
     for pkg_name, pkg_dict in pkg_state.items():
         if "state" in pkg_dict:
-            log_print(f"    {pkg_name:40}: {pkg_dict['state']}")
+            log_print(
+                f"    {pkg_name:40}: {pkg_dict['state']}",
+                other_state=other_state,
+            )
             if pkg_dict["state"] == "install":
                 to_update.append(pkg_name)
         else:
-            log_print(f"    {pkg_name:40}: not reached")
+            log_print(
+                f"    {pkg_name:40}: not reached", other_state=other_state
+            )
     return to_update
 
 
@@ -1344,9 +1500,15 @@ def test_gpg_passphrase(
             )
             os.remove(tempnf.name + ".sig")
         except subprocess.CalledProcessError:
-            log_print("ERROR: Failed to sign test file with gpg")
+            log_print(
+                "ERROR: Failed to sign test file with gpg",
+                other_state=other_state,
+            )
             return False
-    log_print("Verified passphrase works by signing dummy test file")
+    log_print(
+        "Verified passphrase works by signing dummy test file",
+        other_state=other_state,
+    )
     return True
 
 
@@ -1355,33 +1517,38 @@ def validate_and_verify_paths(other_state: dict[str, Union[None, str]]):
 
     if not os.path.exists(other_state["chroot"]):
         log_print(
-            f"ERROR: chroot at \"{other_state['chroot']}\" does not exist"
+            f"ERROR: chroot at \"{other_state['chroot']}\" does not exist",
+            other_state=other_state,
         )
         sys.exit(1)
-    log_print("Ensuring pkgs directory exists...")
+    log_print("Ensuring pkgs directory exists...", other_state=other_state)
     if not os.path.exists(other_state["pkg_out_dir"]):
         pkg_out_dir_path = Path(other_state["pkg_out_dir"])
         pkg_out_dir_path.mkdir(parents=True)
     if not os.path.exists(other_state["gpg_home"]):
         log_print(
-            f"ERROR: checkingGPG at \"{other_state['gpg_home']}\" does not exist"
+            f"ERROR: checkingGPG at \"{other_state['gpg_home']}\" does not exist",
+            other_state=other_state,
         )
         sys.exit(1)
     if "signing_gpg_dir" in other_state and not os.path.exists(
         other_state["signing_gpg_dir"]
     ):
         log_print(
-            f"ERROR: signingGPG at \"{other_state['signing_gpg_dir']}\" does not exist"
+            f"ERROR: signingGPG at \"{other_state['signing_gpg_dir']}\" does not exist",
+            other_state=other_state,
         )
         sys.exit(1)
-    log_print("Ensuring logs directory exists...")
+    log_print("Ensuring logs directory exists...", other_state=other_state)
     if other_state["logs_dir"] is None:
-        log_print('ERROR: "logs_dir" was not specified!')
+        log_print(
+            'ERROR: "logs_dir" was not specified!', other_state=other_state
+        )
         sys.exit(1)
     if not os.path.exists(other_state["logs_dir"]):
         logs_dir_path = Path(other_state["logs_dir"])
         logs_dir_path.mkdir(parents=True)
-    log_print("Ensuring clones directory exists...")
+    log_print("Ensuring clones directory exists...", other_state=other_state)
     if not os.path.exists(other_state["clones_dir"]):
         clones_dir_path = Path(other_state["clones_dir"])
         clones_dir_path.mkdir(parents=True)
@@ -1440,7 +1607,8 @@ if __name__ == "__main__":
         )
     ):
         log_print(
-            "ERROR: --pkg requires also --chroot, --pkg_dir, --repo, --gpg_dir, and --logs_dir"
+            "ERROR: --pkg requires also --chroot, --pkg_dir, --repo, --gpg_dir, and --logs_dir",
+            other_state=other_state,
         )
         sys.exit(1)
 
@@ -1459,14 +1627,19 @@ if __name__ == "__main__":
         if args_logs_dir is not None:
             GLOBAL_LOG_FILE = args_logs_dir + "/update.py_logs"
             log_print(
-                f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}"
+                f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}",
+                other_state=other_state,
             )
-            log_print(f"Set GLOBAL_LOG_FILE to {GLOBAL_LOG_FILE}")
+            log_print(
+                f"Set GLOBAL_LOG_FILE to {GLOBAL_LOG_FILE}",
+                other_state=other_state,
+            )
         other_state["signing_gpg_dir"] = args.signing_gpg_dir
         other_state["signing_gpg_key_fp"] = args.signing_gpg_key_fp
         if args_signing_gpg_key_fp is None:
             log_print(
-                'ERROR: Signing key fingerprint "signing_gpg_key_fp" not present in config'
+                'ERROR: Signing key fingerprint "signing_gpg_key_fp" not present in config',
+                other_state=other_state,
             )
             sys.exit(1)
         if args_signing_gpg_dir is not None and not args.no_store:
@@ -1528,9 +1701,13 @@ if __name__ == "__main__":
         if other_state["logs_dir"] is not None:
             GLOBAL_LOG_FILE = other_state["logs_dir"] + "/update.py_logs"
             log_print(
-                f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}"
+                f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}",
+                other_state=other_state,
             )
-            log_print(f"Set GLOBAL_LOG_FILE to {GLOBAL_LOG_FILE}")
+            log_print(
+                f"Set GLOBAL_LOG_FILE to {GLOBAL_LOG_FILE}",
+                other_state=other_state,
+            )
         if args.pkg:
             to_keep = [args_pkg for args_pkg in args.pkg]
             removal = []
@@ -1556,8 +1733,19 @@ if __name__ == "__main__":
                 sys.exit(1)
         if "editor" in d:
             editor = d["editor"]
+        if "is_timed" in d and d["is_timed"] is True:
+            other_state["is_timed"] = True
+        else:
+            other_state["is_timed"] = False
+        if "is_log_timed" in d and d["is_log_timed"] is True:
+            other_state["is_log_timed"] = True
+        else:
+            other_state["is_log_timed"] = False
     else:
-        log_print('ERROR: At least "--config" or "--pkg" must be specified')
+        log_print(
+            'ERROR: At least "--config" or "--pkg" must be specified',
+            other_state=other_state,
+        )
         sys.exit(1)
 
     validate_and_verify_paths(other_state)
@@ -1576,12 +1764,13 @@ if __name__ == "__main__":
         log_print(
             'ERROR: logs_dir "{}" must be a directory'.format(
                 other_state["logs_dir"]
-            )
+            ),
+            other_state=other_state,
         )
         sys.exit(1)
 
     if not args.no_update:
-        log_print("Updating the chroot...")
+        log_print("Updating the chroot...", other_state=other_state)
         try:
             subprocess.run(
                 (
@@ -1594,7 +1783,9 @@ if __name__ == "__main__":
                 check=True,
             )
         except subprocess.CalledProcessError:
-            log_print("ERROR: Failed to update the chroot")
+            log_print(
+                "ERROR: Failed to update the chroot", other_state=other_state
+            )
             sys.exit(1)
 
     pkg_list = [temp_pkg_name for temp_pkg_name in pkg_state.keys()]
@@ -1624,7 +1815,11 @@ if __name__ == "__main__":
                     time.sleep(1)
                     update_pkg_dir_count += 1
             if not update_pkg_dir_success:
-                log_print('Failed to update pkg dir for "{}"', pkg_list[i])
+                log_print(
+                    'Failed to update pkg dir for "{}"',
+                    pkg_list[i],
+                    other_state=other_state,
+                )
                 print_state_info_and_get_update_list(pkg_state)
                 sys.exit(1)
         if skip_on_same_ver and i >= furthest_checked:
@@ -1632,7 +1827,10 @@ if __name__ == "__main__":
                 pkg_list[i], pkg_state, other_state["repo"], True, other_state
             )
             if check_pkg_version_result != "install":
-                log_print(f"Pkg {pkg_list[i]} is up to date, skipping...")
+                log_print(
+                    f"Pkg {pkg_list[i]} is up to date, skipping...",
+                    other_state=other_state,
+                )
                 pkg_state[pkg_list[i]]["state"] = "up to date"
                 i += 1
                 continue
@@ -1699,16 +1897,19 @@ if __name__ == "__main__":
         else:
             i += 1
 
-    log_print("Showing current actions:")
+    log_print("Showing current actions:", other_state=other_state)
     pkgs_to_update = print_state_info_and_get_update_list(pkg_state)
     if len(pkgs_to_update) > 0:
-        log_print("Continue? [Y/n]")
+        log_print("Continue? [Y/n]", other_state=other_state)
         user_input = sys.stdin.buffer.readline().decode().strip().lower()
         if user_input == "y" or len(user_input) == 0:
             if args.no_update:
-                log_print("Updating (without updating chroot)...")
+                log_print(
+                    "Updating (without updating chroot)...",
+                    other_state=other_state,
+                )
             else:
-                log_print("Updating...")
+                log_print("Updating...", other_state=other_state)
             update_pkg_list(
                 pkgs_to_update,
                 pkg_state,
@@ -1719,6 +1920,6 @@ if __name__ == "__main__":
                 args.no_store,
             )
         else:
-            log_print("Canceled.")
+            log_print("Canceled.", other_state=other_state)
     else:
-        log_print("No packages to update, done.")
+        log_print("No packages to update, done.", other_state=other_state)

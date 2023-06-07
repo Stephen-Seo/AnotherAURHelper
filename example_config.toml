@@ -12,6 +12,10 @@ logs_dir = "/home/stephen/Downloads/aur/logs"
 signing_gpg_dir = "/home/stephen/Downloads/aur/signingGPG"
 signing_gpg_key_fp = "04D9E3A2880F6418EC4BA70EA0F3F8FAA2088E62"
 editor = "/usr/bin/vim"
+# if true, all logs are prepended with current time in UTC
+is_timed = true
+# if true, all output build logs are prepended with current time in UTC
+is_log_timed = true
 ########## END OF MANDATORY VARIABLES
 
 # Each [[entry]] needs a "name".

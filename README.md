@@ -192,3 +192,15 @@ package, you can specify `link_cargo_registry = true` for a package in your
 config (see `ion-git` in the `example_config.toml`) and that will bind-mount
 these two directories into the chroot, which will share your local Rust cache
 with the chroot.
+
+    [[entry]]
+    name = "ion-git"
+    link_cargo_registry = true
+
+## `is_timed` and `is_log_timed`
+
+If `is_timed` is `true` in the config, then output logs are prepended with a
+timestamp.
+
+If `is_log_timed` is `true` in the config, then output build logs are prepended
+with a timestamp.
