@@ -204,3 +204,15 @@ timestamp.
 
 If `is_log_timed` is `true` in the config, then output build logs are prepended
 with a timestamp.
+
+## sccache and Rust
+
+If using `sccache` causes a build error when building a package compiling Rust,
+one may specify in the config to only wrap `rustc` and nothing else by
+specifying `sccache_rust_only`:
+
+    [[entry]]
+    name = "helix-git"
+    link_cargo_registry = true
+    sccache_dir="/home/user/aur/sccache_helix-git"
+    sccache_rust_only = true

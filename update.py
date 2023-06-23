@@ -1116,10 +1116,14 @@ def update_pkg_list(
         pkgdir = os.path.join(other_state["clones_dir"], pkg)
         if "ccache_dir" in pkg_state[pkg]:
             cleanup_sccache(other_state["chroot"])
-            setup_ccache(other_state["chroot"])
+            if not pkg_state[pkg]["sccache_rust_only"]:
+                setup_ccache(other_state["chroot"])
         else:
             cleanup_ccache(other_state["chroot"])
-            if "sccache_dir" in pkg_state[pkg]:
+            if (
+                "sccache_dir" in pkg_state[pkg]
+                and not pkg_state[pkg]["sccache_rust_only"]
+            ):
                 setup_sccache(other_state["chroot"])
             else:
                 cleanup_sccache(other_state["chroot"])
@@ -1243,6 +1247,13 @@ def update_pkg_list(
                     p1.wait()
                     tout.join()
                     terr.join()
+
+                    if (
+                        p1.returncode is None
+                        or type(p1.returncode) is not int
+                        or p1.returncode != 0
+                    ):
+                        raise RuntimeError("pOpen process failed")
                 else:
                     subprocess.run(
                         command_list + post_command_list,
@@ -1258,10 +1269,10 @@ def update_pkg_list(
                 )
                 pkg_state[pkg]["build_status"] = "fail"
                 continue
-            except BaseException:
+            except BaseException as e:
                 log_print(
-                    'ERROR: Failed to build pkg "{}" in chroot (unknown Exception)'.format(
-                        pkg
+                    'ERROR: Failed to build pkg "{}" in chroot (unknown Exception): {}'.format(
+                        pkg, e
                     ),
                     other_state=other_state,
                 )
@@ -1689,6 +1700,15 @@ if __name__ == "__main__":
                     ]
                 else:
                     pkg_state[entry["name"]]["sccache_cache_size"] = "5G"
+                if (
+                    "sccache_rust_only" in entry
+                    and type(entry["sccache_rust_only"]) is bool
+                    and entry["sccache_rust_only"]
+                ):
+                    pkg_state[entry["name"]]["sccache_rust_only"] = True
+                else:
+                    pkg_state[entry["name"]]["sccache_rust_only"] = False
+
             if "other_deps" in entry:
                 pkg_state[entry["name"]]["other_deps"] = entry["other_deps"]
             else:
