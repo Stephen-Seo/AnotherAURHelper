@@ -16,6 +16,8 @@ editor = "/usr/bin/vim"
 is_timed = true
 # if true, all output build logs are prepended with current time in UTC
 is_log_timed = true
+# Default log_limit is 1 GiB
+log_limit = 1073741824
 ########## END OF MANDATORY VARIABLES
 
 # Each [[entry]] needs a "name".

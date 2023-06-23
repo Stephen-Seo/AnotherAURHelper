@@ -1083,7 +1083,25 @@ def cleanup_sccache(chroot: str):
         )
 
 
-def prepend_timestamp_stream(handle, output_file):
+def limited_stream(handle, output_file, log_limit: int):
+    log_count = 0
+    while True:
+        line = handle.readline()
+        if len(line) == 0:
+            break
+        log_count += len(line)
+        if log_count > log_limit:
+            output_file.write(
+                "\nWARNING: Reached log_limit! No longer logging to file!\n"
+            )
+            output_file.flush()
+            break
+        output_file.write(line)
+        output_file.flush()
+
+
+def prepend_timestamp_stream(handle, output_file, log_limit: int):
+    log_count = 0
     while True:
         line = handle.readline()
         if len(line) == 0:
@@ -1091,6 +1109,13 @@ def prepend_timestamp_stream(handle, output_file):
         nowstring = datetime.datetime.now(datetime.timezone.utc).strftime(
             "%Y-%m-%d_%H-%M-%S_%Z "
         )
+        log_count += len(nowstring) + len(line)
+        if log_count > log_limit:
+            output_file.write(
+                "\nWARNING: Reached log_limit! No longer logging to file!\n"
+            )
+            output_file.flush()
+            break
         output_file.write(nowstring + line)
         output_file.flush()
 
@@ -1223,54 +1248,44 @@ def update_pkg_list(
             encoding="utf-8",
         ) as log_stderr:
             try:
-                if other_state["is_log_timed"]:
-                    p1 = subprocess.Popen(
-                        command_list + post_command_list,
-                        cwd=pkgdir,
-                        text=True,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                    )
-                    tout = threading.Thread(
-                        target=prepend_timestamp_stream,
-                        args=[p1.stdout, log_stdout],
-                    )
-                    terr = threading.Thread(
-                        target=prepend_timestamp_stream,
-                        args=[p1.stderr, log_stderr],
-                    )
-
-                    tout.start()
-                    terr.start()
-
-                    p1.wait()
-                    tout.join()
-                    terr.join()
-
-                    if (
-                        p1.returncode is None
-                        or type(p1.returncode) is not int
-                        or p1.returncode != 0
-                    ):
-                        raise RuntimeError("pOpen process failed")
-                else:
-                    subprocess.run(
-                        command_list + post_command_list,
-                        check=True,
-                        cwd=pkgdir,
-                        stdout=log_stdout,
-                        stderr=log_stderr,
-                    )
-            except subprocess.CalledProcessError:
-                log_print(
-                    'ERROR: Failed to build pkg "{}" in chroot'.format(pkg),
-                    other_state=other_state,
+                p1 = subprocess.Popen(
+                    command_list + post_command_list,
+                    cwd=pkgdir,
+                    text=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
                 )
-                pkg_state[pkg]["build_status"] = "fail"
-                continue
+                tout = threading.Thread(
+                    target=prepend_timestamp_stream
+                    if other_state["is_log_timed"]
+                    else limited_stream,
+                    args=[p1.stdout, log_stdout, other_state["log_limit"]],
+                )
+                terr = threading.Thread(
+                    target=prepend_timestamp_stream
+                    if other_state["is_log_timed"]
+                    else limited_stream,
+                    args=[p1.stderr, log_stderr, other_state["log_limit"]],
+                )
+
+                tout.start()
+                terr.start()
+
+                p1.wait()
+                tout.join()
+                terr.join()
+
+                if p1.returncode is None:
+                    raise RuntimeError("pOpen process didn't finish")
+                elif type(p1.returncode) is not int:
+                    raise RuntimeError("pOpen process non-integer returncode")
+                elif p1.returncode != 0:
+                    raise RuntimeError(
+                        f"pOpen process non-zero return code {p1.returncode}"
+                    )
             except BaseException as e:
                 log_print(
-                    'ERROR: Failed to build pkg "{}" in chroot (unknown Exception): {}'.format(
+                    'ERROR: Failed to build pkg "{}" in chroot: {}'.format(
                         pkg, e
                     ),
                     other_state=other_state,
@@ -1638,6 +1653,7 @@ if __name__ == "__main__":
     pkg_state = {}
     other_state = {}
     other_state["logs_dir"] = None
+    other_state["log_limit"] = 1024 * 1024 * 1024
     if args.pkg and not args.config:
         for pkg in args.pkg:
             pkg_state[pkg] = {}
@@ -1773,6 +1789,21 @@ if __name__ == "__main__":
             other_state["is_log_timed"] = True
         else:
             other_state["is_log_timed"] = False
+        if (
+            "log_limit" in d
+            and type(d["log_limit"]) is int
+            and d["log_limit"] > 0
+        ):
+            other_state["log_limit"] = d["log_limit"]
+            log_print('Set "log_limit" to {}'.format(d["log_limit"]))
+        else:
+            log_print(
+                'Using default "log_limit" of {}'.format(
+                    other_state["log_limit"]
+                )
+            )
+        log_print("  {} KiB".format(other_state["log_limit"] / 1024))
+        log_print("  {} MiB".format(other_state["log_limit"] / 1024 / 1024))
     else:
         log_print(
             'ERROR: At least "--config" or "--pkg" must be specified',

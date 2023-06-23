@@ -30,6 +30,16 @@ the TOML config file in a "other\_deps" array for the package like so:
         "mesa"
     ]
 
+## Package stdout/stderr size limit
+
+The possible issue of output logs filling up disk space is addressed with a
+"log\_limit" config option. By default, if the output log file reaches the
+limit, the compilation output is no longer logged to file in the logs dir.
+
+Change "log\_limit" in the config to a value in bytes if the default of 1 GiB
+is too little for your use case (if the size of your output logs extend past 1
+GiB somehow).
+
 # Setting up the AUR Helper
 
 The AUR Helper requires several things:
