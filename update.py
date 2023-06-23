@@ -1116,8 +1116,7 @@ def update_pkg_list(
         pkgdir = os.path.join(other_state["clones_dir"], pkg)
         if "ccache_dir" in pkg_state[pkg]:
             cleanup_sccache(other_state["chroot"])
-            if not pkg_state[pkg]["sccache_rust_only"]:
-                setup_ccache(other_state["chroot"])
+            setup_ccache(other_state["chroot"])
         else:
             cleanup_ccache(other_state["chroot"])
             if (
