@@ -1083,41 +1083,44 @@ def cleanup_sccache(chroot: str):
         )
 
 
-def limited_stream(handle, output_file, log_limit: int):
+def handle_output_stream(handle, output_file, other_state):
     log_count = 0
+    limit_reached = False
     while True:
         line = handle.readline()
         if len(line) == 0:
             break
-        log_count += len(line)
-        if log_count > log_limit:
-            output_file.write(
-                "\nWARNING: Reached log_limit! No longer logging to file!\n"
-            )
-            output_file.flush()
-            break
-        output_file.write(line)
-        output_file.flush()
 
-
-def prepend_timestamp_stream(handle, output_file, log_limit: int):
-    log_count = 0
-    while True:
-        line = handle.readline()
-        if len(line) == 0:
-            break
-        nowstring = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y-%m-%d_%H-%M-%S_%Z "
-        )
-        log_count += len(nowstring) + len(line)
-        if log_count > log_limit:
-            output_file.write(
-                "\nWARNING: Reached log_limit! No longer logging to file!\n"
-            )
-            output_file.flush()
-            break
-        output_file.write(nowstring + line)
-        output_file.flush()
+        if not limit_reached:
+            if other_state["is_log_timed"]:
+                nowstring = datetime.datetime.now(
+                    datetime.timezone.utc
+                ).strftime("%Y-%m-%d_%H-%M-%S_%Z ")
+                line = nowstring + line
+            log_count += len(line)
+            if log_count > other_state["log_limit"]:
+                limit_reached = True
+                if other_state["error_on_limit"]:
+                    output_file.write(
+                        "\nERROR: Reached log_limit! No longer logging to file!\n"
+                    )
+                    output_file.flush()
+                    log_print(
+                        "ERROR: Reached log_limit! No longer logging to file!"
+                    )
+                    handle.close()
+                    break
+                else:
+                    output_file.write(
+                        "\nWARNING: Reached log_limit! No longer logging to file!\n"
+                    )
+                    output_file.flush()
+                    log_print(
+                        "WARNING: Reached log_limit! No longer logging to file!"
+                    )
+            else:
+                output_file.write(line)
+                output_file.flush()
 
 
 def update_pkg_list(
@@ -1256,16 +1259,12 @@ def update_pkg_list(
                     stderr=subprocess.PIPE,
                 )
                 tout = threading.Thread(
-                    target=prepend_timestamp_stream
-                    if other_state["is_log_timed"]
-                    else limited_stream,
-                    args=[p1.stdout, log_stdout, other_state["log_limit"]],
+                    target=handle_output_stream,
+                    args=[p1.stdout, log_stdout, other_state],
                 )
                 terr = threading.Thread(
-                    target=prepend_timestamp_stream
-                    if other_state["is_log_timed"]
-                    else limited_stream,
-                    args=[p1.stderr, log_stderr, other_state["log_limit"]],
+                    target=handle_output_stream,
+                    args=[p1.stderr, log_stderr, other_state],
                 )
 
                 tout.start()
@@ -1654,6 +1653,7 @@ if __name__ == "__main__":
     other_state = {}
     other_state["logs_dir"] = None
     other_state["log_limit"] = 1024 * 1024 * 1024
+    other_state["error_on_limit"] = False
     if args.pkg and not args.config:
         for pkg in args.pkg:
             pkg_state[pkg] = {}
@@ -1804,6 +1804,17 @@ if __name__ == "__main__":
             )
         log_print("  {} KiB".format(other_state["log_limit"] / 1024))
         log_print("  {} MiB".format(other_state["log_limit"] / 1024 / 1024))
+        if (
+            "error_on_limit" in d
+            and type(d["error_on_limit"]) is bool
+            and d["error_on_limit"]
+        ):
+            other_state["error_on_limit"] = True
+        log_print(
+            'Notice: "error_on_limit" is set to "{}"'.format(
+                other_state["error_on_limit"]
+            )
+        )
     else:
         log_print(
             'ERROR: At least "--config" or "--pkg" must be specified',

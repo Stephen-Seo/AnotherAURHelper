@@ -40,6 +40,12 @@ Change "log\_limit" in the config to a value in bytes if the default of 1 GiB
 is too little for your use case (if the size of your output logs extend past 1
 GiB somehow).
 
+### Error when reaching limit
+
+"error\_on\_limit" can be set to true/false in the config. If set to true, then
+the build will fail if the limit is reached. If set to false, then the build
+will continue even if the limit is reached.
+
 # Setting up the AUR Helper
 
 The AUR Helper requires several things:

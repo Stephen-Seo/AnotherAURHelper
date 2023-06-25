@@ -18,6 +18,8 @@ is_timed = true
 is_log_timed = true
 # Default log_limit is 1 GiB
 log_limit = 1073741824
+# If true, then make the build fail if the limit is reached
+error_on_limit = false
 ########## END OF MANDATORY VARIABLES
 
 # Each [[entry]] needs a "name".
