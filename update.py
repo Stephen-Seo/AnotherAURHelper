@@ -1084,6 +1084,11 @@ def cleanup_sccache(chroot: str):
 
 
 def handle_output_stream(handle, output_file, other_state):
+    """Reads lines from an input stream "handle" and writes them to
+    "output_file". Flags in "other_state" determine certain behaviors, such as
+    prepending a timestamp to each line, or the filesize-limit for the
+    "output_file"."""
+
     log_count = 0
     limit_reached = False
     while True:
