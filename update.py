@@ -665,6 +665,17 @@ def get_pkgbuild_version(
                 other_state["chroot"],
             ]
             post_command_list = ["--", "-s", "-r", "-c", "--nobuild"]
+            if "link_cargo_registry" in pkg_state[pkg]:
+                command_list.insert(2, "-d")
+                command_list.insert(
+                    3,
+                    f'{os.environ["HOME"]}/.cargo/registry:/build/.cargo/registry',
+                )
+                command_list.insert(4, "-d")
+                command_list.insert(
+                    5,
+                    f'{os.environ["HOME"]}/.cargo/git:/build/.cargo/git',
+                )
             for dep in pkg_state[pkg]["other_deps"]:
                 dep_fullpath = get_latest_pkg(dep, "/var/cache/pacman/pkg")
                 if not dep_fullpath:
