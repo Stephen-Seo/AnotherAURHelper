@@ -1094,7 +1094,13 @@ def cleanup_sccache(chroot: str):
         )
 
 
-def handle_output_stream(handle, output_file, other_state):
+def handle_output_stream(
+    handle,
+    output_file,
+    other_state,
+    print_to_log=False,
+    ignore_output_file=False,
+):
     """Reads lines from an input stream "handle" and writes them to
     "output_file". Flags in "other_state" determine certain behaviors, such as
     prepending a timestamp to each line, or the filesize-limit for the
@@ -1106,6 +1112,15 @@ def handle_output_stream(handle, output_file, other_state):
         line = handle.readline()
         if len(line) == 0:
             break
+
+        if print_to_log:
+            if line[-1] == "\n":
+                log_print(line[0:-1], other_state=other_state)
+            else:
+                log_print(line, other_state=other_state)
+
+        if ignore_output_file:
+            continue
 
         if not limit_reached:
             if other_state["is_log_timed"]:
@@ -1122,7 +1137,8 @@ def handle_output_stream(handle, output_file, other_state):
                     )
                     output_file.flush()
                     log_print(
-                        "ERROR: Reached log_limit! No longer logging to file!"
+                        "ERROR: Reached log_limit! No longer logging to file!",
+                        other_state=other_state,
                     )
                     handle.close()
                     break
@@ -1132,7 +1148,8 @@ def handle_output_stream(handle, output_file, other_state):
                     )
                     output_file.flush()
                     log_print(
-                        "WARNING: Reached log_limit! No longer logging to file!"
+                        "WARNING: Reached log_limit! No longer logging to file!",
+                        other_state=other_state,
                     )
             else:
                 output_file.write(line)
@@ -1350,10 +1367,48 @@ def update_pkg_list(
             command_list = ["repo-add", other_state["repo"]]
             for gpkg in pkg_list:
                 command_list.append(gpkg)
-            subprocess.run(command_list, check=True)
+            p1 = subprocess.Popen(
+                command_list,
+                text=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            tout = threading.Thread(
+                target=handle_output_stream,
+                args=[p1.stdout, None, other_state, True, True],
+            )
+            terr = threading.Thread(
+                target=handle_output_stream,
+                args=[p1.stderr, None, other_state, True, True],
+            )
+
+            tout.start()
+            terr.start()
+
+            p1.wait()
+            tout.join()
+            terr.join()
+
+            if p1.returncode is None:
+                raise RuntimeError("pOpen process didn't finish")
+            elif type(p1.returncode) is not int:
+                raise RuntimeError("pOpen process non-integer returncode")
+            elif p1.returncode != 0:
+                raise RuntimeError(
+                    f"pOpen process non-zero return code {p1.returncode}"
+                )
         except subprocess.CalledProcessError:
             log_print(
                 'ERROR: Failed to add built pkg(s) "{}" to repo.'.format(pkg),
+                other_state=other_state,
+            )
+            pkg_state[pkg]["build_status"] = "add_fail"
+            continue
+        except RuntimeError as e:
+            log_print(
+                'ERROR: Failed to add built pkg(s) "{}" to repo ({}).'.format(
+                    pkg, e
+                ),
                 other_state=other_state,
             )
             pkg_state[pkg]["build_status"] = "add_fail"
