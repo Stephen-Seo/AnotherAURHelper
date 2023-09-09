@@ -25,6 +25,7 @@ AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
 GLOBAL_LOG_FILE = "log.txt"
 DEFAULT_EDITOR = "/usr/bin/nano"
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
+STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 
 
 class ArchPkgVersion:
@@ -209,7 +210,7 @@ def log_print(*args, **kwargs):
         and kwargs["other_state"]["is_timed"]
     ):
         t = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y-%m-%d_%H-%M-%S_%Z"
+            STRFTIME_FORMAT
         )
         print(t, end=" ")
         with open(GLOBAL_LOG_FILE, "a", encoding="utf-8") as lf:
@@ -1126,7 +1127,7 @@ def handle_output_stream(
             if other_state["is_log_timed"]:
                 nowstring = datetime.datetime.now(
                     datetime.timezone.utc
-                ).strftime("%Y-%m-%d_%H-%M-%S_%Z ")
+                ).strftime(STRFTIME_FORMAT + " ")
                 line = nowstring + line
             log_count += len(line)
             if log_count > other_state["log_limit"]:
@@ -1256,7 +1257,7 @@ def update_pkg_list(
             )
             post_command_list.insert(3, "RUSTC_WRAPPER=/usr/bin/sccache")
         nowstring = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y-%m-%d_%H-%M-%S_%Z"
+            STRFTIME_FORMAT
         )
         if "link_cargo_registry" in pkg_state[pkg]:
             command_list.insert(2, "-d")
@@ -1737,7 +1738,9 @@ if __name__ == "__main__":
         if args_logs_dir is not None:
             GLOBAL_LOG_FILE = args_logs_dir + "/update.py_logs"
             log_print(
-                f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}",
+                datetime.datetime.now(datetime.timezone.utc).strftime(
+                    STRFTIME_FORMAT
+                ),
                 other_state=other_state,
             )
             log_print(
@@ -1820,7 +1823,9 @@ if __name__ == "__main__":
         if other_state["logs_dir"] is not None:
             GLOBAL_LOG_FILE = other_state["logs_dir"] + "/update.py_logs"
             log_print(
-                f"{datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d %H:%M %Z')}",
+                datetime.datetime.now(datetime.timezone.utc).strftime(
+                    STRFTIME_FORMAT
+                ),
                 other_state=other_state,
             )
             log_print(
