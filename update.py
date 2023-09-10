@@ -26,6 +26,7 @@ GLOBAL_LOG_FILE = "log.txt"
 DEFAULT_EDITOR = "/usr/bin/nano"
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
 STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
+STRFTIME_LOCAL_FORMAT = "%Y-%m-%dT%H:%M:%S"
 
 
 class ArchPkgVersion:
@@ -201,6 +202,26 @@ class ArchPkgVersion:
         return self_str
 
 
+def timedelta_to_offset_string(timed: datetime.timedelta):
+    seconds = timed.days * 24 * 60 * 60 + timed.seconds
+    minutes_offset = int(seconds / 60)
+    hours_offset = int(minutes_offset / 60)
+    minutes_offset = minutes_offset - hours_offset * 60
+    return f"{hours_offset:+03d}:{minutes_offset:02d}"
+
+
+def get_datetime_timezone_now(other_state):
+    if other_state["datetime_in_local_time"]:
+        lt = datetime.datetime.now(datetime.timezone.utc).astimezone()
+        return lt.strftime(STRFTIME_LOCAL_FORMAT) + timedelta_to_offset_string(
+            lt.tzinfo.utcoffset(None)
+        )
+    else:
+        return datetime.datetime.now(datetime.timezone.utc).strftime(
+            STRFTIME_FORMAT
+        )
+
+
 def log_print(*args, **kwargs):
     """Prints to stdout, then logs to GLOBAL_LOG_FILE."""
 
@@ -209,9 +230,7 @@ def log_print(*args, **kwargs):
         and "is_timed" in kwargs["other_state"]
         and kwargs["other_state"]["is_timed"]
     ):
-        t = datetime.datetime.now(datetime.timezone.utc).strftime(
-            STRFTIME_FORMAT
-        )
+        t = get_datetime_timezone_now(kwargs["other_state"])
         print(t, end=" ")
         with open(GLOBAL_LOG_FILE, "a", encoding="utf-8") as lf:
             print(t, end=" ", file=lf)
@@ -1125,9 +1144,7 @@ def handle_output_stream(
 
         if not limit_reached:
             if other_state["is_log_timed"]:
-                nowstring = datetime.datetime.now(
-                    datetime.timezone.utc
-                ).strftime(STRFTIME_FORMAT + " ")
+                nowstring = get_datetime_timezone_now(other_state)
                 line = nowstring + line
             log_count += len(line)
             if log_count > other_state["log_limit"]:
@@ -1256,9 +1273,7 @@ def update_pkg_list(
                 2, f'SCCACHE_CACHE_SIZE={pkg_state[pkg]["sccache_cache_size"]}'
             )
             post_command_list.insert(3, "RUSTC_WRAPPER=/usr/bin/sccache")
-        nowstring = datetime.datetime.now(datetime.timezone.utc).strftime(
-            STRFTIME_FORMAT
-        )
+        nowstring = get_datetime_timezone_now(other_state)
         if "link_cargo_registry" in pkg_state[pkg]:
             command_list.insert(2, "-d")
             command_list.insert(
@@ -1738,9 +1753,7 @@ if __name__ == "__main__":
         if args_logs_dir is not None:
             GLOBAL_LOG_FILE = args_logs_dir + "/update.py_logs"
             log_print(
-                datetime.datetime.now(datetime.timezone.utc).strftime(
-                    STRFTIME_FORMAT
-                ),
+                get_datetime_timezone_now(other_state),
                 other_state=other_state,
             )
             log_print(
@@ -1823,9 +1836,7 @@ if __name__ == "__main__":
         if other_state["logs_dir"] is not None:
             GLOBAL_LOG_FILE = other_state["logs_dir"] + "/update.py_logs"
             log_print(
-                datetime.datetime.now(datetime.timezone.utc).strftime(
-                    STRFTIME_FORMAT
-                ),
+                get_datetime_timezone_now(other_state),
                 other_state=other_state,
             )
             log_print(
@@ -1891,6 +1902,14 @@ if __name__ == "__main__":
                 other_state["error_on_limit"]
             )
         )
+        if (
+            "datetime_in_local_time" in d
+            and type(d["datetime_in_local_time"]) is bool
+            and d["datetime_in_local_time"]
+        ):
+            other_state["datetime_in_local_time"] = True
+        else:
+            other_state["datetime_in_local_time"] = False
     else:
         log_print(
             'ERROR: At least "--config" or "--pkg" must be specified',
