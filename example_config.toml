@@ -20,6 +20,8 @@ is_log_timed = true
 log_limit = 1073741824
 # If true, then make the build fail if the limit is reached
 error_on_limit = false
+# If true, timestamps are in localtime. If false, timestamps are UTC.
+datetime_in_local_time = true
 ########## END OF MANDATORY VARIABLES
 
 # Each [[entry]] needs a "name".

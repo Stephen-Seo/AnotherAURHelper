@@ -1833,6 +1833,14 @@ if __name__ == "__main__":
         other_state["gpg_home"] = d["gpg_dir"]
         other_state["logs_dir"] = d["logs_dir"]
         other_state["clones_dir"] = d["clones_dir"]
+        if (
+            "datetime_in_local_time" in d
+            and type(d["datetime_in_local_time"]) is bool
+            and d["datetime_in_local_time"]
+        ):
+            other_state["datetime_in_local_time"] = True
+        else:
+            other_state["datetime_in_local_time"] = False
         if other_state["logs_dir"] is not None:
             GLOBAL_LOG_FILE = other_state["logs_dir"] + "/update.py_logs"
             log_print(
@@ -1902,14 +1910,6 @@ if __name__ == "__main__":
                 other_state["error_on_limit"]
             )
         )
-        if (
-            "datetime_in_local_time" in d
-            and type(d["datetime_in_local_time"]) is bool
-            and d["datetime_in_local_time"]
-        ):
-            other_state["datetime_in_local_time"] = True
-        else:
-            other_state["datetime_in_local_time"] = False
     else:
         log_print(
             'ERROR: At least "--config" or "--pkg" must be specified',
