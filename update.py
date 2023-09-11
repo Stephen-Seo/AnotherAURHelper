@@ -1145,7 +1145,7 @@ def handle_output_stream(
         if not limit_reached:
             if other_state["is_log_timed"]:
                 nowstring = get_datetime_timezone_now(other_state)
-                line = nowstring + line
+                line = nowstring + " " + line
             log_count += len(line)
             if log_count > other_state["log_limit"]:
                 limit_reached = True
