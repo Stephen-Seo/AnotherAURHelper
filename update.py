@@ -207,6 +207,8 @@ def timedelta_to_offset_string(timed: datetime.timedelta):
     minutes_offset = int(seconds / 60)
     hours_offset = int(minutes_offset / 60)
     minutes_offset = minutes_offset - hours_offset * 60
+    if minutes_offset < 0:
+        minutes_offset += 60
     return f"{hours_offset:+03d}:{minutes_offset:02d}"
 
 
