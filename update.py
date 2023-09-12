@@ -202,7 +202,9 @@ class ArchPkgVersion:
         return self_str
 
 
-def timedelta_to_offset_string(timed: datetime.timedelta):
+def timedelta_to_offset_string(timed: datetime.timedelta) -> str:
+    """Returns a timedelta string in the format "+HH:MM" or "-HH:MM"."""
+
     seconds = timed.days * 24 * 60 * 60 + timed.seconds
     minutes_offset = int(seconds / 60)
     hours_offset = int(minutes_offset / 60)
@@ -210,7 +212,11 @@ def timedelta_to_offset_string(timed: datetime.timedelta):
     return f"{hours_offset:+03d}:{minutes_offset:02d}"
 
 
-def get_datetime_timezone_now(other_state):
+def get_datetime_timezone_now(other_state) -> str:
+    """Returns a datetime string compatible with RFC 3339 and ISO 8601.
+    If other_state["datetime_in_local_time"] is True, then the returned string
+    is in localtime."""
+
     if other_state["datetime_in_local_time"]:
         lt = datetime.datetime.now(datetime.timezone.utc).astimezone()
         return lt.strftime(STRFTIME_LOCAL_FORMAT) + timedelta_to_offset_string(
