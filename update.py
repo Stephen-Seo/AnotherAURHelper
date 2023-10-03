@@ -709,7 +709,7 @@ def get_pkgbuild_version(
                         'ERROR: Failed to get dep "{}"'.format(dep),
                         other_state=other_state,
                     )
-                    sys.exit(1)
+                    return False, None, None, None
                 command_list.insert(2, "-I")
                 command_list.insert(3, dep_fullpath)
             for aur_dep in pkg_state[pkg]["aur_deps"]:
@@ -721,7 +721,7 @@ def get_pkgbuild_version(
                         'ERROR: Failed to get aur_dep "{}"'.format(aur_dep),
                         other_state=other_state,
                     )
-                    sys.exit(1)
+                    return False, None, None, None
                 command_list.insert(2, "-I")
                 command_list.insert(3, aur_dep_fullpath)
             subprocess.run(
@@ -1245,6 +1245,7 @@ def update_pkg_list(
             "--log",
             "--holdver",
         ]
+        failure = False
         for dep in pkg_state[pkg]["other_deps"]:
             dep_fullpath = get_latest_pkg(dep, "/var/cache/pacman/pkg")
             if not dep_fullpath:
@@ -1252,9 +1253,12 @@ def update_pkg_list(
                     'ERROR: Failed to get dep "{}"'.format(dep),
                     other_state=other_state,
                 )
-                sys.exit(1)
+                failure = True
+                break
             command_list.insert(2, "-I")
             command_list.insert(3, dep_fullpath)
+        if failure:
+            continue
         for aur_dep in pkg_state[pkg]["aur_deps"]:
             aur_dep_fullpath = get_latest_pkg(
                 aur_dep, other_state["pkg_out_dir"]
@@ -1264,9 +1268,12 @@ def update_pkg_list(
                     'ERROR: Failed to get aur_dep "{}"'.format(aur_dep),
                     other_state=other_state,
                 )
-                sys.exit(1)
+                failure = True
+                break
             command_list.insert(2, "-I")
             command_list.insert(3, aur_dep_fullpath)
+        if failure:
+            continue
         if "ccache_dir" in pkg_state[pkg]:
             command_list.insert(2, "-d")
             command_list.insert(3, f'{pkg_state[pkg]["ccache_dir"]}:/ccache')
