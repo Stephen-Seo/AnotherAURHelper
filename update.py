@@ -1616,6 +1616,14 @@ def test_gpg_passphrase(
         tempnf.write(b"Test file content")
         tempnf.flush()
         try:
+            # Clear gpg password cache so that incorrect passwords don't pass.
+            subprocess.run(
+                ("/usr/bin/env", "gpg-connect-agent", "reloadagent", "/bye"),
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                env={"GNUPGHOME": signing_gpg_dir},
+            )
             subprocess.run(
                 (
                     "/usr/bin/env",
