@@ -1836,8 +1836,13 @@ if __name__ == "__main__":
                 pkg_state[entry["name"]]["other_deps"] = entry["other_deps"]
             else:
                 pkg_state[entry["name"]]["other_deps"] = []
-            if "skip_branch_up_to_date" in entry and not (
-                not args.no_skip is None and entry["name"] in args.no_skip
+            if (
+                "skip_branch_up_to_date" in entry
+                and type(entry["skip_branch_up_to_date"]) is bool
+                and entry["skip_branch_up_to_date"]
+                and not (
+                    not args.no_skip is None and entry["name"] in args.no_skip
+                )
             ):
                 pkg_state[entry["name"]]["skip_branch_up_to_date"] = True
             else:
