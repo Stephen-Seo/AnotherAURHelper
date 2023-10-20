@@ -131,7 +131,7 @@ To use the repository, you can add an entry to your `/etc/pacman.conf` with the
 following:
 
     [MyAURRepo]
-    SigLevel = Required TrustAll
+    SigLevel = Required TrustedOnly
     Include = file:///home/MyAURRepoDirectory
 
 Note that `SigLevel` is set expecting the `MyAURRepo.db` file to be signed (the
