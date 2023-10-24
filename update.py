@@ -683,6 +683,8 @@ def get_pkgbuild_version(
                 'Running "makechrootpkg ... --nobuild" to ensure pkgver in PKGBUILD is updated...',
                 other_state=other_state,
             )
+            # Ensure ccache isn't enabled for this check.
+            cleanup_ccache(other_state["chroot"])
             command_list = [
                 "/usr/bin/env",
                 "makechrootpkg",
