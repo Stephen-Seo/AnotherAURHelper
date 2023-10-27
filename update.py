@@ -1707,16 +1707,21 @@ def validate_and_verify_paths(other_state: dict[str, Union[None, str]]):
 
 
 def signal_handler(sig, frame):
-    """Handle SIGINT"""
+    """Handle SIGINT and SIGUSR1."""
     global OTHER_STATE, PKG_STATE
     if OTHER_STATE is not None and PKG_STATE is not None:
         print_state_info_and_get_update_list(OTHER_STATE, PKG_STATE)
+        if signal.Signals(sig) is not signal.SIGINT:
+            return
         sys.exit(0)
+    if signal.Signals(sig) is not signal.SIGINT:
+        return
     sys.exit(1)
 
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGUSR1, signal_handler)
     editor = None
     parser = argparse.ArgumentParser(description="Update AUR pkgs")
     parser.add_argument(
