@@ -232,3 +232,9 @@ specifying `sccache_rust_only`:
     link_cargo_registry = true
     sccache_dir="/home/user/aur/sccache_helix-git"
     sccache_rust_only = true
+
+## Signal Handling
+
+The script is set up to handle `SIGINT` and `SIGUSR1`. `SIGINT` will print the
+known package list and status, and exit. `SIGUSR1` will also print the known
+package list and status, but will not stop the script.
