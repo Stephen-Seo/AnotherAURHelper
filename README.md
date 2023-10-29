@@ -235,6 +235,6 @@ specifying `sccache_rust_only`:
 
 ## Signal Handling
 
-The script is set up to handle `SIGINT` and `SIGUSR1`. `SIGINT` will print the
-known package list and status, and exit. `SIGUSR1` will also print the known
-package list and status, but will not stop the script.
+The script is set up to handle `SIGINT` and `SIGUSR1`. `SIGINT` (Ctrl-C) will
+print the known package list and status, and exit. `SIGUSR1` will also print
+the known package list and status, but will not stop the script.
