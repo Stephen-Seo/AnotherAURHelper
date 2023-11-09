@@ -1201,6 +1201,7 @@ def update_pkg_list(
         log_print(
             "ERROR: Failed to get sudo privileges", other_state=other_state
         )
+        pkg_state[pkg]["build_status"] = "get_sudo_fail"
         sys.exit(1)
     for pkg in pkgs:
         pkgdir = os.path.join(other_state["clones_dir"], pkg)
@@ -1232,7 +1233,7 @@ def update_pkg_list(
             log_print(
                 f'ERROR: Failed to verify pkg "{pkg}"', other_state=other_state
             )
-            pkg_state[pkg]["build_status"] = "fail"
+            pkg_state[pkg]["build_status"] = "pkg_verify_fail"
             continue
 
         log_print(f'Building "{pkg}"...', other_state=other_state)
@@ -1259,6 +1260,7 @@ def update_pkg_list(
                     other_state=other_state,
                 )
                 failure = True
+                pkg_state[pkg]["build_status"] = "get_dep_fail"
                 break
             command_list.insert(2, "-I")
             command_list.insert(3, dep_fullpath)
@@ -1274,6 +1276,7 @@ def update_pkg_list(
                     other_state=other_state,
                 )
                 failure = True
+                pkg_state[pkg]["build_status"] = "get_aur_dep_fail"
                 break
             command_list.insert(2, "-I")
             command_list.insert(3, aur_dep_fullpath)
@@ -1356,7 +1359,7 @@ def update_pkg_list(
                     ),
                     other_state=other_state,
                 )
-                pkg_state[pkg]["build_status"] = "fail"
+                pkg_state[pkg]["build_status"] = "build_fail"
                 continue
 
         if no_store:
