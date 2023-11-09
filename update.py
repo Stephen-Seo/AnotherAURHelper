@@ -1598,7 +1598,7 @@ def print_state_info_and_get_update_list(
     for pkg_name, pkg_dict in pkg_state.items():
         if "state" in pkg_dict:
             log_print(
-                f"    {pkg_name:40}: {pkg_dict['state']}",
+                f"    {pkg_name:40}: pre_state is \"{pkg_dict['state']}\", build_state is \"{pkg_dict['build_status']}\"",
                 other_state=other_state,
             )
             if pkg_dict["state"] == "install":
@@ -2008,6 +2008,9 @@ if __name__ == "__main__":
             sys.exit(1)
 
     pkg_list = [temp_pkg_name for temp_pkg_name in pkg_state.keys()]
+    # ensure build_status is populated.
+    for pkg_name in pkg_list:
+        pkg_state[pkg_name]["build_status"] = "unknown"
     i = 0
     furthest_checked = 0
     going_back = False
@@ -2050,7 +2053,8 @@ if __name__ == "__main__":
                     f"Pkg {pkg_list[i]} is up to date, skipping...",
                     other_state=other_state,
                 )
-                pkg_state[pkg_list[i]]["state"] = "up to date"
+                pkg_state[pkg_list[i]]["state"] = "up_to_date"
+                pkg_state[pkg_list[i]]["build_status"] = "not_building"
                 i += 1
                 continue
         check_pkg_build_result = check_pkg_build(
@@ -2060,10 +2064,12 @@ if __name__ == "__main__":
             pass
         elif check_pkg_build_result == "not_ok":
             pkg_state[pkg_list[i]]["state"] = "skip"
+            pkg_state[pkg_list[i]]["build_status"] = "not_building"
             i += 1
             continue
         elif check_pkg_build_result == "force_build":
             pkg_state[pkg_list[i]]["state"] = "install"
+            pkg_state[pkg_list[i]]["build_status"] = "will_build"
             i += 1
             continue
         elif check_pkg_build_result == "invalid":
@@ -2093,15 +2099,22 @@ if __name__ == "__main__":
             confirm_result_result = confirm_result(pkg_list[i], state_result)
             if confirm_result_result == "continue":
                 pkg_state[pkg_list[i]]["state"] = state_result
+                pkg_state[pkg_list[i]]["build_status"] = (
+                    "will_build"
+                    if state_result == "install"
+                    else "not_building"
+                )
                 break
             elif confirm_result_result == "recheck":
                 check_pkg_version_result = None
                 continue
             elif confirm_result_result == "force_build":
                 pkg_state[pkg_list[i]]["state"] = "install"
+                pkg_state[pkg_list[i]]["build_status"] = "will_build"
                 break
             elif confirm_result_result == "skip":
                 pkg_state[pkg_list[i]]["state"] = "skip"
+                pkg_state[pkg_list[i]]["build_status"] = "not_building"
                 break
             elif confirm_result_result == "back":
                 if i > 0:
