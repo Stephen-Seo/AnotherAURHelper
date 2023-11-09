@@ -132,7 +132,9 @@ following:
 
     [MyAURRepo]
     SigLevel = Required TrustedOnly
-    Include = file:///home/MyAURRepoDirectory
+    Server = file:///home/MyAURRepoDirectory
+    # Optionally set a file with `Server = ...` entries
+    # Include = /etc/pacman.d/my_repo_server_list
 
 Note that `SigLevel` is set expecting the `MyAURRepo.db` file to be signed (the
 Python script usually signs the `.db` file after a package has been successfully
