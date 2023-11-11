@@ -1600,8 +1600,12 @@ def print_state_info_and_get_update_list(
     log_print("package state:", other_state=other_state)
     for pkg_name, pkg_dict in pkg_state.items():
         if "state" in pkg_dict:
+            state_length = 11 - len(pkg_dict["state"])
+            if state_length <= 0:
+                state_length = 1
+            space_str = " " * state_length
             log_print(
-                f"    {pkg_name:40}: pre_state is \"{pkg_dict['state']}\", build_state is \"{pkg_dict['build_status']}\"",
+                f"    {pkg_name:40}: pre_state is \"{pkg_dict['state']}\",{space_str}build_state is \"{pkg_dict['build_status']}\"",
                 other_state=other_state,
             )
             if pkg_dict["state"] == "install":
