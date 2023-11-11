@@ -1531,9 +1531,14 @@ def update_pkg_list(
                     ),
                 )
 
+    max_name_len = 1
     for pkg in pkgs:
+        if len(pkg) + 1 > max_name_len:
+            max_name_len = len(pkg) + 1
+    for pkg in pkgs:
+        name_space = " " * (max_name_len - len(pkg))
         log_print(
-            f'"{pkg}" status: {pkg_state[pkg]["build_status"]}',
+            f'"{pkg}"{name_space}status: {pkg_state[pkg]["build_status"]}',
             other_state=other_state,
         )
 
@@ -1598,21 +1603,27 @@ def print_state_info_and_get_update_list(
 
     to_update = []
     log_print("package state:", other_state=other_state)
+    max_name_len = 1
+    for pkg_name in pkg_state.keys():
+        if len(pkg_name) + 1 > max_name_len:
+            max_name_len = len(pkg_name) + 1
     for pkg_name, pkg_dict in pkg_state.items():
+        name_space = " " * (max_name_len - len(pkg_name))
         if "state" in pkg_dict:
             state_length = 11 - len(pkg_dict["state"])
             if state_length <= 0:
                 state_length = 1
             space_str = " " * state_length
             log_print(
-                f"    {pkg_name:40}: pre_state is \"{pkg_dict['state']}\",{space_str}build_state is \"{pkg_dict['build_status']}\"",
+                f"    {pkg_name}{name_space}: pre_state is \"{pkg_dict['state']}\",{space_str}build_state is \"{pkg_dict['build_status']}\"",
                 other_state=other_state,
             )
             if pkg_dict["state"] == "install":
                 to_update.append(pkg_name)
         else:
             log_print(
-                f"    {pkg_name:40}: not reached", other_state=other_state
+                f"    {pkg_name}{name_space}: not reached",
+                other_state=other_state,
             )
     return to_update
 
