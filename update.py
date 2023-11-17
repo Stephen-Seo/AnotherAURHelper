@@ -1587,7 +1587,7 @@ def get_latest_pkg(pkg: str, cache_dir: str):
         return None
 
 
-def confirm_result(pkg: str, state_result: str):
+def confirm_result(pkg: str, state_result: str, other_state: dict[str, Any]):
     """Prompts the user the action to take for a pkg after checking its
     PKGBUILD.
 
@@ -2255,7 +2255,9 @@ def main():
                     False,
                     other_state,
                 )
-            confirm_result_result = confirm_result(pkg_list[i], state_result)
+            confirm_result_result = confirm_result(
+                pkg_list[i], state_result, other_state
+            )
             if confirm_result_result == "continue":
                 pkg_state[pkg_list[i]]["state"] = state_result
                 pkg_state[pkg_list[i]]["build_status"] = (
