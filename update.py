@@ -573,7 +573,7 @@ def check_pkg_version(
     (installed pkg is up to date)."""
 
     status, current_epoch, current_version = get_pkg_current_version(
-        pkg, pkg_state, repo
+        pkg, pkg_state, repo, other_state
     )
     if status != "fetched":
         return status
@@ -874,7 +874,9 @@ def get_srcinfo_check_result(
         return "fail"
 
 
-def get_pkg_current_version(pkg: str, pkg_state: dict[str, Any], repo: str):
+def get_pkg_current_version(
+    pkg: str, pkg_state: dict[str, Any], repo: str, other_state: dict[str, Any]
+):
     """Fetches the version info and returns status of fetching and the version.
 
     Returns (status, epoch, version)
