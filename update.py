@@ -1664,7 +1664,10 @@ def build_print_pkg_info(pkgs: tuple[str], other_state: dict[str, any]):
 
 
 def test_gpg_passphrase(
-    signing_gpg_dir: str, signing_key_fp: str, passphrase: str
+    signing_gpg_dir: str,
+    signing_key_fp: str,
+    passphrase: str,
+    other_state: dict[str, any],
 ):
     """Checks if the given gpg passphrase works with the gpg signing key."""
 
@@ -1886,6 +1889,7 @@ def main():
                 other_state["signing_gpg_dir"],
                 other_state["signing_gpg_key_fp"],
                 other_state["signing_gpg_pass"],
+                other_state,
             ):
                 sys.exit(1)
     elif args.config:
@@ -1987,6 +1991,7 @@ def main():
                 other_state["signing_gpg_dir"],
                 other_state["signing_gpg_key_fp"],
                 other_state["signing_gpg_pass"],
+                other_state,
             ):
                 sys.exit(1)
         if "editor" in d:
