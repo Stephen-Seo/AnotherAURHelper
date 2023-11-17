@@ -940,7 +940,7 @@ def get_pkg_current_version(pkg: str, pkg_state: dict[str, Any], repo: str):
     return "fetched", current_epoch, current_version
 
 
-def get_sudo_privileges():
+def get_sudo_privileges(other_state: dict[str, Any]):
     """Starts a bash loop that ensures sudo privileges are ready while this
     script is active."""
 
@@ -1205,7 +1205,7 @@ def update_pkg_list(
 
     atexit.register(build_print_pkg_info, pkgs, other_state)
 
-    if not get_sudo_privileges():
+    if not get_sudo_privileges(other_state):
         log_print(
             "ERROR: Failed to get sudo privileges", other_state=other_state
         )
@@ -2052,7 +2052,7 @@ def main():
             os.path.dirname(os.path.realpath(other_state["chroot"])),
             "tmpfs_chroot",
         )
-        get_sudo_privileges()
+        get_sudo_privileges(other_state)
         try:
             old_umask = os.umask(0o077)
             log_print(
