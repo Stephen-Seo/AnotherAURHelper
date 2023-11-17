@@ -18,6 +18,7 @@ import threading
 from pathlib import Path
 from typing import Any, Union
 import signal
+import pwd
 
 # SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
 SUDO_PROC = False
@@ -1834,6 +1835,7 @@ if __name__ == "__main__":
     PKG_STATE = pkg_state
     OTHER_STATE = other_state
     other_state["USER"] = os.environ["USER"]
+    other_state["UID"] = pwd.getpwnam(other_state["USER"]).pw_uid
     other_state["logs_dir"] = None
     other_state["log_limit"] = 1024 * 1024 * 1024
     other_state["error_on_limit"] = False
@@ -2057,7 +2059,7 @@ if __name__ == "__main__":
                     "-t",
                     "tmpfs",
                     "-o",
-                    "size=90%",
+                    f"size=90%,mode=0700,uid={other_state['UID']}",
                     "tmpfs",
                     other_state["tmpfs_chroot"],
                 ),
@@ -2073,34 +2075,6 @@ if __name__ == "__main__":
                     )
                 ),
                 other_state["tmpfs_chroot"],
-            )
-            log_print(
-                "Setting tmpfs dir permissions...", other_state=other_state
-            )
-            subprocess.run(
-                (
-                    "/usr/bin/env",
-                    "sudo",
-                    "chmod",
-                    "700",
-                    other_state["tmpfs_chroot"],
-                ),
-                check=True,
-            )
-            log_print(
-                "Giving self user owner of tmpfs dir...",
-                other_state=other_state,
-            )
-            subprocess.run(
-                (
-                    "/usr/bin/env",
-                    "sudo",
-                    "chown",
-                    "-R",
-                    other_state["USER"],
-                    other_state["tmpfs_chroot"],
-                ),
-                check=True,
             )
             os.umask(old_umask)
         except subprocess.CalledProcessError:
