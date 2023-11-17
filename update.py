@@ -259,7 +259,7 @@ def log_print(*args, **kwargs):
 def ensure_pkg_dir_exists(
     pkg: str,
     pkg_state: dict[str, Any],
-    other_state: dict[str, Union[None, str]],
+    other_state: dict[str, Any],
 ):
     """Ensures that an AUR-pkg-dir exists, returning False on failure.
 
@@ -325,7 +325,7 @@ def ensure_pkg_dir_exists(
 def update_pkg_dir(
     pkg: str,
     pkg_state: dict[str, Any],
-    other_state: dict[str, Union[None, str]],
+    other_state: dict[str, Any],
 ):
     """Updates the pkg by invoking "git pull".
 
@@ -509,7 +509,7 @@ def update_pkg_dir(
 def check_pkg_build(
     pkg: str,
     pkg_state: dict[str, Any],
-    other_state: dict[str, Union[None, str]],
+    other_state: dict[str, Any],
     editor: str,
 ):
     """Opens the PKGBUILD in the editor, then prompts the user for an action.
@@ -565,7 +565,7 @@ def check_pkg_version(
     pkg_state: dict[str, Any],
     repo: str,
     force_check_srcinfo: bool,
-    other_state: dict[str, Union[None, str]],
+    other_state: dict[str, Any],
 ):
     """Gets the installed version and pkg version and checks them.
 
@@ -604,7 +604,7 @@ def check_pkg_version(
     )
 
 
-def get_srcinfo_version(pkg: str, other_state: dict[str, Union[None, str]]):
+def get_srcinfo_version(pkg: str, other_state: dict[str, Any]):
     """Parses .SRCINFO for verison information.
 
     Returns (success_bool, pkgepoch, pkgver, pkgrel)
@@ -650,7 +650,7 @@ def get_pkgbuild_version(
     pkg: str,
     force_check_srcinfo: bool,
     pkg_state: dict[str, Any],
-    other_state: dict[str, Union[None, str]],
+    other_state: dict[str, Any],
 ):
     """Gets the version of the pkg from .SRCINFO or PKGBUILD.
 
@@ -801,7 +801,7 @@ def get_srcinfo_check_result(
     pkg: str,
     force_check_srcinfo: bool,
     pkg_state: dict[str, Any],
-    other_state: dict[str, Union[None, str]],
+    other_state: dict[str, Any],
 ):
     """Checks the version of the pkg against the currently installed version.
 
@@ -1194,7 +1194,7 @@ def handle_output_stream(
 def update_pkg_list(
     pkgs: list[str],
     pkg_state: dict[str, Any],
-    other_state: dict[str, Union[None, str]],
+    other_state: dict[str, Any],
     signing_gpg_dir: str,
     signing_gpg_key_fp: str,
     signing_gpg_pass: str,
@@ -1649,7 +1649,7 @@ def print_state_info_and_get_update_list(
     return to_update
 
 
-def build_print_pkg_info(pkgs: tuple[str], other_state: dict[str, any]):
+def build_print_pkg_info(pkgs: tuple[str], other_state: dict[str, Any]):
     """Prints the current "build" state of the given pkgs."""
     max_name_len = 1
     for pkg in pkgs:
@@ -1667,7 +1667,7 @@ def test_gpg_passphrase(
     signing_gpg_dir: str,
     signing_key_fp: str,
     passphrase: str,
-    other_state: dict[str, any],
+    other_state: dict[str, Any],
 ):
     """Checks if the given gpg passphrase works with the gpg signing key."""
 
@@ -1720,7 +1720,7 @@ def test_gpg_passphrase(
     return True
 
 
-def validate_and_verify_paths(other_state: dict[str, Union[None, str]]):
+def validate_and_verify_paths(other_state: dict[str, Any]):
     """Checks and validates/ensures that certain directories exist."""
 
     if not os.path.exists(other_state["chroot"]):
