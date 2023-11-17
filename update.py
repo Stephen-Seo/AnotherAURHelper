@@ -1774,7 +1774,8 @@ def signal_handler(sig, frame):
     sys.exit(1)
 
 
-if __name__ == "__main__":
+def main():
+    """The main function."""
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGUSR1, signal_handler)
     editor = None
@@ -1841,6 +1842,7 @@ if __name__ == "__main__":
 
     pkg_state = {}
     other_state = {}
+    global PKG_STATE, OTHER_STATE
     PKG_STATE = pkg_state
     OTHER_STATE = other_state
     other_state["USER"] = os.environ["USER"]
@@ -2307,3 +2309,7 @@ if __name__ == "__main__":
             log_print("Canceled.", other_state=other_state)
     else:
         log_print("No packages to update, done.", other_state=other_state)
+
+
+if __name__ == "__main__":
+    main()
