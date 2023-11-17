@@ -2080,8 +2080,9 @@ if __name__ == "__main__":
                     (
                         "/usr/bin/env",
                         "sudo",
-                        "umount",
-                        tmpfs_path,
+                        "bash",
+                        "-c",
+                        f"for ((i=0; i<5; ++i)); do if umount {tmpfs_path}; then break; fi; sleep 1; done",
                     )
                 ),
                 other_state["tmpfs_chroot"],
