@@ -1212,6 +1212,8 @@ def update_pkg_list(
         pkg_state[pkg]["build_status"] = "get_sudo_fail"
         sys.exit(1)
     for pkg in pkgs:
+        if other_state["stop_building"]:
+            sys.exit(0)
         pkgdir = os.path.join(other_state["clones_dir"], pkg)
         if "ccache_dir" in pkg_state[pkg]:
             cleanup_sccache(
@@ -1764,9 +1766,11 @@ def signal_handler(sig, frame):
         print_state_info_and_get_update_list(OTHER_STATE, PKG_STATE)
         if signal.Signals(sig) is not signal.SIGINT:
             return
+        OTHER_STATE["stop_building"] = True
         sys.exit(0)
     if signal.Signals(sig) is not signal.SIGINT:
         return
+    OTHER_STATE["stop_building"] = True
     sys.exit(1)
 
 
@@ -1841,6 +1845,7 @@ if __name__ == "__main__":
     OTHER_STATE = other_state
     other_state["USER"] = os.environ["USER"]
     other_state["UID"] = pwd.getpwnam(other_state["USER"]).pw_uid
+    other_state["stop_building"] = False
     other_state["logs_dir"] = None
     other_state["log_limit"] = 1024 * 1024 * 1024
     other_state["error_on_limit"] = False
