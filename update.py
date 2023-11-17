@@ -687,13 +687,18 @@ def get_pkgbuild_version(
                 other_state=other_state,
             )
             # Ensure ccache isn't enabled for this check.
-            cleanup_ccache(other_state["chroot"])
+            if other_state["tmpfs"]:
+                cleanup_ccache(other_state["tmpfs_chroot"])
+            else:
+                cleanup_ccache(other_state["chroot"])
             command_list = [
                 "/usr/bin/env",
                 "makechrootpkg",
                 "-c",
                 "-r",
-                other_state["chroot"],
+                other_state["tmpfs_chroot"]
+                if other_state["tmpfs"]
+                else other_state["chroot"],
             ]
             post_command_list = ["--", "-s", "-r", "-c", "--nobuild"]
             if "link_cargo_registry" in pkg_state[pkg]:
@@ -1206,17 +1211,37 @@ def update_pkg_list(
     for pkg in pkgs:
         pkgdir = os.path.join(other_state["clones_dir"], pkg)
         if "ccache_dir" in pkg_state[pkg]:
-            cleanup_sccache(other_state["chroot"])
-            setup_ccache(other_state["chroot"])
+            cleanup_sccache(
+                other_state["tmpfs_chroot"]
+                if other_state["tmpfs"]
+                else other_state["chroot"]
+            )
+            setup_ccache(
+                other_state["tmpfs_chroot"]
+                if other_state["tmpfs"]
+                else other_state["chroot"]
+            )
         else:
-            cleanup_ccache(other_state["chroot"])
+            cleanup_ccache(
+                other_state["tmpfs_chroot"]
+                if other_state["tmpfs"]
+                else other_state["chroot"]
+            )
             if (
                 "sccache_dir" in pkg_state[pkg]
                 and not pkg_state[pkg]["sccache_rust_only"]
             ):
-                setup_sccache(other_state["chroot"])
+                setup_sccache(
+                    other_state["tmpfs_chroot"]
+                    if other_state["tmpfs"]
+                    else other_state["chroot"]
+                )
             else:
-                cleanup_sccache(other_state["chroot"])
+                cleanup_sccache(
+                    other_state["tmpfs_chroot"]
+                    if other_state["tmpfs"]
+                    else other_state["chroot"]
+                )
 
         # check integrity
         log_print(
@@ -1242,7 +1267,9 @@ def update_pkg_list(
             "makechrootpkg",
             "-c",
             "-r",
-            other_state["chroot"],
+            other_state["tmpfs_chroot"]
+            if other_state["tmpfs"]
+            else other_state["chroot"],
         ]
         post_command_list = [
             "--",
@@ -1778,6 +1805,11 @@ if __name__ == "__main__":
         action="store_true",
         help="Don't sign built package and add to repo",
     )
+    parser.add_argument(
+        "--tmpfs",
+        action="store_true",
+        help="Build in tmpfs",
+    )
     args = parser.parse_args()
 
     if (
@@ -1801,6 +1833,7 @@ if __name__ == "__main__":
     other_state = {}
     PKG_STATE = pkg_state
     OTHER_STATE = other_state
+    other_state["USER"] = os.environ["USER"]
     other_state["logs_dir"] = None
     other_state["log_limit"] = 1024 * 1024 * 1024
     other_state["error_on_limit"] = False
@@ -1978,12 +2011,101 @@ if __name__ == "__main__":
                 other_state["error_on_limit"]
             )
         )
+        if "tmpfs" in d and type(d["tmpfs"]) is bool and d["tmpfs"]:
+            other_state["tmpfs"] = True
+        else:
+            other_state["tmpfs"] = False
     else:
         log_print(
             'ERROR: At least "--config" or "--pkg" must be specified',
             other_state=other_state,
         )
         sys.exit(1)
+
+    while len(other_state["chroot"]) > 1 and other_state["chroot"][-1] == "/":
+        other_state["chroot"] = other_state["chroot"][:-1]
+
+    if args.tmpfs:
+        other_state["tmpfs"] = True
+
+    if other_state["tmpfs"]:
+        other_state["tmpfs_chroot"] = os.path.join(
+            os.path.dirname(os.path.realpath(other_state["chroot"])),
+            "tmpfs_chroot",
+        )
+        get_sudo_privileges()
+        try:
+            old_umask = os.umask(0o077)
+            log_print(
+                "Ensuring tmpfs_chroot dir exists...", other_state=other_state
+            )
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "mkdir",
+                    "-p",
+                    other_state["tmpfs_chroot"],
+                ),
+                check=True,
+            )
+            log_print("Creating tmpfs dir...", other_state=other_state)
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "sudo",
+                    "mount",
+                    "-t",
+                    "tmpfs",
+                    "-o",
+                    "size=90%",
+                    "tmpfs",
+                    other_state["tmpfs_chroot"],
+                ),
+                check=True,
+            )
+            atexit.register(
+                lambda tmpfs_path: subprocess.run(
+                    (
+                        "/usr/bin/env",
+                        "sudo",
+                        "umount",
+                        tmpfs_path,
+                    )
+                ),
+                other_state["tmpfs_chroot"],
+            )
+            log_print(
+                "Setting tmpfs dir permissions...", other_state=other_state
+            )
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "sudo",
+                    "chmod",
+                    "700",
+                    other_state["tmpfs_chroot"],
+                ),
+                check=True,
+            )
+            log_print(
+                "Giving self user owner of tmpfs dir...",
+                other_state=other_state,
+            )
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "sudo",
+                    "chown",
+                    "-R",
+                    other_state["USER"],
+                    other_state["tmpfs_chroot"],
+                ),
+                check=True,
+            )
+            os.umask(old_umask)
+        except subprocess.CalledProcessError:
+            log_print("ERROR: Failed to set up tmpfs!")
+            sys.exit(1)
 
     validate_and_verify_paths(other_state)
 
@@ -2024,6 +2146,31 @@ if __name__ == "__main__":
                 "ERROR: Failed to update the chroot", other_state=other_state
             )
             sys.exit(1)
+
+    if other_state["tmpfs"]:
+        try:
+            log_print(
+                'Copying "chroot"/root to tmpfs_chroot/root...',
+                other_state=other_state,
+            )
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "sudo",
+                    "cp",
+                    "-a",
+                    f'{other_state["chroot"]}/root',
+                    f'{other_state["tmpfs_chroot"]}/root',
+                ),
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            log_print(
+                'ERROR: Failed to copy "chroot"/root to tmpfs_chroot/root!',
+                other_state=other_state,
+            )
+            sys.exit(1)
+        os.putenv("CHROOT", os.path.realpath(other_state["tmpfs_chroot"]))
 
     pkg_list = [temp_pkg_name for temp_pkg_name in pkg_state.keys()]
     # ensure build_status is populated.
