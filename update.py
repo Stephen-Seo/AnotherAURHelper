@@ -1203,6 +1203,8 @@ def update_pkg_list(
     """For each package to build: builds it, signs it, and moves it to
     "pkg_out_dir"."""
 
+    atexit.register(build_print_pkg_info, pkgs, other_state)
+
     if not get_sudo_privileges():
         log_print(
             "ERROR: Failed to get sudo privileges", other_state=other_state
@@ -1559,17 +1561,6 @@ def update_pkg_list(
                     ),
                 )
 
-    max_name_len = 1
-    for pkg in pkgs:
-        if len(pkg) + 1 > max_name_len:
-            max_name_len = len(pkg) + 1
-    for pkg in pkgs:
-        name_space = " " * (max_name_len - len(pkg))
-        log_print(
-            f'"{pkg}"{name_space}status: {pkg_state[pkg]["build_status"]}',
-            other_state=other_state,
-        )
-
 
 def get_latest_pkg(pkg: str, cache_dir: str):
     """Gets the latest pkg from the specified "cache_dir" and return its
@@ -1654,6 +1645,20 @@ def print_state_info_and_get_update_list(
                 other_state=other_state,
             )
     return to_update
+
+
+def build_print_pkg_info(pkgs: tuple[str], other_state: dict[str, any]):
+    """Prints the current "build" state of the given pkgs."""
+    max_name_len = 1
+    for pkg in pkgs:
+        if len(pkg) + 1 > max_name_len:
+            max_name_len = len(pkg) + 1
+    for pkg in pkgs:
+        name_space = " " * (max_name_len - len(pkg))
+        log_print(
+            f'"{pkg}"{name_space}status: {pkg_state[pkg]["build_status"]}',
+            other_state=other_state,
+        )
 
 
 def test_gpg_passphrase(
