@@ -1205,7 +1205,7 @@ def update_pkg_list(
     """For each package to build: builds it, signs it, and moves it to
     "pkg_out_dir"."""
 
-    atexit.register(build_print_pkg_info, pkgs, other_state)
+    atexit.register(build_print_pkg_info, pkgs, pkg_state, other_state)
 
     if not get_sudo_privileges(other_state):
         log_print(
@@ -1651,7 +1651,9 @@ def print_state_info_and_get_update_list(
     return to_update
 
 
-def build_print_pkg_info(pkgs: tuple[str], other_state: dict[str, Any]):
+def build_print_pkg_info(
+    pkgs: tuple[str], pkg_state: dict[str, Any], other_state: dict[str, Any]
+):
     """Prints the current "build" state of the given pkgs."""
     max_name_len = 1
     for pkg in pkgs:
