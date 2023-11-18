@@ -1652,7 +1652,9 @@ def print_state_info_and_get_update_list(
 
 
 def build_print_pkg_info(
-    pkgs: tuple[str], pkg_state: dict[str, Any], other_state: dict[str, Any]
+    pkgs: tuple[str, ...],
+    pkg_state: dict[str, Any],
+    other_state: dict[str, Any],
 ):
     """Prints the current "build" state of the given pkgs."""
     max_name_len = 1
