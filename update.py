@@ -755,17 +755,73 @@ def get_pkgbuild_version(
         pkgver = None
         pkgrel = None
 
-        # TODO maybe sandbox sourcing the PKGBUILD
-        pkgbuild_output = subprocess.run(
-            (
-                "/usr/bin/env",
-                "bash",
-                "-c",
-                f"source {os.path.join(pkgdir, 'PKGBUILD')}; echo \"pkgver=$pkgver\"; echo \"pkgrel=$pkgrel\"; echo \"epoch=$epoch\"",
-            ),
-            capture_output=True,
-            text=True,
+        # Setup checking the PKGBUILD from within the chroot.
+        chroot_user_path = os.path.join(
+            other_state["tmpfs_chroot"]
+            if other_state["tmpfs"]
+            else other_state["chroot"],
+            other_state["USER"],
         )
+        chroot_build_path = os.path.join(chroot_user_path, "build")
+        chroot_check_pkgbuild_path = os.path.join(chroot_build_path, "PKGBUILD")
+        chroot_check_sh_path = os.path.join(chroot_build_path, "check.sh")
+
+        try:
+            subprocess.run(
+                (
+                    "/usr/bin/cp",
+                    os.path.join(pkgdir, "PKGBUILD"),
+                    chroot_check_pkgbuild_path,
+                ),
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            log_print(
+                f'ERROR: Failed to check PKGBUILD (moving PKGBUILD to chroot) for "{pkg}"!',
+                other_state=other_state,
+            )
+            return False, None, None, None
+
+        check_pkgbuild_script = """#!/usr/bin/env bash
+
+set -e
+
+source "/build/PKGBUILD"
+echo "pkgver=$pkgver"
+echo "pkgrel=$pkgrel"
+echo "epoch=$epoch"
+"""
+
+        if not create_executable_script(
+            chroot_check_sh_path, check_pkgbuild_script
+        ):
+            log_print(
+                f'ERROR: Failed to check PKGBUILD (check PKGBUILD setup) for "{pkg}"!',
+                other_state=other_state,
+            )
+            return False, None, None, None
+
+        pkgbuild_output = str()
+        try:
+            pkgbuild_output = subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "sudo",
+                    "arch-nspawn",
+                    chroot_user_path,
+                    "/build/check.sh",
+                ),
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+        except subprocess.CalledProcessError:
+            log_print(
+                f'ERROR: Failed to check PKGBUILD (checking PKGBUILD) for "{pkg}"!',
+                other_state=other_state,
+            )
+            return False, None, None, None
+
         output_ver_re = re.compile(
             "^pkgver=([a-zA-Z0-9._+-]+)\\s*$", flags=re.M
         )
