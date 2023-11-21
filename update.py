@@ -1907,7 +1907,7 @@ def main():
 
     pkg_state = {}
     other_state = {}
-    global PKG_STATE, OTHER_STATE
+    global PKG_STATE, OTHER_STATE, GLOBAL_LOG_FILE
     PKG_STATE = pkg_state
     OTHER_STATE = other_state
     other_state["USER"] = os.environ["USER"]
