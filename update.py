@@ -32,6 +32,32 @@ STRFTIME_LOCAL_FORMAT = "%Y-%m-%dT%H:%M:%S"
 PKG_STATE = None
 OTHER_STATE = None
 
+DUMMY_PKGBUILD = """pkgname=dummy_pkg
+pkgver=1.0
+pkgrel=1
+pkgdesc="dummy pkg"
+arch=(any)
+url="https://example.com"
+license=('MIT')
+source=()
+
+prepare() {
+    echo prepare
+}
+
+build() {
+    echo build
+}
+
+check() {
+    echo check
+}
+
+package() {
+    echo package
+}
+"""
+
 
 class ArchPkgVersion:
     """Holds a version (typically of an ArchLinux package) for comparison."""
@@ -697,9 +723,11 @@ def get_pkgbuild_version(
                 "makechrootpkg",
                 "-c",
                 "-r",
-                other_state["tmpfs_chroot"]
-                if other_state["tmpfs"]
-                else other_state["chroot"],
+                (
+                    other_state["tmpfs_chroot"]
+                    if other_state["tmpfs"]
+                    else other_state["chroot"]
+                ),
             ]
             post_command_list = ["--", "-s", "-r", "-c", "--nobuild"]
             if "link_cargo_registry" in pkg_state[pkg]:
@@ -757,9 +785,11 @@ def get_pkgbuild_version(
 
         # Setup checking the PKGBUILD from within the chroot.
         chroot_user_path = os.path.join(
-            other_state["tmpfs_chroot"]
-            if other_state["tmpfs"]
-            else other_state["chroot"],
+            (
+                other_state["tmpfs_chroot"]
+                if other_state["tmpfs"]
+                else other_state["chroot"]
+            ),
             other_state["USER"],
         )
         chroot_build_path = os.path.join(chroot_user_path, "build")
@@ -1330,9 +1360,11 @@ def update_pkg_list(
             "makechrootpkg",
             "-c",
             "-r",
-            other_state["tmpfs_chroot"]
-            if other_state["tmpfs"]
-            else other_state["chroot"],
+            (
+                other_state["tmpfs_chroot"]
+                if other_state["tmpfs"]
+                else other_state["chroot"]
+            ),
         ]
         post_command_list = [
             "--",
@@ -1839,6 +1871,164 @@ def signal_handler(sig, frame):
     sys.exit(1)
 
 
+def check_install_script(
+    pkg_state: dict[str, Any],
+    other_state: dict[str, Any],
+    pkg: str,
+    editor: str,
+):
+    """Returns "error", "does_not_exist", and "ok"."""
+
+    pkgdir = os.path.join(other_state["clones_dir"], pkg)
+
+    chroot_user_path = os.path.join(
+        (
+            other_state["tmpfs_chroot"]
+            if other_state["tmpfs"]
+            else other_state["chroot"]
+        ),
+        other_state["USER"],
+    )
+    chroot_build_path = os.path.join(chroot_user_path, "build")
+    chroot_check_pkgbuild_path = os.path.join(chroot_build_path, "PKGBUILD")
+    chroot_check_sh_path = os.path.join(chroot_build_path, "install_check.sh")
+
+    if not prepare_user_chroot(other_state):
+        log_print(
+            f"ERROR: Failed to prepare user chroot with dummy PKGBUILD!",
+            other_state=other_state,
+        )
+        return "error"
+
+    try:
+        subprocess.run(
+            (
+                "/usr/bin/cp",
+                os.path.join(pkgdir, "PKGBUILD"),
+                chroot_check_pkgbuild_path,
+            ),
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        log_print(
+            f'ERROR: Failed to check PKGBUILD install (moving PKGBUILD to chroot) for "{pkg}"!',
+            other_state=other_state,
+        )
+        return "error"
+
+    get_install_script = """#!/usr/bin/env bash
+
+set -e
+
+source "/build/PKGBUILD"
+
+if [[ -n "$install" ]]; then
+  echo "$install"
+else
+  echo "PKGBUILD_INSTALL_DOES_NOT_EXIST"
+fi
+"""
+
+    if not create_executable_script(chroot_check_sh_path, get_install_script):
+        log_print(
+            f'ERROR: Failed to check PKGBUILD install (check PKGBUILD setup) for "{pkg}"!',
+            other_state=other_state,
+        )
+        return "error"
+
+    install_output = None
+    try:
+        install_output = subprocess.run(
+            (
+                "/usr/bin/env",
+                "sudo",
+                "arch-nspawn",
+                chroot_user_path,
+                "/build/install_check.sh",
+            ),
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+    except subprocess.CalledProcessError:
+        log_print(
+            f'ERROR: Failed to check PKGBUILD install (checking PKGBUILD) for "{pkg}"!',
+            other_state=other_state,
+        )
+        return "error"
+
+    if (
+        len(install_output.stdout.strip()) == 0
+        or install_output.stdout.strip() == "PKGBUILD_INSTALL_DOES_NOT_EXIST"
+    ):
+        return "does_not_exist"
+    elif not os.path.exists(
+        os.path.join(pkgdir, install_output.stdout.strip())
+    ):
+        log_print(
+            f'ERROR: PKGBUILD install file specified but doesn\'t exist for "{pkg}"!',
+            other_state=other_state,
+        )
+        return "error"
+
+    try:
+        subprocess.run(
+            ("/usr/bin/env", editor, install_output.stdout.strip()),
+            check=True,
+            cwd=pkgdir,
+        )
+    except subprocess.CalledProcessError:
+        log_print(
+            'ERROR: Failed checking install file for "{}"'.format(pkg),
+            other_state=other_state,
+        )
+        return "error"
+    return "ok"
+
+
+def prepare_user_chroot(other_state: [str, Any]):
+    try:
+        log_print(
+            'Running "makechrootpkg ... --nobuild" with dummy package to ensure user chroot is ready...',
+            other_state=other_state,
+        )
+        # Ensure ccache isn't enabled for this check.
+        if other_state["tmpfs"]:
+            cleanup_ccache(other_state["tmpfs_chroot"])
+        else:
+            cleanup_ccache(other_state["chroot"])
+        command_list = [
+            "/usr/bin/env",
+            "makechrootpkg",
+            "-c",
+            "-r",
+            (
+                other_state["tmpfs_chroot"]
+                if other_state["tmpfs"]
+                else other_state["chroot"]
+            ),
+        ]
+        post_command_list = ["--", "-s", "-r", "-c", "--nobuild"]
+
+        dummy_package_dir = os.path.join(
+            os.environ["HOME"], ".local", "share", "dummy_pkg_TEMPORARY_DIR"
+        )
+        Path(dummy_package_dir).mkdir(mode=0o700, parents=True, exist_ok=True)
+        dummy_package_pkgbuild = os.path.join(dummy_package_dir, "PKGBUILD")
+        Path(dummy_package_pkgbuild).write_text(DUMMY_PKGBUILD)
+
+        subprocess.run(
+            command_list + post_command_list,
+            check=True,
+            cwd=dummy_package_dir,
+        )
+
+        shutil.rmtree(dummy_package_dir)
+    except subprocess.CalledProcessError:
+        return False
+    return True
+
+
 def main():
     """The main function."""
     signal.signal(signal.SIGINT, signal_handler)
@@ -2290,6 +2480,10 @@ def main():
             pkg_state[pkg_list[i]]["state"] = "install"
             pkg_state[pkg_list[i]]["build_status"] = "will_build"
             i += 1
+            log_print(
+                'WARNING: force_build will skip "install" script check!',
+                other_state=other_state,
+            )
             continue
         elif check_pkg_build_result == "invalid":
             continue
@@ -2300,6 +2494,71 @@ def main():
         else:  # check_pkg_build_result == "abort":
             print_state_info_and_get_update_list(other_state, pkg_state)
             sys.exit(1)
+
+        install_check = check_install_script(
+            pkg_state, other_state, pkg_list[i], editor
+        )
+        if install_check == "does_not_exist":
+            pass
+        elif install_check == "error":
+            log_print(
+                "WARNING: Failed to check PKGBUILD install script!",
+                other_state=other_state,
+            )
+            pkg_state[pkg_list[i]]["state"] = "error"
+            pkg_state[pkg_list[i]]["build_status"] = "not_building"
+            i += 1
+            continue
+        elif install_check == "ok":
+            continue_on_loop_exit = False
+            while True:
+                log_print(
+                    "install script ok? [Y/n/a(bort)/f(orce build)/b(ack)]",
+                    other_state=other_state,
+                )
+                user_input = (
+                    sys.stdin.buffer.readline().decode().strip().lower()
+                )
+                if user_input == "y" or len(user_input) == 0:
+                    log_print(
+                        "User decided install script is ok.",
+                        other_state=other_state,
+                    )
+                    break
+                elif user_input == "n":
+                    log_print(
+                        "User decided install script is NOT ok.",
+                        other_state=other_state,
+                    )
+                    pkg_state[pkg_list[i]]["state"] = "skip"
+                    pkg_state[pkg_list[i]]["build_status"] = "not_building"
+                    i += 1
+                    continue_on_loop_exit = True
+                    break
+                elif user_input == "a":
+                    print_state_info_and_get_update_list(other_state, pkg_state)
+                    sys.exit(1)
+                elif user_input == "f":
+                    pkg_state[pkg_list[i]]["state"] = "install"
+                    pkg_state[pkg_list[i]]["build_status"] = "will_build"
+                    i += 1
+                    continue_on_loop_exit = True
+                    break
+                elif user_input == "b":
+                    if i > 0:
+                        i -= 1
+                    continue_on_loop_exit = True
+                    break
+                else:
+                    continue
+            if continue_on_loop_exit:
+                continue
+        else:  # Should be unreachable.
+            log_print(
+                "WARNING: Check PKGBUILD install script: unreachable code!",
+                other_state=other_state,
+            )
+
         while True:
             if (
                 skip_on_same_ver
