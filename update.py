@@ -2511,9 +2511,15 @@ def main():
             continue
         elif install_check == "ok":
             continue_on_loop_exit = False
+            recheck_install_script = False
             while True:
+                if recheck_install_script:
+                    recheck_install_script = False
+                    check_install_script(
+                        pkg_state, other_state, pkg_list[i], editor
+                    )
                 log_print(
-                    "install script ok? [Y/n/a(bort)/f(orce build)/b(ack)]",
+                    "install script ok? [Y/n/r(echeck)/a(bort)/f(orce build)/b(ack)]",
                     other_state=other_state,
                 )
                 user_input = (
@@ -2535,6 +2541,9 @@ def main():
                     i += 1
                     continue_on_loop_exit = True
                     break
+                elif user_input == "r":
+                    recheck_install_script = True
+                    continue
                 elif user_input == "a":
                     print_state_info_and_get_update_list(other_state, pkg_state)
                     sys.exit(1)
