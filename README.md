@@ -10,7 +10,7 @@ works for me. It always builds in a CHROOT, and it lets the user check the
 PKGBUILD (by default) prior to building. There is no automatic dependency
 management. That must be done in the config. An example config is provided.
 
-Note that if a "install=<filename>" is specified in the PKGBUILD, then the
+Note that if a "install=\<filename\>" is specified in the PKGBUILD, then the
 configured editor will also open the specified file once the PKGBUILD is
 approved by the user. This check is necessary because such "install scripts"
 define hooks that are run when the package is installed.
