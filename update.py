@@ -2424,6 +2424,7 @@ def main():
     i = 0
     furthest_checked = 0
     going_back = False
+    check_install_script_ran_once = False
     while i < len(pkg_list):
         if i > furthest_checked:
             furthest_checked = i
@@ -2497,10 +2498,18 @@ def main():
             sys.exit(1)
 
         install_check = check_install_script(
-            pkg_state, other_state, pkg_list[i], editor
+            pkg_state,
+            other_state,
+            pkg_list[i],
+            editor,
+            skip_prepare_chroot=check_install_script_ran_once,
         )
+        check_install_script_ran_once = True
         if install_check == "does_not_exist":
-            pass
+            log_print(
+                'NOTICE: pkg does not have "install" script.',
+                other_state=other_state,
+            )
         elif install_check == "error":
             log_print(
                 "WARNING: Failed to check PKGBUILD install script!",
