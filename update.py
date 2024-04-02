@@ -1876,6 +1876,7 @@ def check_install_script(
     other_state: dict[str, Any],
     pkg: str,
     editor: str,
+    skip_prepare_chroot=False,
 ):
     """Returns "error", "does_not_exist", and "ok"."""
 
@@ -1893,7 +1894,7 @@ def check_install_script(
     chroot_check_pkgbuild_path = os.path.join(chroot_build_path, "PKGBUILD")
     chroot_check_sh_path = os.path.join(chroot_build_path, "install_check.sh")
 
-    if not prepare_user_chroot(other_state):
+    if not skip_prepare_chroot and not prepare_user_chroot(other_state):
         log_print(
             f"ERROR: Failed to prepare user chroot with dummy PKGBUILD!",
             other_state=other_state,
@@ -2516,7 +2517,11 @@ def main():
                 if recheck_install_script:
                     recheck_install_script = False
                     check_install_script(
-                        pkg_state, other_state, pkg_list[i], editor
+                        pkg_state,
+                        other_state,
+                        pkg_list[i],
+                        editor,
+                        skip_prepare_chroot=True,
                     )
                 log_print(
                     "install script ok? [Y/n/r(echeck)/a(bort)/f(orce build)/b(ack)]",
