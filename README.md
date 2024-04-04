@@ -17,6 +17,18 @@ define hooks that are run when the package is installed.
 
 # Things to know before using the helper
 
+## Security
+
+Apparently `makechrootpkg` (provided by `devtools` pkg and used by this script)
+sources PKGBUILD files directly, meaning that if a malicious PKGBUILD is
+attempted to be built, it may cause an RCE kind of exploit with the current
+user. Thus, it is recommended to run this script in a container (like Docker or
+LXC) so that even if a malicious PKGBUILD is sourced, it will only affect the
+container. Though if you do set up a container, you may have to set up a
+directory mount to access the built packages.
+
+## Soft-lock due to multiple possible dependencies
+
 Sometimes if a package prompts a user to select between alternate package
 dependencies, makechrootpkg will fail to select one by default (it will
 constantly output "y" to stdin when a selection requires an integer). This
