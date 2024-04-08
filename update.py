@@ -742,6 +742,13 @@ def get_pkgbuild_version(
                     f'{os.environ["HOME"]}/.cargo/git:/build/.cargo/git',
                 )
             for dep in pkg_state[pkg]["other_deps"]:
+                prefetch_result = prefetch_dependency(dep, other_state)
+                if prefetch_result != "fetched":
+                    log_print(
+                        'ERROR: Failed to prefetch dep "{}"'.format(dep),
+                        other_state=other_state,
+                    )
+                    return False, None, None, None
                 dep_fullpath = get_latest_pkg(dep, "/var/cache/pacman/pkg")
                 if not dep_fullpath:
                     log_print(
@@ -1375,6 +1382,15 @@ def update_pkg_list(
         ]
         failure = False
         for dep in pkg_state[pkg]["other_deps"]:
+            prefetch_result = prefetch_dependency(dep, other_state)
+            if prefetch_result != "fetched":
+                log_print(
+                    'ERROR: Failed to prefetch dep "{}"'.format(dep),
+                    other_state=other_state,
+                )
+                failure = True
+                pkg_state[pkg]["build_status"] = "get_dep_fail"
+                break
             dep_fullpath = get_latest_pkg(dep, "/var/cache/pacman/pkg")
             if not dep_fullpath:
                 log_print(
@@ -2028,6 +2044,22 @@ def prepare_user_chroot(other_state: [str, Any]):
     except subprocess.CalledProcessError:
         return False
     return True
+
+
+def prefetch_dependency(pkg_name, other_state: [str, Any]):
+    """Returns "fetched" on success."""
+    log_print(
+        f'Prefetching package "{pkg_name}" with "pacman -Sw"...',
+        other_state=other_state,
+    )
+    try:
+        subprocess.run(
+            ("/usr/bin/env", "sudo", "pacman", "--noconfirm", "-Sw", pkg_name),
+            check=True,
+        )
+    except subprocess.CalledProcessError:
+        return "fail"
+    return "fetched"
 
 
 def main():
