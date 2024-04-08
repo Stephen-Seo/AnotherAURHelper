@@ -2063,7 +2063,7 @@ def prepare_user_chroot(other_state: dict[str, Any]):
 def prefetch_dependencies(pkg_names: [str], other_state: dict[str, Any]):
     """Returns "fetched" on success."""
     log_print(
-        f'Prefetching package "{pkg_name}" with "pacman -Sw"...',
+        f'Prefetching packages "{pkg_names}" with "pacman -Sw"...',
         other_state=other_state,
     )
     command_list = ["/usr/bin/env", "sudo", "pacman", "--noconfirm", "-Sw"]
