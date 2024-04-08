@@ -1387,9 +1387,11 @@ def update_pkg_list(
         ]
         failure = False
         if "ccache_dir" in pkg_state[pkg]:
-            pkg_state[pkg]["other_deps"].append("ccache")
+            if not "ccache" in pkg_state[pkg]["other_deps"]:
+                pkg_state[pkg]["other_deps"].append("ccache")
         elif "sccache_dir" in pkg_state[pkg]:
-            pkg_state[pkg]["other_deps"].append("sccache")
+            if not "sccache" in pkg_state[pkg]["other_deps"]:
+                pkg_state[pkg]["other_deps"].append("sccache")
         if len(pkg_state[pkg]["other_deps"]) != 0:
             prefetch_result = prefetch_dependencies(
                 pkg_state[pkg]["other_deps"], other_state
