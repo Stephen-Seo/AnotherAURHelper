@@ -1404,6 +1404,10 @@ def update_pkg_list(
                 failure = True
                 pkg_state[pkg]["build_status"] = "get_dep_fail"
                 break
+            log_print(
+                "Successfully prefetched deps, continuing on to build...",
+                other_state=other_state,
+            )
         for dep in pkg_state[pkg]["other_deps"]:
             dep_fullpath = get_latest_pkg(dep, "/var/cache/pacman/pkg")
             if not dep_fullpath:
