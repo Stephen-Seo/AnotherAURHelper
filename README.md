@@ -63,6 +63,17 @@ GiB somehow).
 the build will fail if the limit is reached. If set to false, then the build
 will continue even if the limit is reached.
 
+## Soft-lock if `sccache` is preinstalled in chroot
+
+Apparently, some packages automatically use ccache/sccache if it is installed in
+the chroot, and in some cases, causes a soft-lock during a build. It is
+recommended to not have ccache/sccache preinstalled in the chroot and to just
+let the aur-helper-script install it when necessary.
+
+For example, when building `tenacity-git` with sccache preinstalled, the build
+will hang after the final build step. Apparently, killing the running `sccache`
+process stops the soft-lock in this case.
+
 # Setting up the AUR Helper
 
 The AUR Helper requires several things:
@@ -86,7 +97,9 @@ The `python-toml` package is required for the Python script to run.
 
 Use `/usr/bin/mkarchroot` to create your CHROOT in a directory.
 
-    mkarchroot $HOME/mychroot/root base base-devel ccache sccache cmake ninja
+    mkarchroot $HOME/mychroot/root base base-devel cmake ninja
+
+As noted earlier, it is better to NOT preinstall `ccache` and `sccache`.
 
 You must refer to the CHROOT as `$HOME/mychroot` if you used the same name as in
 the previous example.

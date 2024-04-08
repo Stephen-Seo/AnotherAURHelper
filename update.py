@@ -1381,6 +1381,10 @@ def update_pkg_list(
             "--holdver",
         ]
         failure = False
+        if "ccache_dir" in pkg_state[pkg]:
+            pkg_state[pkg]["other_deps"].append("ccache")
+        elif "sccache_dir" in pkg_state[pkg]:
+            pkg_state[pkg]["other_deps"].append("sccache")
         for dep in pkg_state[pkg]["other_deps"]:
             prefetch_result = prefetch_dependency(dep, other_state)
             if prefetch_result != "fetched":
