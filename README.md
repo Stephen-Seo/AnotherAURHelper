@@ -74,6 +74,13 @@ For example, when building `tenacity-git` with sccache preinstalled, the build
 will hang after the final build step. Apparently, killing the running `sccache`
 process stops the soft-lock in this case.
 
+## Preloading ccache/sccache
+
+This script expects ccache and sccache not to be installed in the chroot (for
+reasons as mentioned in the previous section) and ccache or sccache will be
+appended to a pkg's "other_deps" if a ccache or sccache directory is configured
+for it.
+
 # Setting up the AUR Helper
 
 The AUR Helper requires several things:
