@@ -92,7 +92,7 @@ The AUR Helper requires several things:
     the built packages and repository database.
   - SUDO privileges to be able to use `makechrootpkg`.
   - `/etc/pacman.conf` must be configured to use the custom repository's
-    packages if `pacman -U` will not be used.
+    packages if `pacman -U <pkgs...>` will not be used.
 
 ## Dependencies
 
@@ -109,7 +109,10 @@ Use `/usr/bin/mkarchroot` to create your CHROOT in a directory.
 As noted earlier, it is better to NOT preinstall `ccache` and `sccache`.
 
 You must refer to the CHROOT as `$HOME/mychroot` if you used the same name as in
-the previous example.
+the previous example:
+
+    mkarchroot $HOME/mychroot/root base base-devel cmake ninja
+    BUILDCHROOT=$HOME/mychoot
 
 ## Set up the GNUPG dirs
 
@@ -146,6 +149,56 @@ every time you use the Python script.
 
 See the `example_config.toml` for more configuration. It should be commented
 enough for figuring out how to use it.
+
+    ########## MANDATORY VARIABLES
+    # If you did `mkarchchroot /home/username/mychroot/root base ...`, then the following must be:
+    chroot = "/home/username/mychroot"
+    # Location to place built packages.
+    pkg_out_dir = "/home/username/pkgs"
+    # It is recommended to put the repo file in the "pkg_out_dir".
+    # If the tar file doesn't already exist, it will be automatically created.
+    repo = "/home/username/pkgs/custom.db.tar"
+    # Location to clone packages from AUR.
+    clones_dir = "/home/username/aur"
+    # add keys to checking GPG with:
+    # `GNUPGHOME=/home/username/checkingGPG gpg --recv-keys <fingerprint>`
+    gpg_dir = "/home/username/checkingGPG"
+    logs_dir = "/home/username/aur/logs"
+    signing_gpg_dir = "/home/username/signingGPG"
+    # You can find the signing key's fingerprint with `gpg -k`.
+    # Make sure it lists '[S]' before the fingerprint, as that means that key is a signing key.
+    # You may have to use `gpg -k --with-subkey-fingerprint` if your signing key is a subkey.
+    # Make sure the `signing_gpg_dir` is used:
+    # `GNUPGHOME=/home/username/signingGPG gpg -k`
+    signing_gpg_key_fp = "04D9E3A2880F6418EC4BA70EA0F3F8FAA2088E62"
+    # It may be more helpful to set this to nano:
+    # editor = "/usr/bin/nano"
+    editor = "/usr/bin/vim"
+    # if true, all logs are prepended with current time in UTC
+    is_timed = true
+    # if true, all output build logs are prepended with current time in UTC
+    is_log_timed = true
+    # Default log_limit is 1 GiB
+    log_limit = 1073741824
+    # If true, then make the build fail if the limit is reached
+    error_on_limit = false
+    # If true, timestamps are in localtime. If false, timestamps are UTC.
+    datetime_in_local_time = true
+    # If true, all builds will be done in a tmpfs. Recommended to have a lot of RAM and/or swap.
+    tmpfs = false
+    ########## END OF MANDATORY VARIABLES
+    ...
+    [[entry]]
+    name = "cpufetch-git"
+    skip_branch_up_to_date = false
+    aur_deps = []
+    other_deps = []
+    #ccache_dir = "/home/username/ccache_dirs/cpufetch_ccache"
+    #sccache_dir = "/home/username/sccache_dirs/cpufetch_sccache"
+    link_cargo_registry = false
+    #repo_path = "https://example.com/mypkgrepo.git"
+    #pkg_name = "cpufetch-git"
+    ...
 
 # Setting up the Repository
 
