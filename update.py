@@ -1757,7 +1757,7 @@ def print_state_info_and_get_update_list(
     for pkg_name, pkg_dict in pkg_state.items():
         name_space = " " * (max_name_len - len(pkg_name))
         if "state" in pkg_dict:
-            state_length = 11 - len(pkg_dict["state"])
+            state_length = 15 - len(pkg_dict["state"])
             if state_length <= 0:
                 state_length = 1
             space_str = " " * state_length
@@ -2507,8 +2507,10 @@ def main():
                     pkg_list[i],
                     other_state=other_state,
                 )
-                print_state_info_and_get_update_list(other_state, pkg_state)
-                sys.exit(1)
+                pkg_state[pkg_list[i]]["state"] = "error_fetching"
+                pkg_state[pkg_list[i]]["build_status"] = "not_building"
+                i += 1
+                continue
         if skip_on_same_ver and i >= furthest_checked:
             check_pkg_version_result = check_pkg_version(
                 pkg_list[i], pkg_state, other_state["repo"], True, other_state
