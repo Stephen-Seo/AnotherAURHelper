@@ -1757,12 +1757,9 @@ def print_state_info_and_get_update_list(
     for pkg_name, pkg_dict in pkg_state.items():
         name_space = " " * (max_name_len - len(pkg_name))
         if "state" in pkg_dict:
-            state_length = 15 - len(pkg_dict["state"])
-            if state_length <= 0:
-                state_length = 1
-            space_str = " " * state_length
+            state_str = '"' + pkg_dict["state"] + '"'
             log_print(
-                f"    {pkg_name}{name_space}: pre_state is \"{pkg_dict['state']}\",{space_str}build_state is \"{pkg_dict['build_status']}\"",
+                f"    {pkg_name}{name_space}: pre_state is {state_str: <13}, build_state is \"{pkg_dict['build_status']}\"",
                 other_state=other_state,
             )
             if pkg_dict["state"] == "install":
@@ -2507,7 +2504,7 @@ def main():
                     pkg_list[i],
                     other_state=other_state,
                 )
-                pkg_state[pkg_list[i]]["state"] = "error_fetching"
+                pkg_state[pkg_list[i]]["state"] = "error_fetch"
                 pkg_state[pkg_list[i]]["build_status"] = "not_building"
                 i += 1
                 continue
