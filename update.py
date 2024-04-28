@@ -1167,7 +1167,7 @@ def setup_sccache(chroot: str):
     """Sets up sccache for the chroot."""
 
     sccache_script = """#!/usr/bin/env sh
-export PATH=${PATH/:\/usr\/local\/bin/}
+export PATH=${PATH/:\\/usr\\/local\\/bin/}
 /usr/bin/env sccache $(basename "$0") "$@"
 """
     if (
