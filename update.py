@@ -1559,7 +1559,7 @@ def update_pkg_list(
 
         log_print("Adding built pkgs to repo...", other_state=other_state)
         try:
-            command_list = ["repo-add", other_state["repo"]]
+            command_list = ["repo-add", "--include-sigs", other_state["repo"]]
             for gpkg in pkg_list:
                 command_list.append(gpkg)
             p1 = subprocess.Popen(
