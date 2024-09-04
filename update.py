@@ -1758,12 +1758,15 @@ def print_state_info_and_get_update_list(
         name_space = " " * (max_name_len - len(pkg_name))
         if "state" in pkg_dict:
             state_str = '"' + pkg_dict["state"] + '"'
-            if ("print_state_SIGUSR1" in other_state
-                    and type(other_state["print_state_SIGUSR1"]) is bool
-                    and other_state["print_state_SIGUSR1"]
-                    and "print_state_info_only_building_sigusr1" in other_state
-                    and type(other_state["print_state_info_only_building_sigusr1"]) is bool
-                    and other_state["print_state_info_only_building_sigusr1"]):
+            if (
+                "print_state_SIGUSR1" in other_state
+                and type(other_state["print_state_SIGUSR1"]) is bool
+                and other_state["print_state_SIGUSR1"]
+                and "print_state_info_only_building_sigusr1" in other_state
+                and type(other_state["print_state_info_only_building_sigusr1"])
+                is bool
+                and other_state["print_state_info_only_building_sigusr1"]
+            ):
                 if state_str == '"install"':
                     log_print(
                         f"    {pkg_name}{name_space}: pre_state is {state_str: <13}, build_state is \"{pkg_dict['build_status']}\"",
@@ -1907,7 +1910,9 @@ def signal_handler(sig, frame):
     """Handle SIGINT and SIGUSR1."""
     global OTHER_STATE, PKG_STATE
     if OTHER_STATE is not None and PKG_STATE is not None:
-        OTHER_STATE["print_state_SIGUSR1"] = signal.Signals(sig) is signal.SIGUSR1
+        OTHER_STATE["print_state_SIGUSR1"] = (
+            signal.Signals(sig) is signal.SIGUSR1
+        )
         print_state_info_and_get_update_list(OTHER_STATE, PKG_STATE)
         OTHER_STATE["print_state_SIGUSR1"] = False
         if signal.Signals(sig) is not signal.SIGINT:
@@ -2356,13 +2361,18 @@ def main():
             other_state["tmpfs"] = True
         else:
             other_state["tmpfs"] = False
-        if ("print_state_info_only_building_sigusr1" in d
-                and type(d["print_state_info_only_building_sigusr1"]) is bool):
-            other_state["print_state_info_only_building_sigusr1"] = \
-                d["print_state_info_only_building_sigusr1"]
-        print("State info print on SIGUSR1 is set to: \"{}\"".format(
-            other_state["print_state_info_only_building_sigusr1"]
-        ))
+        if (
+            "print_state_info_only_building_sigusr1" in d
+            and type(d["print_state_info_only_building_sigusr1"]) is bool
+        ):
+            other_state["print_state_info_only_building_sigusr1"] = d[
+                "print_state_info_only_building_sigusr1"
+            ]
+        print(
+            'State info print on SIGUSR1 is set to: "{}"'.format(
+                other_state["print_state_info_only_building_sigusr1"]
+            )
+        )
     else:
         log_print(
             'ERROR: At least "--config" or "--pkg" must be specified',
