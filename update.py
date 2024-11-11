@@ -1444,6 +1444,7 @@ def update_pkg_list(
             command_list.insert(2, "-d")
             command_list.insert(3, f'{pkg_state[pkg]["ccache_dir"]}:/ccache')
             post_command_list.insert(1, "CCACHE_DIR=/ccache")
+            post_command_list.insert(2, "CCACHE_NOHASHDIR=1")
         elif "sccache_dir" in pkg_state[pkg]:
             command_list.insert(2, "-d")
             command_list.insert(3, f'{pkg_state[pkg]["sccache_dir"]}:/sccache')
