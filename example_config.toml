@@ -77,12 +77,15 @@ skip_branch_up_to_date = true
 
 [[entry]]
 name = "flamegraph-git"
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "g810-led-git"
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "glfw-git"
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "gnome-icon-theme-symbolic"
@@ -113,6 +116,7 @@ skip_branch_up_to_date = true
 [[entry]]
 name = "ion-git"
 link_cargo_registry = true
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "ly"
@@ -266,6 +270,7 @@ name = "obs-studio-git"
 aur_deps = [
     "cef-minimal"
 ]
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "obs-v4l2sink"
@@ -277,6 +282,7 @@ aur_deps = [
     "gnome-icon-theme",
     "gnome-icon-theme-symbolic"
 ]
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "pikaur"
@@ -288,6 +294,7 @@ skip_branch_up_to_date = true
 
 [[entry]]
 name = "qt5-wayland-bugfixport-git"
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "quaternion"
@@ -307,9 +314,11 @@ skip_branch_up_to_date = true
 
 [[entry]]
 name = "wlroots-git"
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "swaybg-git"
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "sway-git"
@@ -320,6 +329,7 @@ aur_deps = [
 other_deps = [
     "mesa"
 ]
+auto_check_PKGBUILD = true
 
 [[entry]]
 name = "texlive-tikz-uml"
@@ -344,3 +354,4 @@ skip_branch_up_to_date = true
 
 [[entry]]
 name = "wlhangul-git"
+auto_check_PKGBUILD = true
