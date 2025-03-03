@@ -547,7 +547,8 @@ def check_pkg_build(
 
     if pkg_state[pkg]["auto_check_PKGBUILD"]:
         log_print(
-            "Checking PKGBUILD (auto_check_PKGBUILD enabled for this pkg)..."
+            "Checking PKGBUILD (auto_check_PKGBUILD enabled for this pkg)...",
+            other_state=other_state,
         )
         try:
             result = subprocess.run(
@@ -561,7 +562,10 @@ def check_pkg_build(
                 result.stdout
                 == pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"]
             ):
-                log_print("PKGBUILD did not change, continuing...")
+                log_print(
+                    "PKGBUILD did not change, continuing...",
+                    other_state=other_state,
+                )
                 return "ok"
         except subprocess.CalledProcessError:
             log_print(
@@ -715,13 +719,19 @@ def get_pkgbuild_version(
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
     log_print(f'Getting version of "{pkg}"...', other_state=other_state)
-    while True and not force_check_srcinfo:
-        log_print(
-            "Use .SRCINFO or directly parse PKGBUILD?", other_state=other_state
-        )
-        user_input = input("1 for .SRCINFO, 2 for PKGBUILD > ")
-        if user_input == "1" or user_input == "2":
-            break
+    if pkg_state[pkg]["only_check_SRCINFO"]:
+        user_input = "1"
+    elif pkg_state[pkg]["only_check_PKGBUILD"]:
+        user_input = "2"
+    else:
+        while True and not force_check_srcinfo:
+            log_print(
+                "Use .SRCINFO or directly parse PKGBUILD?",
+                other_state=other_state,
+            )
+            user_input = input("1 for .SRCINFO, 2 for PKGBUILD > ")
+            if user_input == "1" or user_input == "2":
+                break
     # TODO support split packages
     if force_check_srcinfo or user_input == "1":
         srcinfo_fetch_success, pkgepoch, pkgver, pkgrel = get_srcinfo_version(
@@ -2303,6 +2313,33 @@ def main():
             else:
                 pkg_state[entry["name"]]["auto_check_PKGBUILD"] = False
             if (
+                "only_check_PKGBUILD" in entry
+                and type(entry["only_check_PKGBUILD"]) is bool
+                and entry["only_check_PKGBUILD"]
+            ):
+                pkg_state[entry["name"]]["only_check_PKGBUILD"] = True
+            else:
+                pkg_state[entry["name"]]["only_check_PKGBUILD"] = False
+            if (
+                "only_check_SRCINFO" in entry
+                and type(entry["only_check_SRCINFO"]) is bool
+                and entry["only_check_SRCINFO"]
+            ):
+                pkg_state[entry["name"]]["only_check_SRCINFO"] = True
+            else:
+                pkg_state[entry["name"]]["only_check_SRCINFO"] = False
+            if (
+                pkg_state[entry["name"]]["only_check_PKGBUILD"]
+                and pkg_state[entry["name"]]["only_check_SRCINFO"]
+            ):
+                log_print(
+                    'ERROR: "only_check_SRCINFO" and "only_check_PKGBUILD" are mutually exclusive! (set for pkg {})'.format(
+                        entry["name"]
+                    ),
+                    other_state=other_state,
+                )
+                sys.exit(1)
+            if (
                 "link_cargo_registry" in entry
                 and type(entry["link_cargo_registry"]) is bool
                 and entry["link_cargo_registry"]
@@ -2562,7 +2599,8 @@ def main():
             log_print(
                 'WARNING: Failed to get sha256sum of PKGBUILD pkg "{}"!'.format(
                     pkg
-                )
+                ),
+                other_state=other_state,
             )
             pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"] = "error"
     while i < len(pkg_list):
