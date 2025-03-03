@@ -546,6 +546,9 @@ def check_pkg_build(
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
 
     if pkg_state[pkg]["auto_check_PKGBUILD"]:
+        log_print(
+            "Checking PKGBUILD (auto_check_PKGBUILD enabled for this pkg)..."
+        )
         try:
             result = subprocess.run(
                 ("/usr/bin/sha256sum", "PKGBUILD"),
@@ -558,6 +561,7 @@ def check_pkg_build(
                 result.stdout
                 == pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"]
             ):
+                log_print("PKGBUILD did not change, continuing...")
                 return "ok"
         except subprocess.CalledProcessError:
             log_print(
