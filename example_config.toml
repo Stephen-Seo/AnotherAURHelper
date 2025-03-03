@@ -63,33 +63,41 @@ name = "arcanist-git"
 [[entry]]
 name = "aurutils"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "cef-minimal"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "cpufetch-git"
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "f3"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "flamegraph-git"
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "g810-led-git"
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "glfw-git"
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "gnome-icon-theme-symbolic"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "gnome-icon-theme"
@@ -97,14 +105,17 @@ aur_deps = [
     "gnome-icon-theme-symbolic"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "gnvim"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "perl-file-rename"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "icecat"
@@ -112,23 +123,28 @@ aur_deps = [
     "perl-file-rename"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "ion-git"
 link_cargo_registry = true
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "ly"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "nouveau-fw"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "ncurses5-compat-libs"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "opencl-amd"
@@ -136,54 +152,67 @@ aur_deps = [
     "ncurses5-compat-libs"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "epson-inkjet-printer-escpr"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "epson-inkjet-printer-escpr2"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "google-chrome"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "ifuse"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "libva-vdpau-driver-chromium"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mate-screensaver-hacks"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mcrcon"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "minecraft-launcher"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-environment"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-glm"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-lua"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-pkg-config"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-cmake"
@@ -192,6 +221,7 @@ aur_deps = [
     "mingw-w64-environment"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-configure"
@@ -200,10 +230,12 @@ aur_deps = [
     "mingw-w64-environment"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-zlib"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-libpng"
@@ -214,6 +246,7 @@ aur_deps = [
     "mingw-w64-zlib"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-make"
@@ -221,6 +254,7 @@ aur_deps = [
     "mingw-w64-environment"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-libsodium"
@@ -230,6 +264,7 @@ aur_deps = [
     "mingw-w64-pkg-config"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-glfw"
@@ -239,6 +274,7 @@ aur_deps = [
     "mingw-w64-cmake"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-raylib"
@@ -249,32 +285,39 @@ aur_deps = [
     "mingw-w64-glfw"
 ]
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "mingw-w64-ldd"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "moonscript"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "nginx-mainline-mod-fancyindex"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "non-mixer-lv2-git"
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "obs-studio-git"
 aur_deps = [
     "cef-minimal"
 ]
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "obs-v4l2sink"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "pasystray-git"
@@ -282,43 +325,53 @@ aur_deps = [
     "gnome-icon-theme",
     "gnome-icon-theme-symbolic"
 ]
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "pikaur"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "qjoypad"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "qt5-wayland-bugfixport-git"
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "quaternion"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "samsung-unified-driver"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "stdman"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "sunvox"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "wlroots-git"
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "swaybg-git"
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "sway-git"
@@ -329,29 +382,36 @@ aur_deps = [
 other_deps = [
     "mesa"
 ]
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
 
 [[entry]]
 name = "texlive-tikz-uml"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "ttf-clear-sans"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "umlet"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "ungoogled-chromium"
 ccache_dir = "/home/stephen/Downloads/aur/ccache_ungoogled_chromium"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "wev"
 skip_branch_up_to_date = true
+only_check_SRCINFO = true
 
 [[entry]]
 name = "wlhangul-git"
-auto_check_PKGBUILD = true
+hash_compare_PKGBUILD = true
+only_check_PKGBUILD = true
