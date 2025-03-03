@@ -374,6 +374,7 @@ def update_pkg_dir(
     )
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
+
     # fetch all
     try:
         subprocess.run(
@@ -543,6 +544,27 @@ def check_pkg_build(
     Returns "ok", "not_ok", "abort", or "force_build"."""
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
+
+    if pkg_state[pkg]["auto_check_PKGBUILD"]:
+        try:
+            result = subprocess.run(
+                ("/usr/bin/sha256sum", "PKGBUILD"),
+                check=True,
+                cwd=pkgdir,
+                capture_output=True,
+                encoding="UTF-8",
+            )
+            if (
+                result.stdout
+                == pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"]
+            ):
+                return "ok"
+        except subprocess.CalledProcessError:
+            log_print(
+                'WARNING: Failed to get sha256sum of PKGBUILD pkg "{}"!'.format(
+                    pkg
+                )
+            )
     log_print(
         'Checking PKGBUILD for "{}"...'.format(pkg), other_state=other_state
     )
@@ -2269,6 +2291,14 @@ def main():
             else:
                 pkg_state[entry["name"]]["skip_branch_up_to_date"] = False
             if (
+                "auto_check_PKGBUILD" in entry
+                and type(entry["auto_check_PKGBUILD"]) is bool
+                and entry["auto_check_PKGBUILD"]
+            ):
+                pkg_state[entry["name"]]["auto_check_PKGBUILD"] = True
+            else:
+                pkg_state[entry["name"]]["auto_check_PKGBUILD"] = False
+            if (
                 "link_cargo_registry" in entry
                 and type(entry["link_cargo_registry"]) is bool
                 and entry["link_cargo_registry"]
@@ -2512,6 +2542,25 @@ def main():
     furthest_checked = 0
     going_back = False
     check_install_script_ran_once = False
+    # Get sha256sums of all PKGBUILDS
+    for pkg in pkg_list:
+        pkgdir = os.path.join(other_state["clones_dir"], pkg)
+        try:
+            result = subprocess.run(
+                ("/usr/bin/sha256sum", "PKGBUILD"),
+                check=True,
+                cwd=pkgdir,
+                capture_output=True,
+                encoding="UTF-8",
+            )
+            pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"] = result.stdout
+        except subprocess.CalledProcessError:
+            log_print(
+                'WARNING: Failed to get sha256sum of PKGBUILD pkg "{}"!'.format(
+                    pkg
+                )
+            )
+            pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"] = "error"
     while i < len(pkg_list):
         if i > furthest_checked:
             furthest_checked = i
