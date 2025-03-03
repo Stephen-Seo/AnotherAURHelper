@@ -545,9 +545,9 @@ def check_pkg_build(
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
 
-    if pkg_state[pkg]["auto_check_PKGBUILD"]:
+    if pkg_state[pkg]["hash_compare_PKGBUILD"]:
         log_print(
-            "Checking PKGBUILD (auto_check_PKGBUILD enabled for this pkg)...",
+            "Checking PKGBUILD (hash_compare_PKGBUILD enabled for this pkg)...",
             other_state=other_state,
         )
         try:
@@ -558,10 +558,7 @@ def check_pkg_build(
                 capture_output=True,
                 encoding="UTF-8",
             )
-            if (
-                result.stdout
-                == pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"]
-            ):
+            if result.stdout == pkg_state[pkg]["hash_compare_PKGBUILD_hash"]:
                 log_print(
                     "PKGBUILD did not change, continuing...",
                     other_state=other_state,
@@ -2305,13 +2302,13 @@ def main():
             else:
                 pkg_state[entry["name"]]["skip_branch_up_to_date"] = False
             if (
-                "auto_check_PKGBUILD" in entry
-                and type(entry["auto_check_PKGBUILD"]) is bool
-                and entry["auto_check_PKGBUILD"]
+                "hash_compare_PKGBUILD" in entry
+                and type(entry["hash_compare_PKGBUILD"]) is bool
+                and entry["hash_compare_PKGBUILD"]
             ):
-                pkg_state[entry["name"]]["auto_check_PKGBUILD"] = True
+                pkg_state[entry["name"]]["hash_compare_PKGBUILD"] = True
             else:
-                pkg_state[entry["name"]]["auto_check_PKGBUILD"] = False
+                pkg_state[entry["name"]]["hash_compare_PKGBUILD"] = False
             if (
                 "only_check_PKGBUILD" in entry
                 and type(entry["only_check_PKGBUILD"]) is bool
@@ -2594,7 +2591,7 @@ def main():
                 capture_output=True,
                 encoding="UTF-8",
             )
-            pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"] = result.stdout
+            pkg_state[pkg]["hash_compare_PKGBUILD_hash"] = result.stdout
         except subprocess.CalledProcessError:
             log_print(
                 'WARNING: Failed to get sha256sum of PKGBUILD pkg "{}"!'.format(
@@ -2602,7 +2599,7 @@ def main():
                 ),
                 other_state=other_state,
             )
-            pkg_state[pkg]["auto_check_PKGBUILD_prev_sha256"] = "error"
+            pkg_state[pkg]["hash_compare_PKGBUILD_hash"] = "error"
     while i < len(pkg_list):
         if i > furthest_checked:
             furthest_checked = i
