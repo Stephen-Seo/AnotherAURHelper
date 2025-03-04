@@ -15,10 +15,7 @@
         <link href="../css/solid.min.css" rel="stylesheet">
         <link href="../css/v4-font-face.min.css" rel="stylesheet">
         <link href="../css/base.css" rel="stylesheet">
-        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" disabled>
-        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" >
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-        <script>hljs.highlightAll();</script> 
+        <link href="../monokai.css" rel="stylesheet"> 
     </head>
 
     <body>
@@ -57,35 +54,6 @@
                                 <a rel="next" class="nav-link disabled">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
-                            </li>
-                            <li class="nav-item dropdown">
-                              <button id="theme-menu" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme" class="nav-link dropdown-toggle">
-                                <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
-                                <span class="d-lg-none ms-2">Toggle theme</span>
-                              </button>
-                              <ul class="dropdown-menu dropdown-menu-end">
-                                <li>
-                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
-                                    <i class="fa-solid fa-sun fa-fw"></i>
-                                    <span class="ms-2">Light</span>
-                                    <i class="fa-solid fa-check ms-auto d-none"></i>
-                                  </button>
-                                </li>
-                                <li>
-                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="true">
-                                    <i class="fa-solid fa-moon fa-fw"></i>
-                                    <span class="ms-2">Dark</span>
-                                    <i class="fa-solid fa-check ms-auto"></i>
-                                  </button>
-                                </li>
-                                <li>
-                                  <button class="dropdown-item d-flex align-items-center" data-bs-theme-value="auto" aria-pressed="false">
-                                    <i class="fa-solid fa-circle-half-stroke fa-fw"></i>
-                                    <span class="ms-2">Auto</span>
-                                    <i class="fa-solid fa-check ms-auto d-none"></i>
-                                  </button>
-                                </li>
-                              </ul>
                             </li>
                     </ul>
                 </div>
@@ -165,121 +133,104 @@ a chroot. If your LXC is already configured for unprivileged containers, you can
 create a privileged container by commenting out the config for an unprivileged
 container and creating a container, and uncommenting after the container has
 been created to allow future containers to be created as unprivileged.</p>
-<div class="codehilite"><pre><span></span><code># /etc/lxc/default.conf
-#lxc.idmap = u 0 100000 65536
-#lxc.idmap = g 0 100000 65536
-</code></pre></div>
+<div class="codehilite"><pre><code># /etc/lxc/default.conf
+<span class="c">#lxc.idmap = u 0 100000 65536
+#lxc.idmap = g 0 100000 65536</span></code></pre></div>
 
 <h2 id="lxc-container-setup">LXC Container Setup</h2>
 <p>Create the container like the following on your host system.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>sudo<span class="w"> </span>lxc-create<span class="w"> </span>-n<span class="w"> </span>aur_helper<span class="w"> </span>-t<span class="w"> </span>download
-Downloading<span class="w"> </span>the<span class="w"> </span>image<span class="w"> </span>index
+<div class="codehilite"><pre><code><span class="cmd">> sudo lxc-create -n aur_helper -t download</span>
+Downloading the image index
 
 ---
-DIST<span class="w">             </span>RELEASE<span class="w">     </span>ARCH<span class="w">   </span>VARIANT<span class="w">  </span>BUILD
+DIST             RELEASE     ARCH   VARIANT  BUILD
 ---
 ...
-archlinux<span class="w">        </span>current<span class="w">     </span>amd64<span class="w">  </span>default<span class="w">  </span>20250303_05:33
-archlinux<span class="w">        </span>current<span class="w">     </span>arm64<span class="w">  </span>default<span class="w">  </span>20250303_05:49
+archlinux        current     amd64  default  20250303_05:33
+archlinux        current     arm64  default  20250303_05:49
 ...
 ---
 
 Distribution:
-&gt;<span class="w"> </span>archlinux
+<span class="cmd">> archlinux</span>
 Release:
-&gt;<span class="w"> </span>current
+<span class="cmd">> current</span>
 Architecture:
-&gt;<span class="w"> </span>amd64
+<span class="cmd">> amd64</span>
 
-The<span class="w"> </span>cached<span class="w"> </span>copy<span class="w"> </span>has<span class="w"> </span>expired,<span class="w"> </span>re-downloading...
-Downloading<span class="w"> </span>the<span class="w"> </span>image<span class="w"> </span>index
-Downloading<span class="w"> </span>the<span class="w"> </span>rootfs
-Downloading<span class="w"> </span>the<span class="w"> </span>metadata
-The<span class="w"> </span>image<span class="w"> </span>cache<span class="w"> </span>is<span class="w"> </span>now<span class="w"> </span>ready
-Unpacking<span class="w"> </span>the<span class="w"> </span>rootfs
+The cached copy has expired, re-downloading...
+Downloading the image index
+Downloading the rootfs
+Downloading the metadata
+The image cache is now ready
+Unpacking the rootfs
 
 ---
-You<span class="w"> </span>just<span class="w"> </span>created<span class="w"> </span>an<span class="w"> </span>Archlinux<span class="w">  </span>x86_64<span class="w"> </span><span class="o">(</span>20250303_05:33<span class="o">)</span><span class="w"> </span>container.
+You just created an Archlinux  x86_64 (20250303_05:33) container.
 </code></pre></div>
 
 <p>Start the container.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>sudo<span class="w"> </span>lxc-start<span class="w"> </span>-n<span class="w"> </span>aur_helper<span class="w"> </span>-s<span class="w"> </span>lxc.apparmor.allow_nesting<span class="o">=</span><span class="m">1</span><span class="w"> </span>-s<span class="w"> </span>lxc.apparmor.profile<span class="o">=</span>generated
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo lxc-start -n aur_helper -s lxc.apparmor.allow_nesting=1 -s lxc.apparmor.profile=generated</span></code></pre></div>
 
 <p>Attach to a shell inside the container.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>sudo<span class="w"> </span>lxc-attach<span class="w"> </span>-n<span class="w"> </span>aur_helper
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo lxc-attach -n aur_helper</span></code></pre></div>
 
 <h3 id="getting-required-packages">Getting Required Packages</h3>
 <p>Update your <a href="https://wiki.archlinux.org/title/Mirrors">mirror-list</a> in the
 container and update.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>pacman<span class="w"> </span>-Syu
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ pacman -Syu</span></code></pre></div>
 
-<p><code>base-devel</code>, <code>devtools</code>, and <code>python-toml</code> is required.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>pacman<span class="w"> </span>-S<span class="w"> </span>base-devel<span class="w"> </span>devtools<span class="w"> </span>python-toml
-</code></pre></div>
+<p><code>base-devel</code>, <code>devtools</code>, <code>python-toml</code>, and <code>ccache</code> is required.</p>
+<div class="codehilite"><pre><code><span class="lxc">$ pacman -S base-devel devtools python-toml ccache</span></code></pre></div>
 
 <p>You may need to grab an editor like <code>vim</code>, <code>emacs</code>, or <code>nano</code>.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>pacman<span class="w"> </span>-S<span class="w"> </span>vim<span class="w"> </span>emacs<span class="w"> </span>nano
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ pacman -S vim emacs nano</span></code></pre></div>
 
 <p>If your filesystem is using <code>btrfs</code>, you will need to install <code>btrfs-progs</code>.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>pacman<span class="w"> </span>-S<span class="w"> </span>btrfs-progs
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ pacman -S btrfs-progs</span></code></pre></div>
 
 <h3 id="setting-up-ssh-for-the-container">Setting up SSH for the Container</h3>
 <p>This is pretty straightforward, but for those unfamiliar with ssh, heres a quick
 setup guide.</p>
 <p>First, install <code>openssh</code>.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>pacman<span class="w"> </span>-S<span class="w"> </span>openssh
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ pacman -S openssh</span></code></pre></div>
 
 <p>Enable and start sshd.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>--now<span class="w"> </span>sshd
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ systemctl enable --now sshd</span></code></pre></div>
 
 <p>After setting up the user in the following section, you can use ssh to log in to
 the user.</p>
 <p>You can fetch the local ip address of the running container with the following.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>sudo<span class="w"> </span>lxc-ls<span class="w"> </span>-f
-NAME<span class="w">       </span>STATE<span class="w">   </span>AUTOSTART<span class="w"> </span>GROUPS<span class="w"> </span>IPV4<span class="w">    </span>IPV6<span class="w">    </span>UNPRIVILEGED
-aur_helper<span class="w"> </span>RUNNING<span class="w"> </span><span class="m">0</span><span class="w">         </span>-<span class="w">      </span>omitted<span class="w"> </span>omitted<span class="w"> </span><span class="nb">false</span>
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo lxc-ls -f</span>
+NAME       STATE   AUTOSTART GROUPS IPV4    IPV6    UNPRIVILEGED
+aur_helper RUNNING 0         -      omitted omitted false</code></pre></div>
 
 <p>Just use the local ip address in the IPV4 column and you can ssh into your user
 like so.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>ssh<span class="w"> </span>build@10.0.3.1
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="cmd">> ssh build@10.0.3.1</span></code></pre></div>
 
 <h3 id="creating-the-build-user">Creating the build user</h3>
 <p>A <code>build</code> user is to be created with <code>sudo</code> privileges that will be used to run
 the builds.</p>
 <p>First, create the user.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>useradd<span class="w"> </span>-m<span class="w"> </span>-s<span class="w"> </span>/usr/bin/bash<span class="w"> </span>build
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ useradd -m -s /usr/bin/bash build</span></code></pre></div>
 
 <p>Then add sudo privileges for the <code>build</code> user.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nv">EDITOR</span><span class="o">=</span>nano<span class="w"> </span>visudo
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ EDITOR=nano visudo</span></code></pre></div>
 
 <p>Add the following line for sudo privileges for <code>build</code>.</p>
-<div class="codehilite"><pre><span></span><code>build ALL=(ALL:ALL) NOPASSWD: ALL
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="txt">build ALL=(ALL:ALL) NOPASSWD: ALL</span></code></pre></div>
 
 <p>If you prefer to have <code>build</code> use a password for sudo privielges, then use the
 following instead.</p>
-<div class="codehilite"><pre><span></span><code>build ALL=(ALL:ALL) ALL
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="txt">build ALL=(ALL:ALL) ALL</span></code></pre></div>
 
 <p>And set <code>build</code>'s password.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>passwd<span class="w"> </span>build
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ passwd build</span></code></pre></div>
 
 <p>Open a shell as <code>build</code> to check if it works.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>su<span class="w"> </span>-<span class="w"> </span>build
-$<span class="w"> </span>sudo<span class="w"> </span>ls<span class="w"> </span>-a
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ su - build
+$ sudo ls -a</span></code></pre></div>
 
 <p>At this point you should be able to ssh into <code>build</code>.</p>
 <h2 id="creating-the-chroot">Creating the CHROOT</h2>
@@ -288,9 +239,8 @@ $<span class="w"> </span>sudo<span class="w"> </span>ls<span class="w"> </span>-
 <p>Continue the following steps as the <code>build</code> user, not as <code>root</code>.</p>
 </div>
 <p>Use <code>/usr/bin/mkarchroot</code> to create a CHROOT at <code>/home/build/chroot/root</code>.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>mkdir<span class="w"> </span>/home/build/chroot
-$<span class="w"> </span>mkarchroot<span class="w"> </span>/home/build/chroot/root<span class="w"> </span>base<span class="w"> </span>base-devel<span class="w"> </span>cmake<span class="w"> </span>ninja
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ mkdir /home/build/chroot
+$ mkarchroot /home/build/chroot/root base base-devel cmake ninja</span></code></pre></div>
 
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -309,23 +259,27 @@ handling it in AnotherAURHelper, even if the actual chroot is inside of
 You may have to change <a href="https://wiki.archlinux.org/title/Installation_guide#Localization">locale settings as in the installation guide on the
 ArchWiki</a>.</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You are able to run commands in the CHROOT:<br />
+<div class="codehilite"><pre><code><span class="lxc">$ arch-nspawn /home/build/chroot/root pacman -S cmake</span></code></pre></div><br />
+You may do this to also set proper locale information in the CHROOT.</p>
+</div>
 <h2 id="set-up-gnupg-for-signature-verifcation-and-package-signing">Set up GnuPG for Signature Verifcation and Package Signing</h2>
 <h3 id="checking-gnupg">Checking GnuPG</h3>
 <p>Create a directory at a location of your choosing, ideally inside of
 <code>/home/build/</code>.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>mkdir<span class="w"> </span>/home/build/checking_gpg
-$<span class="w"> </span>chmod<span class="w"> </span><span class="m">700</span><span class="w"> </span>/home/build/checking_gpg
-$<span class="w"> </span><span class="nv">GNUPGHOME</span><span class="o">=</span>/home/build/checking_gpg<span class="w"> </span>gpg<span class="w"> </span>-k
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ mkdir /home/build/checking_gpg
+$ chmod 700 /home/build/checking_gpg
+$ GNUPGHOME=/home/build/checking_gpg gpg -k</span></code></pre></div>
 
 <p>Whenever a build fails due to missing gpg public keys, the key can be added to
 this directory. Usually there should be a key file inside of the AUR pkg's
 directory, but otherwise the fingerprint can be used to fetch it directly.</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># Load key from file</span>
-$<span class="w"> </span><span class="nv">GNUPGHOME</span><span class="o">=</span>/home/build/checking_gpg<span class="w"> </span>gpg<span class="w"> </span>--import<span class="w"> </span>&lt;<span class="w"> </span>the_pub_key_file.pub
-<span class="c1"># Load key via fingerprint</span>
-$<span class="w"> </span><span class="nv">GNUPGHOME</span><span class="o">=</span>/home/build/checking_gpg<span class="w"> </span>gpg<span class="w"> </span>--recv-keys<span class="w"> </span>A_DEV_KEYS_FINGERPRINT
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="c"># Load key from file</span>
+<span class="lxc">$ GNUPGHOME=/home/build/checking_gpg gpg --import < the_pub_key_file.pub</span>
+<span class="c"># Fetch key via fingerprint from a keyserver</span>
+<span class="lxc">$ GNUPGHOME=/home/build/checking_gpg gpg --recv-keys A_DEV_KEYS_FINGERPRINT</span></code></pre></div>
 
 <h3 id="signing-gnupg">Signing GnuPG</h3>
 <p>A GnuPG public/private key pair will need to be generated. Only keys with
@@ -347,92 +301,95 @@ delete all package signatures, and re-sign all packages and the package
 database. (We will cover revoking old keys when necessary, package
 signatures, and the package database later.)</p>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>It may be beneficial to use a long password for this key instead of a short
+memorable one, as a malicious PKGBUILD might attempt to access it if the
+PKGBUILD hasn't been properly vetted first.</p>
+</div>
 <p>Follow the following to generate a GnuPG key for signatures only.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>mkdir<span class="w"> </span>/home/build/signing_gpg
-$<span class="w"> </span>chmod<span class="w"> </span><span class="m">700</span><span class="w"> </span>/home/build/signing_gpg
-$<span class="w"> </span><span class="nv">GNUPGHOME</span><span class="o">=</span>/home/build/signing_gpg<span class="w"> </span>gpg<span class="w"> </span>--pinentry-mode<span class="w"> </span>loopback<span class="w"> </span>--full-gen-key
-gpg<span class="w"> </span><span class="o">(</span>GnuPG<span class="o">)</span><span class="w"> </span><span class="m">2</span>.4.7<span class="p">;</span><span class="w"> </span>Copyright<span class="w"> </span><span class="o">(</span>C<span class="o">)</span><span class="w"> </span><span class="m">2024</span><span class="w"> </span>g10<span class="w"> </span>Code<span class="w"> </span>GmbH
-This<span class="w"> </span>is<span class="w"> </span>free<span class="w"> </span>software:<span class="w"> </span>you<span class="w"> </span>are<span class="w"> </span>free<span class="w"> </span>to<span class="w"> </span>change<span class="w"> </span>and<span class="w"> </span>redistribute<span class="w"> </span>it.
-There<span class="w"> </span>is<span class="w"> </span>NO<span class="w"> </span>WARRANTY,<span class="w"> </span>to<span class="w"> </span>the<span class="w"> </span>extent<span class="w"> </span>permitted<span class="w"> </span>by<span class="w"> </span>law.
+<div class="codehilite"><pre><code><span class="lxc">$ mkdir /home/build/signing_gpg
+$ chmod 700 /home/build/signing_gpg
+$ GNUPGHOME=/home/build/signing_gpg gpg --pinentry-mode loopback --full-gen-key</span>
+gpg (GnuPG) 2.4.7; Copyright (C) 2024 g10 Code GmbH
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
 
-gpg:<span class="w"> </span>keybox<span class="w"> </span><span class="s1">&#39;/home/build/signing_gpg/pubring.kbx&#39;</span><span class="w"> </span>created
-Please<span class="w"> </span><span class="k">select</span><span class="w"> </span>what<span class="w"> </span>kind<span class="w"> </span>of<span class="w"> </span>key<span class="w"> </span>you<span class="w"> </span>want:
-<span class="w">   </span><span class="o">(</span><span class="m">1</span><span class="o">)</span><span class="w"> </span>RSA<span class="w"> </span>and<span class="w"> </span>RSA
-<span class="w">   </span><span class="o">(</span><span class="m">2</span><span class="o">)</span><span class="w"> </span>DSA<span class="w"> </span>and<span class="w"> </span>Elgamal
-<span class="w">   </span><span class="o">(</span><span class="m">3</span><span class="o">)</span><span class="w"> </span>DSA<span class="w"> </span><span class="o">(</span>sign<span class="w"> </span>only<span class="o">)</span>
-<span class="w">   </span><span class="o">(</span><span class="m">4</span><span class="o">)</span><span class="w"> </span>RSA<span class="w"> </span><span class="o">(</span>sign<span class="w"> </span>only<span class="o">)</span>
-<span class="w">   </span><span class="o">(</span><span class="m">9</span><span class="o">)</span><span class="w"> </span>ECC<span class="w"> </span><span class="o">(</span>sign<span class="w"> </span>and<span class="w"> </span>encrypt<span class="o">)</span><span class="w"> </span>*default*
-<span class="w">  </span><span class="o">(</span><span class="m">10</span><span class="o">)</span><span class="w"> </span>ECC<span class="w"> </span><span class="o">(</span>sign<span class="w"> </span>only<span class="o">)</span>
-<span class="w">  </span><span class="o">(</span><span class="m">14</span><span class="o">)</span><span class="w"> </span>Existing<span class="w"> </span>key<span class="w"> </span>from<span class="w"> </span>card
-Your<span class="w"> </span>selection?
-$<span class="w"> </span><span class="m">10</span>
-Please<span class="w"> </span><span class="k">select</span><span class="w"> </span>which<span class="w"> </span>elliptic<span class="w"> </span>curve<span class="w"> </span>you<span class="w"> </span>want:
-<span class="o">(</span><span class="m">1</span><span class="o">)</span><span class="w"> </span>Curve<span class="w"> </span><span class="m">25519</span><span class="w"> </span>*default*
-<span class="o">(</span><span class="m">4</span><span class="o">)</span><span class="w"> </span>NIST<span class="w"> </span>P-384
-<span class="o">(</span><span class="m">6</span><span class="o">)</span><span class="w"> </span>Brainpool<span class="w"> </span>P-256
-Your<span class="w"> </span>selection?
-$<span class="w"> </span><span class="m">1</span>
-Please<span class="w"> </span>specify<span class="w"> </span>how<span class="w"> </span>long<span class="w"> </span>the<span class="w"> </span>key<span class="w"> </span>should<span class="w"> </span>be<span class="w"> </span>valid.
-<span class="w">         </span><span class="nv">0</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>key<span class="w"> </span>does<span class="w"> </span>not<span class="w"> </span>expire
-<span class="w">      </span>&lt;n&gt;<span class="w">  </span><span class="o">=</span><span class="w"> </span>key<span class="w"> </span>expires<span class="w"> </span><span class="k">in</span><span class="w"> </span>n<span class="w"> </span>days
-<span class="w">      </span>&lt;n&gt;w<span class="w"> </span><span class="o">=</span><span class="w"> </span>key<span class="w"> </span>expires<span class="w"> </span><span class="k">in</span><span class="w"> </span>n<span class="w"> </span>weeks
-<span class="w">      </span>&lt;n&gt;m<span class="w"> </span><span class="o">=</span><span class="w"> </span>key<span class="w"> </span>expires<span class="w"> </span><span class="k">in</span><span class="w"> </span>n<span class="w"> </span>months
-<span class="w">      </span>&lt;n&gt;y<span class="w"> </span><span class="o">=</span><span class="w"> </span>key<span class="w"> </span>expires<span class="w"> </span><span class="k">in</span><span class="w"> </span>n<span class="w"> </span>years
-Key<span class="w"> </span>is<span class="w"> </span>valid<span class="w"> </span><span class="k">for</span>?<span class="w"> </span><span class="o">(</span><span class="m">0</span><span class="o">)</span>
-$<span class="w"> </span><span class="m">0</span>
-Key<span class="w"> </span>does<span class="w"> </span>not<span class="w"> </span>expire<span class="w"> </span>at<span class="w"> </span>all
-Is<span class="w"> </span>this<span class="w"> </span>correct?<span class="w"> </span><span class="o">(</span>y/N<span class="o">)</span>
-$<span class="w"> </span>y
+gpg: keybox '/home/build/signing_gpg/pubring.kbx' created
+Please select what kind of key you want:
+   (1) RSA and RSA
+   (2) DSA and Elgamal
+   (3) DSA (sign only)
+   (4) RSA (sign only)
+   (9) ECC (sign and encrypt) *default*
+  (10) ECC (sign only)
+  (14) Existing key from card
+Your selection?
+<span class="lxc">$ 10</span>
+Please select which elliptic curve you want:
+(1) Curve 25519 *default*
+(4) NIST P-384
+(6) Brainpool P-256
+Your selection?
+<span class="lxc">$ 1</span>
+Please specify how long the key should be valid.
+         0 = key does not expire
+      &lt;n&gt;  = key expires in n days
+      &lt;n&gt;w = key expires in n weeks
+      &lt;n&gt;m = key expires in n months
+      &lt;n&gt;y = key expires in n years
+Key is valid for? (0)
+<span class="lxc">$ 0</span>
+Key does not expire at all
+Is this correct? (y/N)
+<span class="lxc">$ y</span>
 
-GnuPG<span class="w"> </span>needs<span class="w"> </span>to<span class="w"> </span>construct<span class="w"> </span>a<span class="w"> </span>user<span class="w"> </span>ID<span class="w"> </span>to<span class="w"> </span>identify<span class="w"> </span>your<span class="w"> </span>key.
+GnuPG needs to construct a user ID to identify your key.
 
-Real<span class="w"> </span>name:
-$<span class="w"> </span>My<span class="w"> </span>Name<span class="w"> </span><span class="o">(</span>AUR<span class="w"> </span>Helper<span class="w"> </span>Signing<span class="w"> </span>Key<span class="o">)</span>
-Email<span class="w"> </span>address:
-$<span class="w"> </span>my_email@example.com
+Real name:
+<span class="lxc">$ My Name (AUR Helper Signing Key)</span>
+Email address:
+<span class="lxc">$ my_email@example.com</span>
 Comment:
-$<span class="w"> </span>Key<span class="w"> </span><span class="k">for</span><span class="w"> </span>AnotherAURHelper
-You<span class="w"> </span>selected<span class="w"> </span>this<span class="w"> </span>USER-ID:
-<span class="w">    </span><span class="s2">&quot;My Name (AUR Helper Signing Key) (Key for AnotherAURHelper) &lt;my_email@example.com&gt;&quot;</span>
+<span class="lxc">$ Key for AnotherAURHelper</span>
+You selected this USER-ID:
+    "My Name (AUR Helper Signing Key) (Key for AnotherAURHelper) &lt;my_email@example.com&gt;"
 
-Change<span class="w"> </span><span class="o">(</span>N<span class="o">)</span>ame,<span class="w"> </span><span class="o">(</span>C<span class="o">)</span>omment,<span class="w"> </span><span class="o">(</span>E<span class="o">)</span>mail<span class="w"> </span>or<span class="w"> </span><span class="o">(</span>O<span class="o">)</span>kay/<span class="o">(</span>Q<span class="o">)</span>uit?
-$<span class="w"> </span>O
-We<span class="w"> </span>need<span class="w"> </span>to<span class="w"> </span>generate<span class="w"> </span>a<span class="w"> </span>lot<span class="w"> </span>of<span class="w"> </span>random<span class="w"> </span>bytes.<span class="w"> </span>It<span class="w"> </span>is<span class="w"> </span>a<span class="w"> </span>good<span class="w"> </span>idea<span class="w"> </span>to<span class="w"> </span>perform
-some<span class="w"> </span>other<span class="w"> </span>action<span class="w"> </span><span class="o">(</span><span class="nb">type</span><span class="w"> </span>on<span class="w"> </span>the<span class="w"> </span>keyboard,<span class="w"> </span>move<span class="w"> </span>the<span class="w"> </span>mouse,<span class="w"> </span>utilize<span class="w"> </span>the
-disks<span class="o">)</span><span class="w"> </span>during<span class="w"> </span>the<span class="w"> </span>prime<span class="w"> </span>generation<span class="p">;</span><span class="w"> </span>this<span class="w"> </span>gives<span class="w"> </span>the<span class="w"> </span>random<span class="w"> </span>number
-generator<span class="w"> </span>a<span class="w"> </span>better<span class="w"> </span>chance<span class="w"> </span>to<span class="w"> </span>gain<span class="w"> </span>enough<span class="w"> </span>entropy.
-Enter<span class="w"> </span>passphrase:
-$<span class="w"> </span>***********
-gpg:<span class="w"> </span>/home/build/signing_gpg/trustdb.gpg:<span class="w"> </span>trustdb<span class="w"> </span>created
-gpg:<span class="w"> </span>directory<span class="w"> </span><span class="s1">&#39;/home/build/signing_gpg/openpgp-revocs.d&#39;</span><span class="w"> </span>created
-gpg:<span class="w"> </span>revocation<span class="w"> </span>certificate<span class="w"> </span>stored<span class="w"> </span>as<span class="w"> </span><span class="s1">&#39;/home/build/signing_gpg/openpgp-revocs.d/BFD86E817FA4B097A8636507A4FDFD431A0D481B.rev&#39;</span>
-public<span class="w"> </span>and<span class="w"> </span>secret<span class="w"> </span>key<span class="w"> </span>created<span class="w"> </span>and<span class="w"> </span>signed.
-pub<span class="w">   </span>ed25519<span class="w"> </span><span class="m">2025</span>-03-04<span class="w"> </span><span class="o">[</span>SC<span class="o">]</span>
-<span class="w">      </span>BFD86E817FA4B097A8636507A4FDFD431A0D481B
-uid<span class="w">                      </span>My<span class="w"> </span>Name<span class="w"> </span><span class="o">(</span>AUR<span class="w"> </span>Helper<span class="w"> </span>Signing<span class="w"> </span>Key<span class="o">)</span><span class="w"> </span><span class="o">(</span>Key<span class="w"> </span><span class="k">for</span><span class="w"> </span>AnotherAURHelper<span class="o">)</span><span class="w"> </span>&lt;my_email@example.com&gt;
-</code></pre></div>
+Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit?
+<span class="lxc">$ O</span>
+We need to generate a lot of random bytes. It is a good idea to perform
+some other action (type on the keyboard, move the mouse, utilize the
+disks) during the prime generation; this gives the random number
+generator a better chance to gain enough entropy.
+Enter passphrase:
+<span class="lxc">$ ***********</span>
+gpg: /home/build/signing_gpg/trustdb.gpg: trustdb created
+gpg: directory '/home/build/signing_gpg/openpgp-revocs.d' created
+gpg: revocation certificate stored as '/home/build/signing_gpg/openpgp-revocs.d/BFD86E817FA4B097A8636507A4FDFD431A0D481B.rev'
+public and secret key created and signed.
+pub   ed25519 2025-03-04 [SC]
+      BFD86E817FA4B097A8636507A4FDFD431A0D481B
+uid                      My Name (AUR Helper Signing Key) (Key for AnotherAURHelper) &lt;my_email@example.com&gt;</code></pre></div>
 
 <p>Verify you inputed the password correctly:</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nb">echo</span><span class="w"> </span>test_file<span class="w"> </span>&gt;<span class="w"> </span>test_file
-$<span class="w"> </span><span class="nv">GNUPGHOME</span><span class="o">=</span>/home/build/signing_gpg<span class="w"> </span>gpg<span class="w"> </span>--pinentry-mode<span class="w"> </span>loopback<span class="w"> </span>--detach-sign<span class="w"> </span>test_file
-Enter<span class="w"> </span>passphrase:
-$<span class="w"> </span>***********
-$<span class="w"> </span><span class="nv">GNUPGHOME</span><span class="o">=</span>/home/build/signing_gpg<span class="w"> </span>gpg<span class="w"> </span>--verify<span class="w"> </span>test_file.sig
-gpg:<span class="w"> </span>assuming<span class="w"> </span>signed<span class="w"> </span>data<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s1">&#39;test_file&#39;</span>
-gpg:<span class="w"> </span>Signature<span class="w"> </span>made<span class="w"> </span>Tue<span class="w"> </span>Mar<span class="w">  </span><span class="m">4</span><span class="w"> </span><span class="m">03</span>:59:43<span class="w"> </span><span class="m">2025</span><span class="w"> </span>UTC
-gpg:<span class="w">                </span>using<span class="w"> </span>EDDSA<span class="w"> </span>key<span class="w"> </span>BFD86E817FA4B097A8636507A4FDFD431A0D481B
-gpg:<span class="w"> </span>checking<span class="w"> </span>the<span class="w"> </span>trustdb
-gpg:<span class="w"> </span>marginals<span class="w"> </span>needed:<span class="w"> </span><span class="m">3</span><span class="w">  </span>completes<span class="w"> </span>needed:<span class="w"> </span><span class="m">1</span><span class="w">  </span>trust<span class="w"> </span>model:<span class="w"> </span>pgp
-gpg:<span class="w"> </span>depth:<span class="w"> </span><span class="m">0</span><span class="w">  </span>valid:<span class="w">   </span><span class="m">1</span><span class="w">  </span>signed:<span class="w">   </span><span class="m">0</span><span class="w">  </span>trust:<span class="w"> </span><span class="m">0</span>-,<span class="w"> </span>0q,<span class="w"> </span>0n,<span class="w"> </span>0m,<span class="w"> </span>0f,<span class="w"> </span>1u
-gpg:<span class="w"> </span>Good<span class="w"> </span>signature<span class="w"> </span>from<span class="w"> </span><span class="s2">&quot;My Name (AUR Helper Signing Key) (Key for AnotherAURHelper) &lt;my_email@example.com&gt;&quot;</span><span class="w"> </span><span class="o">[</span>ultimate<span class="o">]</span>
-<span class="c1"># cleanup</span>
-$<span class="w"> </span>rm<span class="w"> </span>test_file<span class="w"> </span>test_file.sig
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ echo test_file > test_file
+$ GNUPGHOME=/home/build/signing_gpg gpg --pinentry-mode loopback --detach-sign test_file</span>
+Enter passphrase:
+<span class="lxc">$ ***********
+$ GNUPGHOME=/home/build/signing_gpg gpg --verify test_file.sig</span>
+gpg: assuming signed data in 'test_file'
+gpg: Signature made Tue Mar  4 03:59:43 2025 UTC
+gpg:                using EDDSA key BFD86E817FA4B097A8636507A4FDFD431A0D481B
+gpg: checking the trustdb
+gpg: marginals needed: 3  completes needed: 1  trust model: pgp
+gpg: depth: 0  valid:   1  signed:   0  trust: 0-, 0q, 0n, 0m, 0f, 1u
+gpg: Good signature from "My Name (AUR Helper Signing Key) (Key for AnotherAURHelper) &lt;my_email@example.com&gt;" [ultimate]
+<span class="c"># cleanup</span>
+<span class="lxc">$ rm test_file test_file.sig</span></code></pre></div>
 
 <h2 id="set-up-output-dir-and-configuration">Set up Output Dir and Configuration</h2>
 <p>Create an output directory for your built packages.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>mkdir<span class="w"> </span>/home/build/aur_pkgs
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ mkdir /home/build/aur_pkgs</span></code></pre></div>
 
 <p>Set up a <code>/home/build/config.toml</code> file with config for AnotherAURHelper.</p>
 <div class="admonition note">
@@ -442,38 +399,37 @@ $<span class="w"> </span>rm<span class="w"> </span>test_file<span class="w"> </s
 <p>Refer to the <code>example_config.toml</code> file inside AnotherAURHelper's repo as a
 reference.<br />
 At this point, we will clone AnotherAURHelper.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/Stephen-Seo/AnotherAURHelper.git
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ git clone https://github.com/Stephen-Seo/AnotherAURHelper.git</span></code></pre></div>
 
 <p>Your config should look like the following:</p>
 <div class="codehilite"><pre><span></span><code><span class="c1">########## MANDATORY VARIABLES</span>
-<span class="n">chroot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/build/chroot&quot;</span>
+<span class="n">chroot</span> <span class="o">=</span> <span class="s2">&quot;/home/build/chroot&quot;</span>
 <span class="c1"># Location to place built packages.</span>
-<span class="n">pkg_out_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/build/aur_pkgs&quot;</span>
+<span class="n">pkg_out_dir</span> <span class="o">=</span> <span class="s2">&quot;/home/build/aur_pkgs&quot;</span>
 <span class="c1"># It is recommended to put the repo file in the &quot;pkg_out_dir&quot;.</span>
 <span class="c1"># If the tar file doesn&#39;t already exist, it will be automatically created.</span>
-<span class="n">repo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/build/aur_pkgs/MyRepo.db.tar&quot;</span>
+<span class="n">repo</span> <span class="o">=</span> <span class="s2">&quot;/home/build/aur_pkgs/MyRepo.db.tar&quot;</span>
 <span class="c1"># Location to clone packages from AUR.</span>
-<span class="n">clones_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/build/aur&quot;</span>
-<span class="n">gpg_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/build/checking_gpg&quot;</span>
-<span class="n">logs_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/build/logs&quot;</span>
-<span class="n">signing_gpg_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/build/signing_gpg&quot;</span>
-<span class="n">signing_gpg_key_fp</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;BFD86E817FA4B097A8636507A4FDFD431A0D481B&quot;</span>
-<span class="n">editor</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/usr/bin/nano&quot;</span>
+<span class="n">clones_dir</span> <span class="o">=</span> <span class="s2">&quot;/home/build/aur&quot;</span>
+<span class="n">gpg_dir</span> <span class="o">=</span> <span class="s2">&quot;/home/build/checking_gpg&quot;</span>
+<span class="n">logs_dir</span> <span class="o">=</span> <span class="s2">&quot;/home/build/logs&quot;</span>
+<span class="n">signing_gpg_dir</span> <span class="o">=</span> <span class="s2">&quot;/home/build/signing_gpg&quot;</span>
+<span class="n">signing_gpg_key_fp</span> <span class="o">=</span> <span class="s2">&quot;BFD86E817FA4B097A8636507A4FDFD431A0D481B&quot;</span>
+<span class="n">editor</span> <span class="o">=</span> <span class="s2">&quot;/usr/bin/nano&quot;</span>
 <span class="c1"># if true, all logs are prepended with current time in UTC</span>
-<span class="n">is_timed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span>
+<span class="n">is_timed</span> <span class="o">=</span> <span class="n">true</span>
 <span class="c1"># if true, all output build logs are prepended with current time in UTC</span>
-<span class="n">is_log_timed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span>
+<span class="n">is_log_timed</span> <span class="o">=</span> <span class="n">true</span>
 <span class="c1"># Default log_limit is 1 GiB</span>
-<span class="n">log_limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1073741824</span>
+<span class="n">log_limit</span> <span class="o">=</span> <span class="mi">1073741824</span>
 <span class="c1"># If true, then make the build fail if the limit is reached</span>
-<span class="n">error_on_limit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span>
+<span class="n">error_on_limit</span> <span class="o">=</span> <span class="n">true</span>
 <span class="c1"># If true, timestamps are in localtime. If false, timestamps are UTC.</span>
-<span class="n">datetime_in_local_time</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span>
+<span class="n">datetime_in_local_time</span> <span class="o">=</span> <span class="n">true</span>
 <span class="c1"># If true, all builds will be done in a tmpfs. Recommended to have a lot of RAM and/or swap.</span>
-<span class="n">tmpfs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">false</span>
+<span class="n">tmpfs</span> <span class="o">=</span> <span class="n">false</span>
 <span class="c1"># If true, only packages to be built will be printed when USR1 is signaled.</span>
-<span class="n">print_state_info_only_building_sigusr1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span>
+<span class="n">print_state_info_only_building_sigusr1</span> <span class="o">=</span> <span class="n">true</span>
 <span class="c1">########## END OF MANDATORY VARIABLES</span>
 </code></pre></div>
 
@@ -483,15 +439,13 @@ At this point, we will clone AnotherAURHelper.</p>
 to name it "MyCoolRepo", then it should be set as <code>repo = "/home/build/aur_pkgs/MyCoolRepo.db.tar"</code>.</p>
 </div>
 <p>Create some necessary directories.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>aur_pkgs
-$<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>aur
-$<span class="w"> </span>mkdir<span class="w"> </span>-p<span class="w"> </span>logs
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ mkdir -p aur_pkgs
+$ mkdir -p aur
+$ mkdir -p logs</span></code></pre></div>
 
 <p>Create some necessary symlinks based on the previously set <code>repo = ...</code>.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>MyRepo.db.tar<span class="w"> </span>/home/build/aur_pkgs/MyRepo.db
-$<span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>MyRepo.files.tar<span class="w"> </span>/home/build/aur_pkgs/MyRepo.files
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ ln -s MyRepo.db.tar /home/build/aur_pkgs/MyRepo.db
+$ ln -s MyRepo.files.tar /home/build/aur_pkgs/MyRepo.files</span></code></pre></div>
 
 <p>Here is a few packages you can add to your <code>config.toml</code>.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">[[entry]]</span>
@@ -534,21 +488,18 @@ in the <code>/etc/pacman.conf</code> to a url like
 of the AUR Helper signing key to verify the packages built and signed by
 AnotherAURHelper.</p>
 <p>Export the public key of your GnuPG signing key from your LXC instance.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span><span class="nv">GNUPGHOME</span><span class="o">=</span>/home/build/signing_gpg<span class="w"> </span>gpg<span class="w"> </span>--export<span class="w"> </span>&gt;<span class="w"> </span>signing_key.pub
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ GNUPGHOME=/home/build/signing_gpg gpg --export > signing_key.pub</span></code></pre></div>
 
 <p>Use <code>scp</code>, <code>sftp</code>, or <code>sshfs</code> to get this public key out of the container. Use
 <code>pacman-key</code> on the other ArchLinux system to import and locally sign the
 public key to trust it.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>sudo<span class="w"> </span>pacman-key<span class="w"> </span>-a<span class="w"> </span>signing_key.pub
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo pacman-key -a signing_key.pub</span></code></pre></div>
 
 <p>Check that the imported key is the only key listed when querying for it.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>sudo<span class="w"> </span>pacman-key<span class="w"> </span>--finger<span class="w"> </span><span class="s1">&#39;AUR Helper Signing Key&#39;</span>
-pub<span class="w">   </span>ed25519<span class="w"> </span><span class="m">2025</span>-03-04<span class="w"> </span><span class="o">[</span>SC<span class="o">]</span>
-<span class="w">      </span>BFD8<span class="w"> </span>6E81<span class="w"> </span>7FA4<span class="w"> </span>B097<span class="w"> </span>A863<span class="w">  </span><span class="m">6507</span><span class="w"> </span>A4FD<span class="w"> </span>FD43<span class="w"> </span>1A0D<span class="w"> </span>481B
-uid<span class="w">           </span><span class="o">[</span><span class="w"> </span>unknown<span class="o">]</span><span class="w"> </span>My<span class="w"> </span>Name<span class="w"> </span><span class="o">(</span>AUR<span class="w"> </span>Helper<span class="w"> </span>Signing<span class="w"> </span>Key<span class="o">)</span><span class="w"> </span><span class="o">(</span>Key<span class="w"> </span><span class="k">for</span><span class="w"> </span>AnotherAURHelper<span class="o">)</span><span class="w"> </span>&lt;my_email@example.com&gt;
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo pacman-key --finger 'AUR Helper Signing Key'</span>
+pub   ed25519 2025-03-04 [SC]
+      BFD8 6E81 7FA4 B097 A863  6507 A4FD FD43 1A0D 481B
+uid           [ unknown] My Name (AUR Helper Signing Key) (Key for AnotherAURHelper) &lt;my_email@example.com&gt;</code></pre></div>
 
 <p>If there is only one key listed, then you can use the <code>AUR Helper Signing Key</code>
 string to specify the correct key to sign. (Signing another key in GnuPG means
@@ -557,8 +508,7 @@ string passed to <code>pacman-key --finger ...</code> until only the key you wan
 is shown.</p>
 <p>Once you've determined the string that specifies the key you created and want
 to sign, sign it.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>sudo<span class="w"> </span>pacman-key<span class="w"> </span>--lsign-key<span class="w"> </span><span class="s1">&#39;AUR Helper Signing Key&#39;</span>
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo pacman-key --lsign-key 'AUR Helper Signing Key'</span></code></pre></div>
 
 <p>Once this is done, the ArchLinux system will now trust packages signed by your
 signing key. If you want to revoke such a key, you can delete it from your
@@ -570,13 +520,11 @@ delete keys you don't mean to delete. If such a thing happens, you may have
 to <a href="https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys">regenerate your ArchLinux installation's pacman keyring</a>.</p>
 </div>
 <p>Use the following command to delete a key from your ArchLinux system's keyring.</p>
-<div class="codehilite"><pre><span></span><code>&gt;<span class="w"> </span>sudo<span class="w"> </span>pacman-key<span class="w"> </span>-d<span class="w"> </span><span class="s1">&#39;AUR Helper Signing Key&#39;</span>
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo pacman-key -d 'AUR Helper Signing Key'</span></code></pre></div>
 
 <h2 id="testing">Testing</h2>
 <p>The build process will typically involve running the following.</p>
-<div class="codehilite"><pre><span></span><code>$<span class="w"> </span>./AnotherAURHelper/update.py<span class="w"> </span>--config<span class="w"> </span>/home/build/config.toml
-</code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ ./AnotherAURHelper/update.py --config /home/build/config.toml</span></code></pre></div>
 
 <p>Just follow the steps, and by the end of it, it should build your packages,
 sign them, and place them in the directory specified in your <code>config.toml</code>.</p>
