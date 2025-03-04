@@ -15,6 +15,11 @@ configured editor will also open the specified file once the PKGBUILD is
 approved by the user. This check is necessary because such "install scripts"
 define hooks that are run when the package is installed.
 
+# Guide to setting this up with LXC
+
+[This Github Pages website contains a detailed guide into setting up
+AnotherAURHelper with LXC.](https://stephen-seo.github.io/AnotherAURHelper/setup_lxc/)
+
 # Things to know before using the helper
 
 ## Security
@@ -80,176 +85,6 @@ This script expects ccache and sccache not to be installed in the chroot (for
 reasons as mentioned in the previous section) and ccache or sccache will be
 appended to a pkg's "other_deps" if a ccache or sccache directory is configured
 for it.
-
-# Setting up the AUR Helper
-
-The AUR Helper requires several things:
-
-  - A CHROOT to build in.
-  - A "checking GNUPG" directory that contains the GPG public keys that will be
-    checked when building the PKGBUILD.
-  - A "signing GNUPG" directory that contains the GPG private key that will sign
-    the built packages and repository database.
-  - SUDO privileges to be able to use `makechrootpkg`.
-  - `/etc/pacman.conf` must be configured to use the custom repository's
-    packages if `pacman -U <pkgs...>` will not be used.
-
-## Dependencies
-
-The `devtools` package is required.
-
-The `python-toml` package is required for the Python script to run.
-
-## Create the CHROOT
-
-Use `/usr/bin/mkarchroot` to create your CHROOT in a directory.
-
-    mkarchroot $HOME/mychroot/root base base-devel cmake ninja
-
-As noted earlier, it is better to NOT preinstall `ccache` and `sccache`.
-
-You must refer to the CHROOT as `$HOME/mychroot` if you used the same name as in
-the previous example:
-
-    mkarchroot $HOME/mychroot/root base base-devel cmake ninja
-    BUILDCHROOT=$HOME/mychoot
-
-## Set up the GNUPG dirs
-
-### Checking GNUPG
-
-Just create the directory anywhere, and store it in the `config.toml`. You must
-manually add public keys to it if a package requires checking source files with
-GNUPG.
-
-    GNUPGHOME=$HOME/myCheckingGNUPGDir gpg --recv-keys A_DEV_KEYS_FINGERPRINT
-
-Note that gpg may not automatically create the GNUPGHOME directory.
-
-### Signing GNUPG
-
-You will need to set up a GPG public/private key pair. GNUPG always respects
-the `GNUPGHOME` environment variable as the `.gnupg` dir, so set the variable
-first, create the directory, then set up your keys. The keys will be used to
-sign the packages you build and the custom repository that stores the package
-metadata.
-
-Set the `signing_gpg_key_fp` variable in the config to the output fingerprint
-from of:
-
-    GNUPGHOME=mySigningGNUPGDir gpg --fingerprint
-
-Note that you must remove the spaces between each part of the fingerprint, like
-in the example config.
-
-Keep note of the password you store for this GNUPG key, as you will enter it
-every time you use the Python script.
-
-## Set up the config dir
-
-See the `example_config.toml` for more configuration. It should be commented
-enough for figuring out how to use it.
-
-    ########## MANDATORY VARIABLES
-    # If you did `mkarchchroot /home/username/mychroot/root base ...`, then the following must be:
-    chroot = "/home/username/mychroot"
-    # Location to place built packages.
-    pkg_out_dir = "/home/username/pkgs"
-    # It is recommended to put the repo file in the "pkg_out_dir".
-    # If the tar file doesn't already exist, it will be automatically created.
-    repo = "/home/username/pkgs/custom.db.tar"
-    # Location to clone packages from AUR.
-    clones_dir = "/home/username/aur"
-    # add keys to checking GPG with:
-    # `GNUPGHOME=/home/username/checkingGPG gpg --recv-keys <fingerprint>`
-    gpg_dir = "/home/username/checkingGPG"
-    logs_dir = "/home/username/aur/logs"
-    signing_gpg_dir = "/home/username/signingGPG"
-    # You can find the signing key's fingerprint with `gpg -k`.
-    # Make sure it lists '[S]' before the fingerprint, as that means that key is a signing key.
-    # You may have to use `gpg -k --with-subkey-fingerprint` if your signing key is a subkey.
-    # Make sure the `signing_gpg_dir` is used:
-    # `GNUPGHOME=/home/username/signingGPG gpg -k`
-    signing_gpg_key_fp = "04D9E3A2880F6418EC4BA70EA0F3F8FAA2088E62"
-    # It may be more helpful to set this to nano:
-    # editor = "/usr/bin/nano"
-    editor = "/usr/bin/vim"
-    # if true, all logs are prepended with current time in UTC
-    is_timed = true
-    # if true, all output build logs are prepended with current time in UTC
-    is_log_timed = true
-    # Default log_limit is 1 GiB
-    log_limit = 1073741824
-    # If true, then make the build fail if the limit is reached
-    error_on_limit = false
-    # If true, timestamps are in localtime. If false, timestamps are UTC.
-    datetime_in_local_time = true
-    # If true, all builds will be done in a tmpfs. Recommended to have a lot of RAM and/or swap.
-    tmpfs = false
-    ########## END OF MANDATORY VARIABLES
-    ...
-    [[entry]]
-    name = "cpufetch-git"
-    skip_branch_up_to_date = false
-    aur_deps = []
-    other_deps = []
-    #ccache_dir = "/home/username/ccache_dirs/cpufetch_ccache"
-    #sccache_dir = "/home/username/sccache_dirs/cpufetch_sccache"
-    link_cargo_registry = false
-    #repo_path = "https://example.com/mypkgrepo.git"
-    #pkg_name = "cpufetch-git"
-    ...
-
-# Setting up the Repository
-
-Create a directory for where you will store built packages and the repository.
-
-The name of the repo must be similar to the `repo` specified in the config.
-
-For example, if your repo's name is `MyAURRepo`, then `repo` should be set to
-`.../MyAURRepo.db.tar`.
-
-You must also create symlinks such that `MyAURRepo.db` points to
-`MyAURRepo.db.tar` and `MyAURRepo.files` points to `MyAURRepo.files.tar`.
-
-The Python script should automatically make a relative (not absolute) symlink to
-`MyAURRepo.db.tar.sig` with the name `MyAURRepo.db.sig` after signing (which
-should happen after each package is built and signed). Note the name doesn't
-have to be `MyAURRepo`, but is based on the `repo` variable set in the config.
-
-To use the repository, you can add an entry to your `/etc/pacman.conf` with the
-following:
-
-    [MyAURRepo]
-    SigLevel = Required TrustedOnly
-    Server = file:///home/MyAURRepoDirectory
-    # Optionally set a file with `Server = ...` entries
-    # Include = /etc/pacman.d/my_repo_server_list
-
-Note that `SigLevel` is set expecting the `MyAURRepo.db` file to be signed (the
-Python script usually signs the `.db` file after a package has been successfully
-built).
-
-# Making your system trust the new Repository
-
-Export the public key from your `signingGPGDirectory`.
-
-    GNUPGHOME=mySigningGNUPGDir gpg --export MySigningKeyName > $HOME/MySigningKey.pub
-
-Use `pacman-key` to add and trust it.
-
-    sudo pacman-key -a $HOME/MySigningKey.pub
-
-First check that the name is unique:
-
-    sudo pacman-key --finger MySigningKeyName
-
-Then trust it:
-
-    sudo pacman-key --lsign-key MySigningKeyName
-
-After these steps, `pacman` should now trust the packages and repository signed
-by the GPG key you set up.
 
 # Using the AUR Helper
 
