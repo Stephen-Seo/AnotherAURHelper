@@ -1,0 +1,29 @@
+name: deploy_mkdocs_gh_pages
+on:
+  push:
+    branches:
+      - mkdocs
+permissions:
+  contents: write
+jobs:
+  deploy:
+    if: github.repository == 'Stephen-Seo/AnotherAURHelper'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get Dependencies via apt-get
+        run: |
+          sudo apt-get -y install python3 git
+      - name: Get mkdocs and Dependencies
+        run: |
+          sudo pip install mkdocs markdown pygments
+      - name: Clone and Checkout repository
+        run: |
+          git clone --depth=1 --no-single-branch https://github.com/Stephen-Seo/AnotherAURHelper.git AAH
+          cd AAH && git checkout mkdocs
+      - name: Publish with mkdocs
+        run: |
+          cd AAH
+          git config --global user.name 'Stephen Seo'
+          git config --global user.email 'seo.disparate@gmail.com'
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY
+          mkdocs gh-deploy
