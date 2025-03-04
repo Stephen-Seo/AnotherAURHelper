@@ -169,6 +169,11 @@ $ mkarchroot /home/build/chroot/root base base-devel cmake ninja</span></code></
     You may have to change [locale settings as in the installation guide on the
     ArchWiki](https://wiki.archlinux.org/title/Installation_guide#Localization).
 
+!!! note
+    You are able to run commands in the CHROOT:  
+    <div class="codehilite"><pre><code><span class="lxc">$ arch-nspawn /home/build/chroot/root pacman -S cmake</span></code></pre></div>  
+    You may do this to also set proper locale information in the CHROOT.
+
 ## Set up GnuPG for Signature Verifcation and Package Signing
 
 ### Checking GnuPG
@@ -186,7 +191,7 @@ directory, but otherwise the fingerprint can be used to fetch it directly.
 
 <div class="codehilite"><pre><code><span class="c"># Load key from file</span>
 <span class="lxc">$ GNUPGHOME=/home/build/checking_gpg gpg --import < the_pub_key_file.pub</span>
-<span class="c"># Load key via fingerprint</span>
+<span class="c"># Fetch key via fingerprint from a keyserver</span>
 <span class="lxc">$ GNUPGHOME=/home/build/checking_gpg gpg --recv-keys A_DEV_KEYS_FINGERPRINT</span></code></pre></div>
 
 ### Signing GnuPG
@@ -209,6 +214,11 @@ Also, be prepared to set up a password for this key.
     delete all package signatures, and re-sign all packages and the package
     database. (We will cover revoking old keys when necessary, package
     signatures, and the package database later.)
+
+!!! note
+    It may be beneficial to use a long password for this key instead of a short
+    memorable one, as a malicious PKGBUILD might attempt to access it if the
+    PKGBUILD hasn't been properly vetted first.
 
 Follow the following to generate a GnuPG key for signatures only.
 
