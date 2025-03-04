@@ -60,10 +60,12 @@ Create the container like the following on your host system.
 
 Start the container.
 
+    :::bash
     > sudo lxc-start -n aur_helper -s lxc.apparmor.allow_nesting=1 -s lxc.apparmor.profile=generated
 
 Attach to a shell inside the container.
 
+    :::bash
     > sudo lxc-attach -n aur_helper
 
 ### Getting Required Packages
