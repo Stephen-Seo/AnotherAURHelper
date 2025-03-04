@@ -73,9 +73,9 @@ container and update.
 
 <div class="codehilite"><pre><code><span class="lxc">$ pacman -Syu</span></code></pre></div>
 
-`base-devel`, `devtools`, and `python-toml` is required.
+`base-devel`, `devtools`, `python-toml`, and `ccache` is required.
 
-<div class="codehilite"><pre><code><span class="lxc">$ pacman -S base-devel devtools python-toml</span></code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ pacman -S base-devel devtools python-toml ccache</span></code></pre></div>
 
 You may need to grab an editor like `vim`, `emacs`, or `nano`.
 
