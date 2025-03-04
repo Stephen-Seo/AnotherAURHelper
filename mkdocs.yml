@@ -7,4 +7,5 @@ markdown_extensions:
   - admonition
   - codehilite
 nav:
+  - Home: index.md
   - Setup with LXC: setup_lxc.md
