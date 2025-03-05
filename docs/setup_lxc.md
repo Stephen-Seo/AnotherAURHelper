@@ -464,6 +464,11 @@ The build process will typically involve running the following.
 Just follow the steps, and by the end of it, it should build your packages,
 sign them, and place them in the directory specified in your `config.toml`.
 
+!!! warning
+    Be sure to `pacman -Syu` in the container before running `update.py`. You
+    should be doing this at most once per day (if you use AnotherAURHelper once
+    a day).
+
 ## Serving the Packages
 
 As mentioned earlier, the contents of your `/home/build/aur_pkgs` directory can
