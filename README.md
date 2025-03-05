@@ -148,6 +148,32 @@ timestamp.
 If `is_log_timed` is `true` in the config, then output build logs are prepended
 with a timestamp.
 
+## `only_check_SRCINFO` and `only_check_PKGBUILD`
+
+These options can be set for a package entry to always check one or the other
+(of .SRCINFO or PKGBUILD) so that the user does not have to pick.
+
+    [[entry]]
+    name = "ttf-clear-sans"
+    only_check_SRCINFO = true
+
+    [[entry]]
+    name = "cpufetch-git"
+    only_check_PKGBUILD = true
+
+## `hash_compare_PKGBUILD`
+
+This option can be set for a package entry to only check the PKGBUILD if the
+PKGBUILD changed between the start of executing `update.py` and after the aur
+package is git-pull'd from the AUR.
+
+Note that this may cause a package's PKGBUILD to not be checked if the PKGBUILD
+was fetched, then `update.py` was aborted and restarted again.
+
+    [[entry]]
+    name = "glfw-git"
+    hash_compare_PKGBUILD = true
+
 ## sccache and Rust
 
 If using `sccache` causes a build error when building a package compiling Rust,
