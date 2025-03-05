@@ -534,6 +534,12 @@ to <a href="https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_al
 
 <p>Just follow the steps, and by the end of it, it should build your packages,
 sign them, and place them in the directory specified in your <code>config.toml</code>.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Be sure to <code>pacman -Syu</code> in the container before running <code>update.py</code>. You
+should be doing this at most once per day (if you use AnotherAURHelper once
+a day).</p>
+</div>
 <h2 id="serving-the-packages">Serving the Packages</h2>
 <p>As mentioned earlier, the contents of your <code>/home/build/aur_pkgs</code> directory can
 be served with <code>nginx</code> or others. The directory can be copied from your LXC
