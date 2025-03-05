@@ -87,8 +87,8 @@ If your filesystem is using `btrfs`, you will need to install `btrfs-progs`.
 
 ### Setting up SSH for the Container
 
-This is pretty straightforward, but for those unfamiliar with ssh, heres a quick
-setup guide.
+This is pretty straightforward, but for those unfamiliar with ssh, here's a
+quick setup guide.
 
 First, install `openssh`.
 
@@ -355,6 +355,11 @@ Your config should look like the following:
 !!! note
     The `repo = ...` option determines the name of the repository. If you want
     to name it "MyCoolRepo", then it should be set as `repo = "/home/build/aur_pkgs/MyCoolRepo.db.tar"`.
+
+!!! note
+    The `signing_gpg_key_fp = ...` option ensures the correct signing key is
+    used. You can use `GNUPGHOME=/home/build/signing_gpg gpg -K` to get your
+    signing key's fingerprint to put in here.
 
 Create some necessary directories.
 
