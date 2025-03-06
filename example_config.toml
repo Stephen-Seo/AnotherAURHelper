@@ -26,6 +26,8 @@ datetime_in_local_time = true
 tmpfs = false
 # If true, only packages to be built will be printed when USR1 is signaled.
 print_state_info_only_building_sigusr1 = true
+# The path to the persistent state.
+persistent_state_db = "/home/stephen/aur_helper_state.db"
 ########## END OF MANDATORY VARIABLES
 
 # Each [[entry]] needs a "name".
