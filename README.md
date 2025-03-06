@@ -140,6 +140,10 @@ with the chroot.
     name = "ion-git"
     link_cargo_registry = true
 
+Note that packages with this option enabled may fail to build if
+`$HOME/.cargo/registry` and `$HOME/.cargo/git` does not exist for the user
+running AnotherAURHelper.
+
 ## `is_timed` and `is_log_timed`
 
 If `is_timed` is `true` in the config, then output logs are prepended with a
