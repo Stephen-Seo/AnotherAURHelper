@@ -180,8 +180,8 @@ You just created an Archlinux  x86_64 (20250303_05:33) container.
 container and update.</p>
 <div class="codehilite"><pre><code><span class="lxc">$ pacman -Syu</span></code></pre></div>
 
-<p><code>base-devel</code>, <code>devtools</code>, <code>python-toml</code>, and <code>ccache</code> is required.</p>
-<div class="codehilite"><pre><code><span class="lxc">$ pacman -S base-devel devtools python-toml ccache</span></code></pre></div>
+<p><code>base-devel</code>, <code>devtools</code>, <code>python-toml</code>, <code>ccache</code>, and <code>sqlite</code> is required.</p>
+<div class="codehilite"><pre><code><span class="lxc">$ pacman -S base-devel devtools python-toml ccache sqlite</span></code></pre></div>
 
 <p>You may need to grab an editor like <code>vim</code>, <code>emacs</code>, or <code>nano</code>.</p>
 <div class="codehilite"><pre><code><span class="lxc">$ pacman -S vim emacs nano</span></code></pre></div>
@@ -430,6 +430,8 @@ At this point, we will clone AnotherAURHelper.</p>
 <span class="n">tmpfs</span> <span class="o">=</span> <span class="n">false</span>
 <span class="c1"># If true, only packages to be built will be printed when USR1 is signaled.</span>
 <span class="n">print_state_info_only_building_sigusr1</span> <span class="o">=</span> <span class="n">true</span>
+<span class="c1"># The path to the persistent state.</span>
+<span class="n">persistent_state_db</span> <span class="o">=</span> <span class="s2">&quot;/home/build/aur_helper_state.db&quot;</span>
 <span class="c1">########## END OF MANDATORY VARIABLES</span>
 </code></pre></div>
 
@@ -443,6 +445,13 @@ to name it "MyCoolRepo", then it should be set as <code>repo = "/home/build/aur_
 <p>The <code>signing_gpg_key_fp = ...</code> option ensures the correct signing key is
 used. You can use <code>GNUPGHOME=/home/build/signing_gpg gpg -K</code> to get your
 signing key's fingerprint to put in here.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <code>persistent_state_db = ...</code> option ensures that the per-package-option
+<code>hash_compare_PKGBUILD</code> doesn't skip a PKGBUILD that hasn't been explicitly
+trusted. Also note this is a fairly new feature that may still be only in
+the dev branch of AnotherAURHelper's repository.</p>
 </div>
 <p>Create some necessary directories.</p>
 <div class="codehilite"><pre><code><span class="lxc">$ mkdir -p aur_pkgs
