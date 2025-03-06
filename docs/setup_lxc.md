@@ -73,9 +73,9 @@ container and update.
 
 <div class="codehilite"><pre><code><span class="lxc">$ pacman -Syu</span></code></pre></div>
 
-`base-devel`, `devtools`, `python-toml`, and `ccache` is required.
+`base-devel`, `devtools`, `python-toml`, `ccache`, and `sqlite` is required.
 
-<div class="codehilite"><pre><code><span class="lxc">$ pacman -S base-devel devtools python-toml ccache</span></code></pre></div>
+<div class="codehilite"><pre><code><span class="lxc">$ pacman -S base-devel devtools python-toml ccache sqlite</span></code></pre></div>
 
 You may need to grab an editor like `vim`, `emacs`, or `nano`.
 
@@ -350,6 +350,8 @@ Your config should look like the following:
     tmpfs = false
     # If true, only packages to be built will be printed when USR1 is signaled.
     print_state_info_only_building_sigusr1 = true
+    # The path to the persistent state.
+    persistent_state_db = "/home/build/aur_helper_state.db"
     ########## END OF MANDATORY VARIABLES
 
 !!! note
@@ -360,6 +362,12 @@ Your config should look like the following:
     The `signing_gpg_key_fp = ...` option ensures the correct signing key is
     used. You can use `GNUPGHOME=/home/build/signing_gpg gpg -K` to get your
     signing key's fingerprint to put in here.
+
+!!! note
+    The `persistent_state_db = ...` option ensures that the per-package-option
+    `hash_compare_PKGBUILD` doesn't skip a PKGBUILD that hasn't been explicitly
+    trusted. Also note this is a fairly new feature that may still be only in
+    the dev branch of AnotherAURHelper's repository.
 
 Create some necessary directories.
 
