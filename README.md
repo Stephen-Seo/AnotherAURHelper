@@ -167,8 +167,12 @@ This option can be set for a package entry to only check the PKGBUILD if the
 PKGBUILD changed between the start of executing `update.py` and after the aur
 package is git-pull'd from the AUR.
 
-Note that this may cause a package's PKGBUILD to not be checked if the PKGBUILD
-was fetched, then `update.py` was aborted and restarted again.
+~~Note that this may cause a package's PKGBUILD to not be checked if the
+PKGBUILD was fetched, then `update.py` was aborted and restarted again.~~
+
+The sqlite database at the path specified by `persistent_state_db = ...` keeps
+track of when a package's PKGBUILD was decided to be "ok" by the user. This
+prevents a PKGBUILD that hasn't been checked to be skipped by this option.
 
     [[entry]]
     name = "glfw-git"
