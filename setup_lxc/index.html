@@ -265,6 +265,17 @@ ArchWiki</a>.</p>
 <div class="codehilite"><pre><code><span class="lxc">$ arch-nspawn /home/build/chroot/root pacman -S cmake</span></code></pre></div><br />
 You may do this to also set proper locale information in the CHROOT.</p>
 </div>
+<p>You may want to uncomment some lines in
+<code>/home/build/chroot/root/etc/pacman.conf</code> to allow fetching <code>multilib</code> packages.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># pacman.conf</span>
+...
+<span class="o">[</span>multilib<span class="o">]</span>
+<span class="nv">Include</span><span class="w"> </span><span class="o">=</span><span class="w"> </span>/etc/pacman.d/mirrorlist
+...
+</code></pre></div>
+
+<p>When the CHROOT is used to build packages by AnotherAURHelper, it should
+automatically use the same mirrorlist as the one used by the LXC container.</p>
 <h2 id="set-up-gnupg-for-signature-verifcation-and-package-signing">Set up GnuPG for Signature Verifcation and Package Signing</h2>
 <h3 id="checking-gnupg">Checking GnuPG</h3>
 <p>Create a directory at a location of your choosing, ideally inside of
