@@ -174,6 +174,19 @@ $ mkarchroot /home/build/chroot/root base base-devel cmake ninja</span></code></
     <div class="codehilite"><pre><code><span class="lxc">$ arch-nspawn /home/build/chroot/root pacman -S cmake</span></code></pre></div>  
     You may do this to also set proper locale information in the CHROOT.
 
+You may want to uncomment some lines in
+`/home/build/chroot/root/etc/pacman.conf` to allow fetching `multilib` packages.
+
+    :::bash
+    # pacman.conf
+    ...
+    [multilib]
+    Include = /etc/pacman.d/mirrorlist
+    ...
+
+When the CHROOT is used to build packages by AnotherAURHelper, it should
+automatically use the same mirrorlist as the one used by the LXC container.
+
 ## Set up GnuPG for Signature Verifcation and Package Signing
 
 ### Checking GnuPG
