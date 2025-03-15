@@ -2685,6 +2685,14 @@ def main():
                 other_state=other_state,
             )
             pkg_state[pkg]["hash_compare_PKGBUILD_hash"] = "error"
+        except FileNotFoundError:
+            log_print(
+                'NOTICE: Failed to get sha256sum of PKGBUILD pkg "{}" (file not found)!'.format(
+                    pkg
+                ),
+                other_state=other_state,
+            )
+            pkg_state[pkg]["hash_compare_PKGBUILD_hash"] = "not_found"
     while i < len(pkg_list):
         if i > furthest_checked:
             furthest_checked = i
