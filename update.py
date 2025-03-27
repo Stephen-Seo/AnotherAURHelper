@@ -565,7 +565,10 @@ def check_pkg_build(
                 capture_output=True,
                 encoding="UTF-8",
             )
-            if result.stdout == pkg_state[pkg]["hash_compare_PKGBUILD_hash"]:
+            if (
+                result.stdout == pkg_state[pkg]["hash_compare_PKGBUILD_hash"]
+                and not pkg_state[pkg]["no_skip"]
+            ):
                 log_print(
                     "PKGBUILD did not change, continuing...",
                     other_state=other_state,
@@ -2292,6 +2295,9 @@ def main():
         for pkg in args.pkg:
             pkg_state[pkg] = {}
             pkg_state[pkg]["aur_deps"] = []
+            pkg_state[pkg]["no_skip"] = False
+            if pkg in args.no_skip:
+                pkg_state[pkg]["no_skip"] = True
         other_state["chroot"] = args.chroot
         other_state["pkg_out_dir"] = args.pkg_dir
         other_state["repo"] = args.repo
@@ -2330,6 +2336,8 @@ def main():
         d = toml.load(args.config)
         for entry in d["entry"]:
             pkg_state[entry["name"]] = {}
+            if not "no_skip" in pkg_state[entry["name"]]:
+                pkg_state[entry["name"]]["no_skip"] = False
             if "aur_deps" in entry:
                 pkg_state[entry["name"]]["aur_deps"] = entry["aur_deps"]
             else:
