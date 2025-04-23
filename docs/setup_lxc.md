@@ -225,8 +225,7 @@ Also, be prepared to set up a password for this key.
     Write the password down somewhere so you don't forget it! If you ever lose
     this password, you will need to revoke the old key, re-generate a new key,
     delete all package signatures, and re-sign all packages and the package
-    database. (We will cover revoking old keys when necessary, package
-    signatures, and the package database later.)
+    database. [You can do so by following instructions here](key_handling.md).
 
 !!! note
     It may be beneficial to use a long password for this key instead of a short
