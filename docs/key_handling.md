@@ -48,8 +48,7 @@ Then, you can remove the key with a single command.
     key database on your ArchLinux machine. [The Arch Wiki has instructions for
     this here](https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys).
 
-<div class="codehilite"><pre><code><span class="cmd">> sudo pacman-key --delete 'AUR Helper Signing Key'</span>
-</div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo pacman-key --delete 'AUR Helper Signing Key'</span></code></pre></div>
 
 ### Re-registering the New Signing Key
 
