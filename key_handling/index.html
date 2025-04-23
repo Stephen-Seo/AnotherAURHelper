@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>Repo Key Handling - Docs for AnotherAURHelper</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link href="../monokai.css" rel="stylesheet"> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">Docs for AnotherAURHelper</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../setup_lxc/" class="nav-link">Setup with LXC</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="./" class="nav-link active" aria-current="page">Repo Key Handling</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" href="../setup_lxc/" class="nav-link">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" class="nav-link disabled">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#key-handling-with-anotheraurhelper" class="nav-link">Key handling with AnotherAURHelper</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#rotating-the-signing-key" class="nav-link">Rotating the Signing Key</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="key-handling-with-anotheraurhelper">Key handling with AnotherAURHelper</h1>
+<p>AnotherAURHelper maintains an ArchLinux repository. This is achieved by the
+following things:</p>
+<ol>
+<li>Every package is signed with the <code>signing key</code>.</li>
+<li>After every time a package is built, the database file is signed by the
+<code>signing key</code>.</li>
+</ol>
+<p>Note that the database file contains information about every package in the
+repository and it must be signed after packages are added/removed, otherwise
+pacman will notice the mismatch between signature file and database file.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The database filename depends on the name of the repository. If your config
+has the line <code>repo = "/home/build/aur_pkgs/MyCoolRepo.db.tar</code>, then the
+database file is <code>MyCoolRepo.db.tar</code>, and the name of the repository is
+referred to as <code>MyCoolRepo</code>.</p>
+</div>
+<h2 id="rotating-the-signing-key">Rotating the Signing Key</h2>
+<p>If you ever need to replace the signing key, here are the steps you need to
+follow to ensure your repository is usable.</p>
+<h3 id="removing-old-signatures">Removing Old Signatures</h3>
+<p>If your config has <code>pkg_out_dir = "/home/build/aur_pkgs"</code>, then you can just
+remove every file ending with the suffix <code>.sig</code> to remove old signatures.</p>
+<div class="codehilite"><pre><span></span><code>rm /home/build/aur_pkgs/*.sig
+</code></pre></div>
+
+<h3 id="revoking-the-old-signing-key">Revoking the Old Signing Key</h3>
+<p>On every ArchLinux machine that has trusted the previous key, you need to
+delete the previous signing key as root.</p>
+<p>First, determine you have selected the correct key with <code>--finger</code>.</p>
+<div class="codehilite"><pre><code><span class="cmd">> sudo pacman-key --finger 'AUR Helper Signing Key'</span>
+pub   ed25519 2025-03-04 [SC]
+      BFD8 6E81 7FA4 B097 A863  6507 A4FD FD43 1A0D 481B
+uid           [  full  ] My Name (AUR Helper Signing Key) (Key for AnotherAURHelper) &lt;my_email@example.com&gt;</code></pre></div>
+
+<p>Then, you can remove the key with a single command.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you accidentally remove multiple keys, you may have to refresh the pacman
+key database on your ArchLinux machine. <a href="https://wiki.archlinux.org/title/Pacman/Package_signing#Resetting_all_the_keys">The Arch Wiki has instructions for
+this here</a>.</p>
+</div>
+<div class="codehilite"><pre><code><span class="cmd">> sudo pacman-key --delete 'AUR Helper Signing Key'</span>
+</div>
+
+<h3 id="re-registering-the-new-signing-key">Re-registering the New Signing Key</h3>
+<p>You can follow the steps in the <a href="https://stephen-seo.github.io/AnotherAURHelper/setup_lxc"><code>Setup with LXC</code></a>
+guide to recreate the new key and to re-register the new key with the ArchLinux
+machines.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You must remove the previous key completely, otherwise you might re-use the
+old key by mistake. The most sure way to do this is to remove the
+<code>signing_gpg</code> directory and make recreate the directory with <code>700</code>
+permissions.</p>
+</div>
+<h3 id="re-signing-the-packages">Re-signing the Packages</h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>gpg may only require you to input the password for your signing key once
+because it caches your credentials with <code>gpg-agent</code>. If you don't use gpg
+for long enough, the cache expires, and then you have to re-input your
+gpg password again when you use it.</p>
+</div>
+<p>Every package in your <code>pkg_out_dir</code> directory should be signed with the new key.</p>
+<div class="codehilite"><pre><code><span class="lxc">$ GNUPGHOME=/home/build/signing_gpg find /home/build/aur_pkgs -regex '^/home/build/aur_pkgs/.*pkg\.tar\.\(xz\|zst\)$' -execdir gpg --detach-sign '{}' ';'</span></code></pre></div>
+
+<p>The previous command should sign every package with the new key that you set up.</p>
+<h3 id="re-creating-and-signing-the-database-file">Re-creating and Signing the Database File</h3>
+<p>The easiest way to re-set-up the database file is to remove it, then add
+entries.</p>
+<div class="codehilite"><pre><code><span class="lxc">$ rm /home/build/aur_pkgs/MyRepo.db.tar</span>
+<span class="lxc">$ find /home/build/aur_pkgs -regex '^/home/build/aur_pkgs/.*pkg\.tar\.\(xz\|zst\)$' -execdir repo-add --include-sigs /home/build/aur_pkgs/MyRepo.db.tar '{}' ';'
+$ GNUPGHOME=/home/build/signing_gpg gpg --detach-sign /home/build/aur_pkgs/MyRepo.db.tar</span></code></pre></div></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
