@@ -1748,17 +1748,25 @@ def get_latest_pkg(pkg: str, cache_dir: str):
 
     globbed = glob.glob(os.path.join(cache_dir, pkg + "*"))
     if len(globbed) > 0:
-        globbed.sort()
         reprog = re.compile(
             ".*"
             + pkg
-            + "-[0-9a-zA-Z.+_:]+-[0-9a-zA-Z.+_]+-(any|x86_64).pkg.tar.(xz|gz|zst)$"
+            + "-([0-9a-zA-Z.+_:]+-[0-9a-zA-Z.+_]+)-(any|x86_64)\.pkg\.tar\.(xz|gz|zst)$"
         )
-        result = list(filter(lambda x: reprog.match(x), globbed))
-        if len(result) == 0:
+        globbed = list(filter(lambda x: reprog.match(x), globbed))
+        if len(globbed) == 0:
             return None
-        else:
-            return result[-1]
+        try:
+            globbed.sort(
+                key=lambda path: ArchPkgVersion(reprog.match(path).group(1))
+            )
+        except AttributeError:
+            log_print(
+                "Failed to get_latest_pkg: sorting error!",
+                other_state=OTHER_STATE,
+            )
+            return None
+        return globbed[-1]
     else:
         return None
 
