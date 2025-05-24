@@ -66,6 +66,12 @@ class ArchPkgVersion:
     def __init__(self, version_str: str):
         self.versions = []
         self.pkgver = 0
+        self.epoch = 0
+        epoch_re = re.compile("^([0-9]+):(.+)$")
+        epoch_match = epoch_re.match(version_str)
+        if not epoch_match is None:
+            self.epoch = int(epoch_match.group(1))
+            version_str = epoch_match.group(2)
         end_dash_idx = version_str.rfind("-")
         if end_dash_idx != -1 and end_dash_idx + 1 < len(version_str):
             try:
@@ -110,6 +116,10 @@ class ArchPkgVersion:
     def compare_with(self, other_self: "ArchPkgVersion"):
         """Returns -1 if self is less than other_self, 0 if they are equal, and
         1 if self is greater than other_self."""
+        if self.epoch < other_self.epoch:
+            return -1
+        elif self.epoch > other_self.epoch:
+            return 1
         self_count = len(self.versions)
         other_count = len(other_self.versions)
         if other_count < self_count:
