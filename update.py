@@ -1761,7 +1761,7 @@ def get_latest_pkg(pkg: str, cache_dir: str):
         reprog = re.compile(
             ".*"
             + pkg
-            + "-([0-9a-zA-Z.+_:]+-[0-9a-zA-Z.+_]+)-(any|x86_64)\.pkg\.tar\.(xz|gz|zst)$"
+            + "-([0-9a-zA-Z.+_:]+-[0-9a-zA-Z.+_]+)-(any|x86_64)\\.pkg\\.tar\\.(xz|gz|zst)$"
         )
         globbed = list(filter(lambda x: reprog.match(x), globbed))
         if len(globbed) == 0:
