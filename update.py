@@ -2235,7 +2235,9 @@ def main():
     editor = None
     parser = argparse.ArgumentParser(description="Update AUR pkgs")
     parser.add_argument(
-        "--config", help="Info and pkg(s) to update in a .toml config"
+        "--config",
+        help="Info and pkg(s) to update in a .toml config",
+        required=True,
     )
     parser.add_argument(
         "-p", "--pkg", action="append", help="Pkg(s) to update", metavar="pkg"
