@@ -790,7 +790,7 @@ def get_pkgbuild_version(
                     else other_state["chroot"]
                 ),
             ]
-            post_command_list = ["--", "-s", "-r", "-c", "--nobuild"]
+            post_command_list = ["--", "-s", "-r", "-c", "--nobuild", "-f"]
             if "link_cargo_registry" in pkg_state[pkg]:
                 command_list.insert(2, "-d")
                 command_list.insert(
@@ -1445,6 +1445,7 @@ def update_pkg_list(
             "--noconfirm",
             "--log",
             "--holdver",
+            "-f",
         ]
         failure = False
         if "ccache_dir" in pkg_state[pkg]:
@@ -2134,7 +2135,7 @@ def prepare_user_chroot(other_state: dict[str, Any]):
                 else other_state["chroot"]
             ),
         ]
-        post_command_list = ["--", "-s", "-r", "-c", "--nobuild"]
+        post_command_list = ["--", "-s", "-r", "-c", "--nobuild", "-f"]
 
         dummy_package_dir = os.path.join(
             os.environ["HOME"], ".local", "share", "dummy_pkg_TEMPORARY_DIR"
