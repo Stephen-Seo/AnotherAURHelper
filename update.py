@@ -62,41 +62,43 @@ package() {
 
 
 def on_exit_fn():
-    if (
-        OTHER_STATE is not None
-        and "cargo_config_backup_path" in OTHER_STATE
-        and os.path.isfile(OTHER_STATE["cargo_config_backup_path"])
-    ):
-        try:
+    if OTHER_STATE is not None:
+        if "cargo_config_backup_path" in OTHER_STATE and os.path.isfile(
+            OTHER_STATE["cargo_config_backup_path"]
+        ):
+            try:
+                log_print(
+                    "NOTICE: Attempting to restore $HOME/.cargo/config.toml from backup...",
+                    other_state=OTHER_STATE,
+                )
+                shutil.copyfile(
+                    OTHER_STATE["cargo_config_backup_path"],
+                    OTHER_STATE["cargo_config_path"],
+                )
+                log_print(
+                    "NOTICE: $HOME/.cargo/config.toml was restored from backup.",
+                    other_state=OTHER_STATE,
+                )
+            except OSError:
+                log_print(
+                    "ERROR: Failed to restore .cargo/config.toml from backup (restoring is a precaution; it may not be necessary to restore from file backup)",
+                    other_state=OTHER_STATE,
+                )
+        if (
+            "full_.cargo_used" in OTHER_STATE
+            and OTHER_STATE["full_.cargo_used"]
+        ):
             log_print(
-                "NOTICE: Attempting to restore $HOME/.cargo/config.toml from backup...",
+                'NOTICE: "full_link_cargo_registry" was used, $HOME/.cargo is:',
                 other_state=OTHER_STATE,
             )
-            shutil.copyfile(
-                OTHER_STATE["cargo_config_backup_path"],
-                OTHER_STATE["cargo_config_path"],
-            )
-            log_print(
-                "NOTICE: $HOME/.cargo/config.toml was restored from backup.",
-                other_state=OTHER_STATE,
-            )
-        except OSError:
-            log_print(
-                "ERROR: Failed to restore .cargo/config.toml from backup (restoring is a precaution; it may not be necessary to restore from file backup)",
-                other_state=OTHER_STATE,
-            )
-    if OTHER_STATE["full_.cargo_used"]:
-        log_print(
-            'NOTICE: "full_link_cargo_registry" was used, $HOME/.cargo is:',
-            other_state=OTHER_STATE,
-        )
-        dot_cargo_path = os.path.join(os.environ["HOME"], ".cargo")
-        try:
-            log_print(os.listdir(dot_cargo_path), other_state=OTHER_STATE)
-        except:
-            log_print(
-                f"NOTICE: An exception ocurred while attempting to list the contents of {dot_cargo_path}"
-            )
+            dot_cargo_path = os.path.join(os.environ["HOME"], ".cargo")
+            try:
+                log_print(os.listdir(dot_cargo_path), other_state=OTHER_STATE)
+            except:
+                log_print(
+                    f"NOTICE: An exception ocurred while attempting to list the contents of {dot_cargo_path}"
+                )
 
 
 class ArchPkgVersion:
