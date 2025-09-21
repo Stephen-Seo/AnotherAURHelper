@@ -68,9 +68,17 @@ def on_exit_fn():
         and os.path.isfile(OTHER_STATE["cargo_config_backup_path"])
     ):
         try:
+            log_print(
+                "NOTICE: Attempting to restore $HOME/.cargo/config.toml from backup...",
+                other_state=OTHER_STATE,
+            )
             shutil.copyfile(
                 OTHER_STATE["cargo_config_backup_path"],
                 OTHER_STATE["cargo_config_path"],
+            )
+            log_print(
+                "NOTICE: $HOME/.cargo/config.toml was restored from backup.",
+                other_state=OTHER_STATE,
             )
         except OSError:
             log_print(
