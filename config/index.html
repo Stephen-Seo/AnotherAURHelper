@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        
+        
+        <link rel="shortcut icon" href="../img/favicon.ico">
+        <title>config.toml settings - Docs for AnotherAURHelper</title>
+        <link href="../css/bootstrap.min.css" rel="stylesheet">
+        <link href="../css/fontawesome.min.css" rel="stylesheet">
+        <link href="../css/brands.min.css" rel="stylesheet">
+        <link href="../css/solid.min.css" rel="stylesheet">
+        <link href="../css/v4-font-face.min.css" rel="stylesheet">
+        <link href="../css/base.css" rel="stylesheet">
+        <link href="../monokai.css" rel="stylesheet"> 
+    </head>
+
+    <body>
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href="..">Docs for AnotherAURHelper</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbar-collapse" aria-controls="navbar-collapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="nav-item">
+                                <a href=".." class="nav-link">Home</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../setup_lxc/" class="nav-link">Setup with LXC</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="../key_handling/" class="nav-link">Repo Key Handling</a>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <script src="../js/darkmode.js"></script>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#configtoml-settings" class="nav-link">config.toml settings</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#global-settings" class="nav-link">Global Settings</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#per-package-settings" class="nav-link">Per Package Settings</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="configtoml-settings">config.toml settings</h1>
+<h2 id="global-settings">Global Settings</h2>
+<div class="codehilite"><pre><span></span><code><span class="n">chroot</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/user/Downloads/chroot&quot;</span>
+</code></pre></div>
+
+<p>Location of the chroot.</p>
+<div class="codehilite"><pre><span></span><code>tmpfs = false
+</code></pre></div>
+
+<p>If set to true, creates a new directory, sets it up with tmpfs, and copies the
+chroot to it (recommended to have +32GiB ram if this option is used).</p>
+<div class="codehilite"><pre><span></span><code>pkg_out_dir = &quot;/home/user/pkgs_out&quot;
+</code></pre></div>
+
+<p>The location to place built packages. Should be the same location for the
+repository tar file.</p>
+<div class="codehilite"><pre><span></span><code>repo = &quot;/home/user/pkgs_out/custom.db.tar&quot;
+</code></pre></div>
+
+<p>The repository (tar) file. Change "custom" to any other name to change the name
+of the repository</p>
+<div class="codehilite"><pre><span></span><code><span class="n">clones_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/user/Downloads/aur&quot;</span>
+</code></pre></div>
+
+<p>The location to place the AUR-package-git-clones. Each subdirectory in this
+directory should have a PKGBUILD and .SRCINFO as each AUR package should have
+these files.</p>
+<div class="codehilite"><pre><span></span><code>gpg_dir = &quot;/home/user/gnupg_dir&quot;
+</code></pre></div>
+
+<p>The location of the GNUPGHOME dir. This keeps track of gpg keys and is used to
+verify sources within PKGBUILDs that use a gpg key. If a build fails due to an
+"unknown gpg key", then one can do <code>GNUPGHOME=/home/user/gnupg_dir gpg
+--recv-keys FINGERPRINT</code> or <code>GNUPGHOME=/home/user/gnupg_dir gpg --import &lt;
+pub_key_file</code> to save a signer's public key.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">logs_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/user/Downloads/logs&quot;</span>
+</code></pre></div>
+
+<p>The directory to place all logs.</p>
+<div class="codehilite"><pre><span></span><code>signing_gpg_dir = &quot;/home/user/signing_gnupg_dir&quot;
+</code></pre></div>
+
+<p>The location to store the signing key used for every package and repo stored in
+"pkg_out_dir" and "repo". It is recommended to only generate a "SC" key as
+mentioned in the guide (--full-gen-key, RSA sign only or ECC sign only).</p>
+<div class="codehilite"><pre><span></span><code>signing_gpg_key_fp = &quot;THE_GPG_KEY_FINGERPRINT&quot;
+</code></pre></div>
+
+<p>A 40-character-long hexadecimal fingerprint of the signing key. This is
+typically displayed using <code>GNUPGHOME=/home/user/signing_gnupg_dir gpg -K</code>. If
+you want to use a subkey to sign the packages, then you can list/find them with
+<code>GNUPGHOME=/home/user/signing_gnupg_dir gpg -K --with-subkey-fingerprint</code>.</p>
+<div class="codehilite"><pre><span></span><code>editor = &quot;/usr/bin/vim&quot;
+</code></pre></div>
+
+<p>The text editor to use when viewing PKGBUILDs or other files. It can be set to
+<code>editor = "/usr/bin/nano"</code> or any other editor of your choosing.</p>
+<div class="codehilite"><pre><span></span><code>is_timed = true
+</code></pre></div>
+
+<p>If "is_timed" is set to "true", then all printed logs will have a timestamp.
+Note that the timestamps will be in UTC.</p>
+<div class="codehilite"><pre><span></span><code>is_log_timed = true
+</code></pre></div>
+
+<p>if "is_log_timed" is set to "true", then all saved logs will have a timestamp.
+Note that the timestamps will be in UTC.</p>
+<div class="codehilite"><pre><span></span><code>log_limit = 1073741824
+</code></pre></div>
+
+<p>The log-file-size limit in bytes. The default is 1GiB.</p>
+<div class="codehilite"><pre><span></span><code>error_on_limit = true
+</code></pre></div>
+
+<p>If "error_on_limit" is "true", then the currently built package will be
+aborted if its log file exceeds the size limit set by "log_limit".</p>
+<div class="codehilite"><pre><span></span><code>datetime_in_local_time = true
+</code></pre></div>
+
+<p>If true, timestamps will be in localtime instead of UTC</p>
+<div class="codehilite"><pre><span></span><code>print_state_info_only_building_sigusr1 = true
+</code></pre></div>
+
+<p>If this option is set to "true", then only the packages that are to be built
+will be logged when SIGUSR1 is received during building. Otherwise, all packages
+listed in the config.toml will be printed with their status. Note that SIGUSR1
+does not stop the build.</p>
+<div class="codehilite"><pre><span></span><code>persistent_state_db = &quot;/home/user/aur_helper_state.db&quot;
+</code></pre></div>
+
+<p>The path for AnotherAURHelper to create and use a sqlite database to help keep
+track of things. The current use of it is to check if a PKGBUILD of a package
+was previously determined to be "OK" and will therefore skip checking the
+PKGBUILD depending on the per-package options.</p>
+<div class="codehilite"><pre><span></span><code>temporary_files_dir = &quot;/home/user/aur_helper_temp_files&quot;
+</code></pre></div>
+
+<p>The path for AnotherAURHelper to place temporary files. It is currently used to
+keep a backup of "$HOME/.cargo/config.toml" which will write back to its
+original location on program exit to ensure the config file remains exactly as
+it was before any build starts.</p>
+<h2 id="per-package-settings">Per Package Settings</h2>
+<h3 id="per-package-example">Per Package Example</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">[[entry]]</span>
+<span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;helix-git-package&quot;</span>
+<span class="na">pkg_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;helix-git&quot;</span>
+<span class="na">repo_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;https://aur.archlinux.org/helix-git&quot;</span>
+<span class="na">skip_branch_up_to_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
+<span class="na">only_check_SRCINFO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
+<span class="na">only_check_PKGBUILD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="na">hash_compare_PKGBUILD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="na">ccache_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/user/ccache_dirs/helix_git_does_not_use_ccache&quot;</span>
+<span class="na">sccache_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/user/sccache_dirs/helix_may_use_sccache&quot;</span>
+<span class="na">sccache_cache_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;5G&quot;</span>
+<span class="na">sccache_rust_only</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="na">link_cargo_registry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
+<span class="na">full_link_cargo_registry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
+<span class="na">aur_deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span>
+<span class="w">    </span><span class="na">&quot;wlroots-git&quot;,</span>
+<span class="w">    </span><span class="na">&quot;sway-git&quot;</span>
+<span class="na">]</span>
+<span class="na">other_deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span>
+<span class="w">    </span><span class="na">&quot;xorg-xwayland&quot;,</span>
+<span class="w">    </span><span class="na">&quot;stdman&quot;</span>
+<span class="na">]</span>
+</code></pre></div>
+
+<h3 id="per-package-options-explanation">Per Package Options Explanation</h3>
+<div class="codehilite"><pre><span></span><code>name = &quot;helix-git&quot;
+</code></pre></div>
+
+<p>The "name" of the package. This is the name of the git clone directory of a
+package. This is also the name used when cloning from https://aur.archlinux.org
+.</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">pkg_name</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&quot;helix-git-package&quot;</span>
+</code></pre></div>
+
+<p>The "informal" name of the package. Only used for logging about the package.
+Defaults to "name" if unset.</p>
+<div class="codehilite"><pre><span></span><code>repo_path = &quot;https://aur.archlinux.org/helix-git&quot;
+</code></pre></div>
+
+<p>If unset, defaults to "https://aur.archlinux.org/{name}.git". Otherwise, it
+should be a path to a git repository containing a PKGBUILD file and .SRCINFO
+file.</p>
+<div class="codehilite"><pre><span></span><code>skip_branch_up_to_date = false
+</code></pre></div>
+
+<p>Skips prompt for a package if it is already "up-to-date". A package is
+"up-to-date" if the repository does not have a new commit.</p>
+<div class="codehilite"><pre><span></span><code>only_check_SRCINFO = false
+</code></pre></div>
+
+<p>Skips prompt for checking between SRCINFO or PKGBUILD and checks SRCINFO
+directly.</p>
+<div class="codehilite"><pre><span></span><code>only_check_PKGBUILD = true
+</code></pre></div>
+
+<p>Skips prompt for checking between SRCINFO or PKGBUILD and checks PKGBUILD
+directory.</p>
+<div class="codehilite"><pre><span></span><code>hash_compare_PKGBUILD = true
+</code></pre></div>
+
+<p>Skips checking PKGBUILD prompt with "editor" if the hash of the PKGBUILD on
+start of AnotherAURHelper does not match the hash of the PKGBUILD after <code>git
+pull</code>.</p>
+<div class="codehilite"><pre><span></span><code>ccache_dir = &quot;/home/user/ccache_dirs/helix_git_does_not_use_ccache&quot;
+</code></pre></div>
+
+<p>If "ccache_dir" is specified, then ccache will be set up for the build and it
+will be cached in the specified directory.</p>
+<div class="codehilite"><pre><span></span><code>sccache_dir = &quot;/home/user/sccache_dirs/helix_may_use_sccache&quot;
+</code></pre></div>
+
+<p>If "sccache_dir" is specified, then sccache will be set up for the build and it
+will be cached in the specified directory.</p>
+<div class="codehilite"><pre><span></span><code>sccache_cache_size = &quot;5G&quot;
+</code></pre></div>
+
+<p>Forces the sccache cache size to the given value. (Refer to sccache
+documentation on environment variable SCCACHE_CACHE_SIZE for what values are
+acceptable.)</p>
+<div class="codehilite"><pre><span></span><code>sccache_rust_only = true
+</code></pre></div>
+
+<p>Forces the use of sccache to be used only by the Rust compiler.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">link_cargo_registry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">false</span>
+</code></pre></div>
+
+<p>Binds "$HOME/.cargo/git" to "/build/.cargo/git" and "$HOME/.cargo/registry" to
+"/build/.cargo/registry" in the chroot. This enables sharing of the host's cache
+to the chroot's cache for Rust packages.</p>
+<div class="codehilite"><pre><span></span><code><span class="n">full_link_cargo_registry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">true</span>
+</code></pre></div>
+
+<p>Binds "$HOME/.cargo" to "/build/.cargo" in the chroot. This enables sharing of
+the host's cache to the chroot's cache for Rust packages. Note that if this is
+used, then "$HOME/.cargo/config.toml" will be copied to a temporary directory,
+and when AnotherAURHelper exits, the config.toml in the temporary directory is
+copied back to prevent it being overwritten somehow during package building.</p>
+<div class="codehilite"><pre><span></span><code>aur_deps = [
+    &quot;wlroots-git&quot;,
+    &quot;sway-git&quot;
+]
+</code></pre></div>
+
+<p>Uses the "pkg_out_dir" and "repo" to install previously built AUR packages
+specified by "aur_deps". It is recommended to move the named dependencies
+before this package in the config.toml so it always loads the latest built
+version of it as AnotherAURHelper builds all packages in sequential order in
+the config.toml.</p>
+<div class="codehilite"><pre><span></span><code>other_deps = [
+    &quot;xorg-xwayland&quot;,
+    &quot;stdman&quot;
+]
+</code></pre></div>
+
+<p>Like "aur_deps", but for packages already available in the package
+repositories.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="../js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = "..",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="../js/base.js"></script>
+        <script src="../search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
