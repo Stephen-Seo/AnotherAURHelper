@@ -5,3 +5,5 @@
 [Getting Started With LXC.](setup_lxc.md)
 
 [Key Handling](key_handling.md)
+
+[Config Documentation](config.md)
