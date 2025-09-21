@@ -196,6 +196,9 @@ to the chroot's cache for Rust packages.
 
     full_link_cargo_registry = true
 
+!!! note
+    Currently, this option is only in the `dev` branch as of 2025-09-21.
+
 Binds "$HOME/.cargo" to "/build/.cargo" in the chroot. This enables sharing of
 the host's cache to the chroot's cache for Rust packages. Note that if this is
 used, then "$HOME/.cargo/config.toml" will be copied to a temporary directory,
