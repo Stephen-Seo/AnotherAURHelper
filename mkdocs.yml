@@ -11,5 +11,6 @@ nav:
   - Home: index.md
   - Setup with LXC: setup_lxc.md
   - Repo Key Handling: key_handling.md
+  - Options Documentation: config.md
 extra_css:
   - monokai.css
