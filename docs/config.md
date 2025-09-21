@@ -165,8 +165,8 @@ directory.
     hash_compare_PKGBUILD = true
 
 Skips checking PKGBUILD prompt with "editor" if the hash of the PKGBUILD on
-start of AnotherAURHelper does not match the hash of the PKGBUILD after `git
-pull`.
+start of AnotherAURHelper does not match the hash of the PKGBUILD after
+`git pull`.
 
     ccache_dir = "/home/user/ccache_dirs/helix_git_does_not_use_ccache"
 
