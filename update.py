@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import atexit
 import os
 import stat
 import sys
@@ -58,6 +59,46 @@ package() {
     echo package
 }
 """
+
+
+def on_exit_fn():
+    if OTHER_STATE is not None:
+        if "cargo_config_backup_path" in OTHER_STATE and os.path.isfile(
+            OTHER_STATE["cargo_config_backup_path"]
+        ):
+            try:
+                log_print(
+                    "NOTICE: Attempting to restore $HOME/.cargo/config.toml from backup...",
+                    other_state=OTHER_STATE,
+                )
+                shutil.copyfile(
+                    OTHER_STATE["cargo_config_backup_path"],
+                    OTHER_STATE["cargo_config_path"],
+                )
+                log_print(
+                    "NOTICE: $HOME/.cargo/config.toml was restored from backup.",
+                    other_state=OTHER_STATE,
+                )
+            except OSError:
+                log_print(
+                    "ERROR: Failed to restore .cargo/config.toml from backup (restoring is a precaution; it may not be necessary to restore from file backup)",
+                    other_state=OTHER_STATE,
+                )
+        if (
+            "full_.cargo_used" in OTHER_STATE
+            and OTHER_STATE["full_.cargo_used"]
+        ):
+            log_print(
+                'NOTICE: "full_link_cargo_registry" was used, $HOME/.cargo is:',
+                other_state=OTHER_STATE,
+            )
+            dot_cargo_path = os.path.join(os.environ["HOME"], ".cargo")
+            try:
+                log_print(os.listdir(dot_cargo_path), other_state=OTHER_STATE)
+            except:
+                log_print(
+                    f"NOTICE: An exception ocurred while attempting to list the contents of {dot_cargo_path}"
+                )
 
 
 class ArchPkgVersion:
@@ -791,7 +832,13 @@ def get_pkgbuild_version(
                 ),
             ]
             post_command_list = ["--", "-s", "-r", "-c", "--nobuild", "-f"]
-            if "link_cargo_registry" in pkg_state[pkg]:
+            if "full_link_cargo_registry" in pkg_state[pkg]:
+                command_list.insert(2, "-d")
+                command_list.insert(
+                    3,
+                    f'{os.environ["HOME"]}/.cargo:/build/.cargo',
+                )
+            elif "link_cargo_registry" in pkg_state[pkg]:
                 command_list.insert(2, "-d")
                 command_list.insert(
                     3,
@@ -1516,7 +1563,13 @@ def update_pkg_list(
             )
             post_command_list.insert(3, "RUSTC_WRAPPER=/usr/bin/sccache")
         nowstring = get_datetime_timezone_now(other_state)
-        if "link_cargo_registry" in pkg_state[pkg]:
+        if "full_link_cargo_registry" in pkg_state[pkg]:
+            command_list.insert(2, "-d")
+            command_list.insert(
+                3,
+                f'{os.environ["HOME"]}/.cargo:/build/.cargo',
+            )
+        elif "link_cargo_registry" in pkg_state[pkg]:
             command_list.insert(2, "-d")
             command_list.insert(
                 3,
@@ -2231,6 +2284,8 @@ def save_persistent_state_from_other(other_state: dict[str, Any]):
 
 def main():
     """The main function."""
+    atexit.register(on_exit_fn)
+
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGUSR1, signal_handler)
     editor = None
@@ -2312,6 +2367,7 @@ def main():
     other_state["print_state_info_only_building_sigusr1"] = True
     other_state["state_db_path"] = "aur_helper_state.db"
     other_state["state_db_state"] = {}
+    other_state["full_.cargo_used"] = False
     if args.pkg and not args.config:
         for pkg in args.pkg:
             pkg_state[pkg] = {}
@@ -2444,11 +2500,35 @@ def main():
                 and entry["link_cargo_registry"]
             ):
                 pkg_state[entry["name"]]["link_cargo_registry"] = True
+            elif (
+                "full_link_cargo_registry" in entry
+                and type(entry["full_link_cargo_registry"]) is bool
+                and entry["full_link_cargo_registry"]
+            ):
+                pkg_state[entry["name"]]["full_link_cargo_registry"] = True
+                other_state["full_.cargo_used"] = True
         if "persistent_state_db" in d and type(d["persistent_state_db"]) is str:
             other_state["state_db_path"] = d["persistent_state_db"]
         else:
             log_print(
                 "ERROR: persistent_state_db in config is invalid!",
+                other_state=other_state,
+            )
+            sys.exit(1)
+        if "temporary_files_dir" in d and type(d["temporary_files_dir"]) is str:
+            other_state["temporary_files_dir"] = d["temporary_files_dir"]
+            try:
+                os.mkdir(d["temporary_files_dir"], mode=0o700)
+            except FileExistsError:
+                pass
+            except FileNotFoundError:
+                log_print(
+                    f'ERROR: Failed to create "{d["temporary_files_dir"]}" directory (parent directory missing?)!',
+                    other_state=other_state,
+                )
+        else:
+            log_print(
+                'ERROR: Expected option "temporary_files_dir" in config!',
                 other_state=other_state,
             )
             sys.exit(1)
@@ -2558,6 +2638,18 @@ def main():
             other_state=other_state,
         )
         sys.exit(1)
+
+    other_state["cargo_config_path"] = os.path.join(
+        os.environ["HOME"], ".cargo", "config.toml"
+    )
+    other_state["cargo_config_backup_path"] = os.path.join(
+        other_state["temporary_files_dir"], "cargo_config.toml"
+    )
+    if os.path.isfile(other_state["cargo_config_path"]):
+        shutil.copyfile(
+            other_state["cargo_config_path"],
+            other_state["cargo_config_backup_path"],
+        )
 
     other_state["state_db_state"] = load_peristent_state(
         other_state["state_db_path"]

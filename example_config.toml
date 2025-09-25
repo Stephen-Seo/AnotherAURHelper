@@ -28,6 +28,8 @@ tmpfs = false
 print_state_info_only_building_sigusr1 = true
 # The path to the persistent state.
 persistent_state_db = "/home/stephen/aur_helper_state.db"
+# A directory to hold temporary files
+temporary_files_dir = "/home/stephen/temp/run"
 ########## END OF MANDATORY VARIABLES
 
 # Each [[entry]] needs a "name".
