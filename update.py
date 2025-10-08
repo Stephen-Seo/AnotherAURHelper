@@ -441,60 +441,49 @@ def update_pkg_dir(
         )
         return False, False
 
-    # get remotes
-    remotes = []
+    # get current branch
+    current_branch = None
     try:
         result = subprocess.run(
-            ("/usr/bin/env", "git", "remote"),
+            ("/usr/bin/env", "git", "branch", "--show-current"),
             check=True,
             cwd=pkgdir,
             capture_output=True,
             encoding="UTF-8",
         )
-        remotes = result.stdout.split(sep="\n")
+        current_branch = result.stdout.strip()
     except subprocess.CalledProcessError:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting remotes).'.format(
-                pkg
-            ),
+            f'ERROR: Failed to get current branch of "{pkg}" (getting branch)',
             other_state=other_state,
         )
-        return False, False
-    remotes = list(filter(lambda s: len(s) > 0, remotes))
-    if len(remotes) == 0:
+    if current_branch is None or not isinstance(current_branch, str):
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting remotes).'.format(
-                pkg
-            ),
+            f'ERROR: Failed to get current branch of "{pkg}" (validation)',
             other_state=other_state,
         )
         return False, False
 
-    # get remote that current branch is tracking
-    selected_remote = None
+    # get hash of current commit
+    current_commit_hash = None
     try:
         result = subprocess.run(
-            ("/usr/bin/env", "git", "status", "-sb", "--porcelain"),
+            ("/usr/bin/env", "git", "log", "-1", "--format=format:%H"),
             check=True,
             cwd=pkgdir,
             capture_output=True,
             encoding="UTF-8",
         )
-        result_lines = result.stdout.split(sep="\n")
-        for matching_line in filter(lambda s: s.startswith("##"), result_lines):
-            for remote in map(lambda r: r.strip(), remotes):
-                if matching_line.find(remote) != -1:
-                    selected_remote = remote
-                    break
+        current_commit_hash = result.stdout.strip()
     except subprocess.CalledProcessError:
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).',
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current commit\'s hash).',
             other_state=other_state,
         )
         return False, False
-    if selected_remote is None or not isinstance(selected_remote, str):
+    if current_commit_hash is None or not isinstance(current_commit_hash, str):
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).',
+            f'ERROR: Failed to update pkg dir of "{pkg}" (validating current commit\'s hash).',
             other_state=other_state,
         )
         return False, False
@@ -503,7 +492,14 @@ def update_pkg_dir(
     current_branch_hash = None
     try:
         result = subprocess.run(
-            ("/usr/bin/env", "git", "log", "-1", "--format=format:%H"),
+            (
+                "/usr/bin/env",
+                "git",
+                "log",
+                "-1",
+                "--format=format:%H",
+                current_branch,
+            ),
             check=True,
             cwd=pkgdir,
             capture_output=True,
@@ -518,44 +514,13 @@ def update_pkg_dir(
         return False, False
     if current_branch_hash is None or not isinstance(current_branch_hash, str):
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current branch\'s hash).',
-            other_state=other_state,
-        )
-        return False, False
-
-    # get hash of remote branch
-    remote_branch_hash = None
-    try:
-        result = subprocess.run(
-            (
-                "/usr/bin/env",
-                "git",
-                "log",
-                "-1",
-                "--format=format:%H",
-                selected_remote,
-            ),
-            check=True,
-            cwd=pkgdir,
-            capture_output=True,
-            encoding="UTF-8",
-        )
-        remote_branch_hash = result.stdout.strip()
-    except subprocess.CalledProcessError:
-        log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).',
-            other_state=other_state,
-        )
-        return False, False
-    if remote_branch_hash is None or not isinstance(remote_branch_hash, str):
-        log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).',
+            f'ERROR: Failed to update pkg dir of "{pkg}" (validating current branch\'s hash).',
             other_state=other_state,
         )
         return False, False
 
     # update current branch if not same commit
-    if current_branch_hash != remote_branch_hash:
+    if current_commit_hash != current_branch_hash:
         try:
             subprocess.run(
                 ("/usr/bin/env", "git", "pull"), check=True, cwd=pkgdir
