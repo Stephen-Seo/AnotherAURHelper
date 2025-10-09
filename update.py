@@ -452,6 +452,7 @@ def update_pkg_dir(
 
     # get remote that branch is tracking
     current_remote = None
+    current_remote_branch = None
     try:
         result = subprocess.run(
             ("/usr/bin/env", "git", "status", "-sb", "--porcelain"),
@@ -460,20 +461,31 @@ def update_pkg_dir(
             capture_output=True,
             encoding="UTF-8",
         )
-        get_remote_re = re.compile(f'^## {current_branch}...([^/]+)/{current_branch}.*$')
+        get_remote_re = re.compile(
+            f"^## {current_branch}...([^/]+)/([^\s]+).*$"
+        )
         for line in result.stdout.strip().splitlines():
             match = get_remote_re.fullmatch(line)
             if match is not None:
                 current_remote = match.group(1)
+                current_remote_branch = match.group(2)
                 break
     except subprocess.CalledProcessError:
         log_print(
             f'ERROR: Failed to get current remote of "{pkg}" (getting remote)',
             other_state=other_state,
         )
-    if current_remote is None or not isinstance(current_branch, str):
+    if current_remote is None or not isinstance(current_remote, str):
         log_print(
             f'ERROR: Failed to get current remote of "{pkg}" (validation)',
+            other_state=other_state,
+        )
+        return False, False
+    elif current_remote_branch is None or not isinstance(
+        current_remote_branch, str
+    ):
+        log_print(
+            f'ERROR: Failed to get current remote branch of "{pkg}" (validation)',
             other_state=other_state,
         )
         return False, False
@@ -526,7 +538,7 @@ def update_pkg_dir(
                 "log",
                 "-1",
                 "--format=format:%H",
-                current_branch,
+                f"{current_remote}/{current_remote_branch}",
             ),
             check=True,
             cwd=pkgdir,
