@@ -468,7 +468,7 @@ def update_pkg_dir(
             encoding="UTF-8",
         )
         get_remote_re = re.compile(
-            f"^## {current_branch}\\.\\.\\.([^/]+)/([^\\s]+).*$"
+            f"^## {current_branch}\\.\\.\\.([^/]+)/([^\\s]+).*?$"
         )
         for line in result.stdout.strip().splitlines():
             match = get_remote_re.fullmatch(line)
