@@ -427,20 +427,6 @@ def update_pkg_dir(
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
 
-    # fetch all
-    try:
-        subprocess.run(
-            ("/usr/bin/env", "git", "fetch", "-p", "--all"),
-            check=True,
-            cwd=pkgdir,
-        )
-    except subprocess.CalledProcessError:
-        log_print(
-            'ERROR: Failed to update pkg dir of "{}" (fetching).'.format(pkg),
-            other_state=other_state,
-        )
-        return False, False
-
     # get current branch
     current_branch = None
     try:
@@ -460,6 +446,48 @@ def update_pkg_dir(
     if current_branch is None or not isinstance(current_branch, str):
         log_print(
             f'ERROR: Failed to get current branch of "{pkg}" (validation)',
+            other_state=other_state,
+        )
+        return False, False
+
+    # get remote that branch is tracking
+    current_remote = None
+    try:
+        result = subprocess.run(
+            ("/usr/bin/env", "git", "status", "-sb", "--porcelain"),
+            check=True,
+            cwd=pkgdir,
+            capture_output=True,
+            encoding="UTF-8",
+        )
+        get_remote_re = re.compile(f'^## {current_branch}...([^/]+)/{current_branch}.*$')
+        for line in result.stdout.strip().splitlines():
+            match = get_remote_re.fullmatch(line)
+            if match is not None:
+                current_remote = match.group(1)
+                break
+    except subprocess.CalledProcessError:
+        log_print(
+            f'ERROR: Failed to get current remote of "{pkg}" (getting remote)',
+            other_state=other_state,
+        )
+    if current_remote is None or not isinstance(current_branch, str):
+        log_print(
+            f'ERROR: Failed to get current remote of "{pkg}" (validation)',
+            other_state=other_state,
+        )
+        return False, False
+
+    # fetch all
+    try:
+        subprocess.run(
+            ("/usr/bin/env", "git", "fetch", "-p", current_remote),
+            check=True,
+            cwd=pkgdir,
+        )
+    except subprocess.CalledProcessError:
+        log_print(
+            'ERROR: Failed to update pkg dir of "{}" (fetching).'.format(pkg),
             other_state=other_state,
         )
         return False, False
