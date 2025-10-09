@@ -143,9 +143,9 @@ Defaults to "name" if unset.
 
     repo_path = "https://aur.archlinux.org/helix-git"
 
-If unset, defaults to "https://aur.archlinux.org/{name}.git". Otherwise, it
-should be a path to a git repository containing a PKGBUILD file and .SRCINFO
-file.
+If set to `NO_REPO`, the software will not attempt to clone from
+aur.archlinux.org. If unset, the default path
+`https://aur.archlinux.org/{pkgname}.git` will be used.
 
     skip_branch_up_to_date = false
 
