@@ -29,6 +29,13 @@ AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
 GLOBAL_LOG_FILE = "log.txt"
 DEFAULT_EDITOR = "/usr/bin/nano"
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
+EPOCH_RE = re.compile("^([0-9]+):(.+)$")
+GET_PKGVER_RE = re.compile("^\\s*pkgver\\s*=\\s*([a-zA-Z0-9._+-]+)\\s*$")
+GET_PKGREL_RE = re.compile("^\\s*pkgrel\\s*=\\s*([0-9.]+)\\s*$")
+GET_PKGEPOCH_RE = re.compile("^\\s*epoch\\s*=\\s*([0-9]+)\\s*$")
+OUTPUT_PKGVER_RE = re.compile("^pkgver=([a-zA-Z0-9._+-]+)\\s*$", flags=re.M)
+OUTPUT_PKGREL_RE = re.compile("^pkgrel=([0-9.]+)\\s*$", flags=re.M)
+OUTPUT_PKGEPOCH_RE = re.compile("^epoch=([0-9]+)\\s*$", flags=re.M)
 STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 STRFTIME_LOCAL_FORMAT = "%Y-%m-%dT%H:%M:%S"
 PKG_STATE = None
@@ -108,8 +115,7 @@ class ArchPkgVersion:
         self.versions = []
         self.pkgver = 0
         self.epoch = 0
-        epoch_re = re.compile("^([0-9]+):(.+)$")
-        epoch_match = epoch_re.match(version_str)
+        epoch_match = EPOCH_RE.match(version_str)
         if not epoch_match is None:
             self.epoch = int(epoch_match.group(1))
             version_str = epoch_match.group(2)
@@ -748,9 +754,6 @@ def get_srcinfo_version(pkg: str, other_state: dict[str, Any]):
             other_state=other_state,
         )
         return False, None, None, None
-    pkgver_reprog = re.compile("^\\s*pkgver\\s*=\\s*([a-zA-Z0-9._+-]+)\\s*$")
-    pkgrel_reprog = re.compile("^\\s*pkgrel\\s*=\\s*([0-9.]+)\\s*$")
-    pkgepoch_reprog = re.compile("^\\s*epoch\\s*=\\s*([0-9]+)\\s*$")
     pkgver = None
     pkgrel = None
     pkgepoch = None
@@ -760,9 +763,9 @@ def get_srcinfo_version(pkg: str, other_state: dict[str, Any]):
     ) as fo:
         line = fo.readline()
         while len(line) > 0:
-            pkgver_result = pkgver_reprog.match(line)
-            pkgrel_result = pkgrel_reprog.match(line)
-            pkgepoch_result = pkgepoch_reprog.match(line)
+            pkgver_result = GET_PKGVER_RE.match(line)
+            pkgrel_result = GET_PKGREL_RE.match(line)
+            pkgepoch_result = GET_PKGEPOCH_RE.match(line)
             if pkgver_result:
                 pkgver = pkgver_result.group(1)
             elif pkgrel_result:
@@ -977,19 +980,13 @@ echo "epoch=$epoch"
             )
             return False, None, None, None
 
-        output_ver_re = re.compile(
-            "^pkgver=([a-zA-Z0-9._+-]+)\\s*$", flags=re.M
-        )
-        output_rel_re = re.compile("^pkgrel=([0-9.]+)\\s*$", flags=re.M)
-        output_epoch_re = re.compile("^epoch=([0-9]+)\\s*$", flags=re.M)
-
-        match = output_ver_re.search(pkgbuild_output.stdout)
+        match = OUTPUT_PKGVER_RE.search(pkgbuild_output.stdout)
         if match:
             pkgver = match.group(1)
-        match = output_rel_re.search(pkgbuild_output.stdout)
+        match = OUTPUT_PKGREL_RE.search(pkgbuild_output.stdout)
         if match:
             pkgrel = match.group(1)
-        match = output_epoch_re.search(pkgbuild_output.stdout)
+        match = OUTPUT_PKGEPOCH_RE.search(pkgbuild_output.stdout)
         if match:
             pkgepoch = match.group(1)
     else:
