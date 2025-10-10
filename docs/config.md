@@ -109,6 +109,7 @@ it was before any build starts.
     name = "helix-git-package"
     pkg_name = "helix-git"
     repo_path = "https://aur.archlinux.org/helix-git"
+    repo_branch = "master"
     skip_branch_up_to_date = false
     only_check_SRCINFO = false
     only_check_PKGBUILD = true
@@ -145,7 +146,13 @@ Defaults to "name" if unset.
 
 If set to `NO_REPO`, the software will not attempt to clone from
 aur.archlinux.org. If unset, the default path
-`https://aur.archlinux.org/{pkgname}.git` will be used.
+`https://aur.archlinux.org/{pkgname}.git` will be used. If set, this path will
+be used when cloning the repo for the first time.
+
+    repo_branch = "master"
+
+If `repo_branch` is set, then it will be the target branch when cloning for the
+first time.
 
     skip_branch_up_to_date = false
 
