@@ -131,20 +131,20 @@ it was before any build starts.
 
 ### Per Package Options Explanation
 
-    #!toml
+    :::toml
     name = "helix-git"
 
 The "name" of the package. This is the name of the git clone directory of a
 package. This is also the name used when cloning from https://aur.archlinux.org
 .
 
-    #!toml
+    :::toml
     pkg_name = "helix-git-package"
 
 The "informal" name of the package. Only used for logging about the package.
 Defaults to "name" if unset.
 
-    #!toml
+    :::toml
     repo_path = "https://aur.archlinux.org/helix-git"
 
 If set to `NO_REPO`, the software will not attempt to clone from
@@ -152,69 +152,69 @@ aur.archlinux.org. If unset, the default path
 `https://aur.archlinux.org/{pkgname}.git` will be used. If set, this path will
 be used when cloning the repo for the first time.
 
-    #!toml
+    :::toml
     repo_branch = "master"
 
 If `repo_branch` is set, then it will be the target branch when cloning for the
 first time.
 
-    #!toml
+    :::toml
     skip_branch_up_to_date = false
 
 Skips prompt for a package if it is already "up-to-date". A package is
 "up-to-date" if the repository does not have a new commit.
 
-    #!toml
+    :::toml
     only_check_SRCINFO = false
 
 Skips prompt for checking between SRCINFO or PKGBUILD and checks SRCINFO
 directly.
 
-    #!toml
+    :::toml
     only_check_PKGBUILD = true
 
 Skips prompt for checking between SRCINFO or PKGBUILD and checks PKGBUILD
 directory.
 
-    #!toml
+    :::toml
     hash_compare_PKGBUILD = true
 
 Skips checking PKGBUILD prompt with "editor" if the hash of the PKGBUILD on
 start of AnotherAURHelper does not match the hash of the PKGBUILD after
 `git pull`.
 
-    #!toml
+    :::toml
     ccache_dir = "/home/user/ccache_dirs/helix_git_does_not_use_ccache"
 
 If "ccache\_dir" is specified, then ccache will be set up for the build and it
 will be cached in the specified directory.
 
-    #!toml
+    :::toml
     sccache_dir = "/home/user/sccache_dirs/helix_may_use_sccache"
 
 If "sccache\_dir" is specified, then sccache will be set up for the build and it
 will be cached in the specified directory.
 
-    #!toml
+    :::toml
     sccache_cache_size = "5G"
 
 Forces the sccache cache size to the given value. (Refer to sccache
 documentation on environment variable SCCACHE\_CACHE\_SIZE for what values are
 acceptable.)
 
-    #!toml
+    :::toml
     sccache_rust_only = true
 
 Forces the use of sccache to be used only by the Rust compiler.
 
-    #!toml
+    :::toml
     link_cargo_registry = false
 
 Binds "$HOME/.cargo/git" to "/build/.cargo/git" and "$HOME/.cargo/registry" to
 "/build/.cargo/registry" in the chroot. This enables sharing of the host's cache
 to the chroot's cache for Rust packages.
 
-    #!toml
+    :::toml
     full_link_cargo_registry = true
 
 Binds "$HOME/.cargo" to "/build/.cargo" in the chroot. This enables sharing of
@@ -223,7 +223,7 @@ used, then "$HOME/.cargo/config.toml" will be copied to a temporary directory,
 and when AnotherAURHelper exits, the config.toml in the temporary directory is
 copied back to prevent it being overwritten somehow during package building.
 
-    #!toml
+    :::toml
     aur_deps = [
         "wlroots-git",
         "sway-git"
@@ -235,7 +235,7 @@ before this package in the config.toml so it always loads the latest built
 version of it as AnotherAURHelper builds all packages in sequential order in
 the config.toml.
 
-    #!toml
+    :::toml
     other_deps = [
         "xorg-xwayland",
         "stdman"
