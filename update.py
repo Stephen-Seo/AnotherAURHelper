@@ -29,6 +29,13 @@ AUR_GIT_REPO_PATH_TEMPLATE = AUR_GIT_REPO_PATH + "/{}.git"
 GLOBAL_LOG_FILE = "log.txt"
 DEFAULT_EDITOR = "/usr/bin/nano"
 IS_DIGIT_REGEX = re.compile("^[0-9]+$")
+EPOCH_RE = re.compile("^([0-9]+):(.+)$")
+GET_PKGVER_RE = re.compile("^\\s*pkgver\\s*=\\s*([a-zA-Z0-9._+-]+)\\s*$")
+GET_PKGREL_RE = re.compile("^\\s*pkgrel\\s*=\\s*([0-9.]+)\\s*$")
+GET_PKGEPOCH_RE = re.compile("^\\s*epoch\\s*=\\s*([0-9]+)\\s*$")
+OUTPUT_PKGVER_RE = re.compile("^pkgver=([a-zA-Z0-9._+-]+)\\s*$", flags=re.M)
+OUTPUT_PKGREL_RE = re.compile("^pkgrel=([0-9.]+)\\s*$", flags=re.M)
+OUTPUT_PKGEPOCH_RE = re.compile("^epoch=([0-9]+)\\s*$", flags=re.M)
 STRFTIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 STRFTIME_LOCAL_FORMAT = "%Y-%m-%dT%H:%M:%S"
 PKG_STATE = None
@@ -108,8 +115,7 @@ class ArchPkgVersion:
         self.versions = []
         self.pkgver = 0
         self.epoch = 0
-        epoch_re = re.compile("^([0-9]+):(.+)$")
-        epoch_match = epoch_re.match(version_str)
+        epoch_match = EPOCH_RE.match(version_str)
         if not epoch_match is None:
             self.epoch = int(epoch_match.group(1))
             version_str = epoch_match.group(2)
@@ -376,6 +382,7 @@ def ensure_pkg_dir_exists(
                     "/usr/bin/env",
                     "git",
                     "clone",
+                    "--single_branch",
                     pkg_state[pkg]["repo_path"],
                     pkgdir,
                 ),
@@ -397,6 +404,59 @@ def ensure_pkg_dir_exists(
             other_state=other_state,
         )
         return False
+    elif "repo_branch" in pkg_state[pkg]:
+        try:
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "git",
+                    "clone",
+                    "--branch",
+                    pkg_state[pkg]["repo_branch"],
+                    "--single-branch",
+                    pkg_state[pkg]["repo_path"],
+                    pkgdir,
+                ),
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            log_print(
+                'ERROR: Failed to git clone "{}" with branch "{}"'.format(
+                    pkg_state[pkg]["repo_path"], pkg_state[pkg]["repo_branch"]
+                ),
+                other_state=other_state,
+            )
+            return False
+        log_print(
+            'Cloned dir "{}" tracking branch "{}".'.format(
+                pkg, pkg_state[pkg]["repo_branch"]
+            ),
+            other_state=other_state,
+        )
+        return True
+    else:
+        try:
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "git",
+                    "clone",
+                    "--single-branch",
+                    pkg_state[pkg]["repo_path"],
+                    pkgdir,
+                ),
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            log_print(
+                'ERROR: Failed to git clone "{}"'.format(
+                    pkg_state[pkg]["repo_path"]
+                ),
+                other_state=other_state,
+            )
+            return False
+        log_print('Cloned dir "{}".'.format(pkg), other_state=other_state)
+        return True
     return False
 
 
@@ -427,10 +487,73 @@ def update_pkg_dir(
 
     pkgdir = os.path.join(other_state["clones_dir"], pkg)
 
+    # get current branch
+    current_branch = None
+    try:
+        result = subprocess.run(
+            ("/usr/bin/env", "git", "branch", "--show-current"),
+            check=True,
+            cwd=pkgdir,
+            capture_output=True,
+            encoding="UTF-8",
+        )
+        current_branch = result.stdout.strip()
+    except subprocess.CalledProcessError:
+        log_print(
+            f'ERROR: Failed to get current branch of "{pkg}" (getting branch)',
+            other_state=other_state,
+        )
+    if current_branch is None or not isinstance(current_branch, str):
+        log_print(
+            f'ERROR: Failed to get current branch of "{pkg}" (validation)',
+            other_state=other_state,
+        )
+        return False, False
+
+    # get remote that branch is tracking
+    current_remote = None
+    current_remote_branch = None
+    try:
+        result = subprocess.run(
+            ("/usr/bin/env", "git", "status", "-sb", "--porcelain"),
+            check=True,
+            cwd=pkgdir,
+            capture_output=True,
+            encoding="UTF-8",
+        )
+        get_remote_re = re.compile(
+            f"^## {current_branch}\\.\\.\\.([^/]+)/([^\\s]+).*?$"
+        )
+        for line in result.stdout.strip().splitlines():
+            match = get_remote_re.fullmatch(line)
+            if match is not None:
+                current_remote = match.group(1)
+                current_remote_branch = match.group(2)
+                break
+    except subprocess.CalledProcessError:
+        log_print(
+            f'ERROR: Failed to get current remote of "{pkg}" (getting remote)',
+            other_state=other_state,
+        )
+    if current_remote is None or not isinstance(current_remote, str):
+        log_print(
+            f'ERROR: Failed to get current remote of "{pkg}" (validation)',
+            other_state=other_state,
+        )
+        return False, False
+    elif current_remote_branch is None or not isinstance(
+        current_remote_branch, str
+    ):
+        log_print(
+            f'ERROR: Failed to get current remote branch of "{pkg}" (validation)',
+            other_state=other_state,
+        )
+        return False, False
+
     # fetch all
     try:
         subprocess.run(
-            ("/usr/bin/env", "git", "fetch", "-p", "--all"),
+            ("/usr/bin/env", "git", "fetch", "-p", current_remote),
             check=True,
             cwd=pkgdir,
         )
@@ -441,60 +564,26 @@ def update_pkg_dir(
         )
         return False, False
 
-    # get remotes
-    remotes = []
+    # get hash of current commit
+    current_commit_hash = None
     try:
         result = subprocess.run(
-            ("/usr/bin/env", "git", "remote"),
+            ("/usr/bin/env", "git", "log", "-1", "--format=format:%H"),
             check=True,
             cwd=pkgdir,
             capture_output=True,
             encoding="UTF-8",
         )
-        remotes = result.stdout.split(sep="\n")
+        current_commit_hash = result.stdout.strip()
     except subprocess.CalledProcessError:
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting remotes).'.format(
-                pkg
-            ),
+            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current commit\'s hash).',
             other_state=other_state,
         )
         return False, False
-    remotes = list(filter(lambda s: len(s) > 0, remotes))
-    if len(remotes) == 0:
+    if current_commit_hash is None or not isinstance(current_commit_hash, str):
         log_print(
-            'ERROR: Failed to update pkg dir of "{}" (getting remotes).'.format(
-                pkg
-            ),
-            other_state=other_state,
-        )
-        return False, False
-
-    # get remote that current branch is tracking
-    selected_remote = None
-    try:
-        result = subprocess.run(
-            ("/usr/bin/env", "git", "status", "-sb", "--porcelain"),
-            check=True,
-            cwd=pkgdir,
-            capture_output=True,
-            encoding="UTF-8",
-        )
-        result_lines = result.stdout.split(sep="\n")
-        for matching_line in filter(lambda s: s.startswith("##"), result_lines):
-            for remote in map(lambda r: r.strip(), remotes):
-                if matching_line.find(remote) != -1:
-                    selected_remote = remote
-                    break
-    except subprocess.CalledProcessError:
-        log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).',
-            other_state=other_state,
-        )
-        return False, False
-    if selected_remote is None or not isinstance(selected_remote, str):
-        log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting branch\'s remote).',
+            f'ERROR: Failed to update pkg dir of "{pkg}" (validating current commit\'s hash).',
             other_state=other_state,
         )
         return False, False
@@ -503,7 +592,14 @@ def update_pkg_dir(
     current_branch_hash = None
     try:
         result = subprocess.run(
-            ("/usr/bin/env", "git", "log", "-1", "--format=format:%H"),
+            (
+                "/usr/bin/env",
+                "git",
+                "log",
+                "-1",
+                "--format=format:%H",
+                f"{current_remote}/{current_remote_branch}",
+            ),
             check=True,
             cwd=pkgdir,
             capture_output=True,
@@ -518,44 +614,13 @@ def update_pkg_dir(
         return False, False
     if current_branch_hash is None or not isinstance(current_branch_hash, str):
         log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting current branch\'s hash).',
-            other_state=other_state,
-        )
-        return False, False
-
-    # get hash of remote branch
-    remote_branch_hash = None
-    try:
-        result = subprocess.run(
-            (
-                "/usr/bin/env",
-                "git",
-                "log",
-                "-1",
-                "--format=format:%H",
-                selected_remote,
-            ),
-            check=True,
-            cwd=pkgdir,
-            capture_output=True,
-            encoding="UTF-8",
-        )
-        remote_branch_hash = result.stdout.strip()
-    except subprocess.CalledProcessError:
-        log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).',
-            other_state=other_state,
-        )
-        return False, False
-    if remote_branch_hash is None or not isinstance(remote_branch_hash, str):
-        log_print(
-            f'ERROR: Failed to update pkg dir of "{pkg}" (getting remote branch\'s hash).',
+            f'ERROR: Failed to update pkg dir of "{pkg}" (validating current branch\'s hash).',
             other_state=other_state,
         )
         return False, False
 
     # update current branch if not same commit
-    if current_branch_hash != remote_branch_hash:
+    if current_commit_hash != current_branch_hash:
         try:
             subprocess.run(
                 ("/usr/bin/env", "git", "pull"), check=True, cwd=pkgdir
@@ -743,9 +808,6 @@ def get_srcinfo_version(pkg: str, other_state: dict[str, Any]):
             other_state=other_state,
         )
         return False, None, None, None
-    pkgver_reprog = re.compile("^\\s*pkgver\\s*=\\s*([a-zA-Z0-9._+-]+)\\s*$")
-    pkgrel_reprog = re.compile("^\\s*pkgrel\\s*=\\s*([0-9.]+)\\s*$")
-    pkgepoch_reprog = re.compile("^\\s*epoch\\s*=\\s*([0-9]+)\\s*$")
     pkgver = None
     pkgrel = None
     pkgepoch = None
@@ -755,9 +817,9 @@ def get_srcinfo_version(pkg: str, other_state: dict[str, Any]):
     ) as fo:
         line = fo.readline()
         while len(line) > 0:
-            pkgver_result = pkgver_reprog.match(line)
-            pkgrel_result = pkgrel_reprog.match(line)
-            pkgepoch_result = pkgepoch_reprog.match(line)
+            pkgver_result = GET_PKGVER_RE.match(line)
+            pkgrel_result = GET_PKGREL_RE.match(line)
+            pkgepoch_result = GET_PKGEPOCH_RE.match(line)
             if pkgver_result:
                 pkgver = pkgver_result.group(1)
             elif pkgrel_result:
@@ -972,19 +1034,13 @@ echo "epoch=$epoch"
             )
             return False, None, None, None
 
-        output_ver_re = re.compile(
-            "^pkgver=([a-zA-Z0-9._+-]+)\\s*$", flags=re.M
-        )
-        output_rel_re = re.compile("^pkgrel=([0-9.]+)\\s*$", flags=re.M)
-        output_epoch_re = re.compile("^epoch=([0-9]+)\\s*$", flags=re.M)
-
-        match = output_ver_re.search(pkgbuild_output.stdout)
+        match = OUTPUT_PKGVER_RE.search(pkgbuild_output.stdout)
         if match:
             pkgver = match.group(1)
-        match = output_rel_re.search(pkgbuild_output.stdout)
+        match = OUTPUT_PKGREL_RE.search(pkgbuild_output.stdout)
         if match:
             pkgrel = match.group(1)
-        match = output_epoch_re.search(pkgbuild_output.stdout)
+        match = OUTPUT_PKGEPOCH_RE.search(pkgbuild_output.stdout)
         if match:
             pkgepoch = match.group(1)
     else:
@@ -2421,6 +2477,8 @@ def main():
                 pkg_state[entry["name"]]["aur_deps"] = []
             if "repo_path" in entry:
                 pkg_state[entry["name"]]["repo_path"] = entry["repo_path"]
+            if "repo_branch" in entry:
+                pkg_state[entry["name"]]["repo_branch"] = entry["repo_branch"]
             if "pkg_name" in entry:
                 pkg_state[entry["name"]]["pkg_name"] = entry["pkg_name"]
             else:
