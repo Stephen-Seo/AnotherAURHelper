@@ -382,6 +382,7 @@ def ensure_pkg_dir_exists(
                     "/usr/bin/env",
                     "git",
                     "clone",
+                    "--single_branch",
                     pkg_state[pkg]["repo_path"],
                     pkgdir,
                 ),
@@ -403,6 +404,59 @@ def ensure_pkg_dir_exists(
             other_state=other_state,
         )
         return False
+    elif "repo_branch" in pkg_state[pkg]:
+        try:
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "git",
+                    "clone",
+                    "--branch",
+                    pkg_state[pkg]["repo_branch"],
+                    "--single-branch",
+                    pkg_state[pkg]["repo_path"],
+                    pkgdir,
+                ),
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            log_print(
+                'ERROR: Failed to git clone "{}" with branch "{}"'.format(
+                    pkg_state[pkg]["repo_path"], pkg_state[pkg]["repo_branch"]
+                ),
+                other_state=other_state,
+            )
+            return False
+        log_print(
+            'Cloned dir "{}" tracking branch "{}".'.format(
+                pkg, pkg_state[pkg]["repo_branch"]
+            ),
+            other_state=other_state,
+        )
+        return True
+    else:
+        try:
+            subprocess.run(
+                (
+                    "/usr/bin/env",
+                    "git",
+                    "clone",
+                    "--single-branch",
+                    pkg_state[pkg]["repo_path"],
+                    pkgdir,
+                ),
+                check=True,
+            )
+        except subprocess.CalledProcessError:
+            log_print(
+                'ERROR: Failed to git clone "{}"'.format(
+                    pkg_state[pkg]["repo_path"]
+                ),
+                other_state=other_state,
+            )
+            return False
+        log_print('Cloned dir "{}".'.format(pkg), other_state=other_state)
+        return True
     return False
 
 
@@ -2423,6 +2477,8 @@ def main():
                 pkg_state[entry["name"]]["aur_deps"] = []
             if "repo_path" in entry:
                 pkg_state[entry["name"]]["repo_path"] = entry["repo_path"]
+            if "repo_branch" in entry:
+                pkg_state[entry["name"]]["repo_branch"] = entry["repo_branch"]
             if "pkg_name" in entry:
                 pkg_state[entry["name"]]["pkg_name"] = entry["pkg_name"]
             else:
