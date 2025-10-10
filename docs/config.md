@@ -2,31 +2,37 @@
 
 ## Global Settings
 
+    :::toml
     chroot = "/home/user/Downloads/chroot"
 
 Location of the chroot.
 
+    :::toml
     tmpfs = false
 
 If set to true, creates a new directory, sets it up with tmpfs, and copies the
 chroot to it (recommended to have +32GiB ram if this option is used).
 
+    :::toml
     pkg_out_dir = "/home/user/pkgs_out"
 
 The location to place built packages. Should be the same location for the
 repository tar file.
 
+    :::toml
     repo = "/home/user/pkgs_out/custom.db.tar"
 
 The repository (tar) file. Change "custom" to any other name to change the name
 of the repository
 
+    :::toml
     clones_dir = "/home/user/Downloads/aur"
 
 The location to place the AUR-package-git-clones. Each subdirectory in this
 directory should have a PKGBUILD and .SRCINFO as each AUR package should have
 these files.
 
+    :::toml
     gpg_dir = "/home/user/gnupg_dir"
 
 The location of the GNUPGHOME dir. This keeps track of gpg keys and is used to
@@ -35,16 +41,19 @@ verify sources within PKGBUILDs that use a gpg key. If a build fails due to an
 --recv-keys FINGERPRINT` or `GNUPGHOME=/home/user/gnupg_dir gpg --import <
 pub_key_file` to save a signer's public key.
 
+    :::toml
     logs_dir = "/home/user/Downloads/logs"
 
 The directory to place all logs.
 
+    :::toml
     signing_gpg_dir = "/home/user/signing_gnupg_dir"
 
 The location to store the signing key used for every package and repo stored in
 "pkg\_out\_dir" and "repo". It is recommended to only generate a "SC" key as
 mentioned in the guide (--full-gen-key, RSA sign only or ECC sign only).
 
+    :::toml
     signing_gpg_key_fp = "THE_GPG_KEY_FINGERPRINT"
 
 A 40-character-long hexadecimal fingerprint of the signing key. This is
@@ -52,34 +61,41 @@ typically displayed using `GNUPGHOME=/home/user/signing_gnupg_dir gpg -K`. If
 you want to use a subkey to sign the packages, then you can list/find them with
 `GNUPGHOME=/home/user/signing_gnupg_dir gpg -K --with-subkey-fingerprint`.
 
+    :::toml
     editor = "/usr/bin/vim"
 
 The text editor to use when viewing PKGBUILDs or other files. It can be set to
 `editor = "/usr/bin/nano"` or any other editor of your choosing.
 
+    :::toml
     is_timed = true
 
 If "is\_timed" is set to "true", then all printed logs will have a timestamp.
 Note that the timestamps will be in UTC.
 
+    :::toml
     is_log_timed = true
 
 if "is\_log\_timed" is set to "true", then all saved logs will have a timestamp.
 Note that the timestamps will be in UTC.
 
+    :::toml
     log_limit = 1073741824
 
 The log-file-size limit in bytes. The default is 1GiB.
 
+    :::toml
     error_on_limit = true
 
 If "error\_on\_limit" is "true", then the currently built package will be
 aborted if its log file exceeds the size limit set by "log\_limit".
 
+    :::toml
     datetime_in_local_time = true
 
 If true, timestamps will be in localtime instead of UTC
 
+    :::toml
     print_state_info_only_building_sigusr1 = true
 
 If this option is set to "true", then only the packages that are to be built
@@ -87,6 +103,7 @@ will be logged when SIGUSR1 is received during building. Otherwise, all packages
 listed in the config.toml will be printed with their status. Note that SIGUSR1
 does not stop the build.
 
+    :::toml
     persistent_state_db = "/home/user/aur_helper_state.db"
 
 The path for AnotherAURHelper to create and use a sqlite database to help keep
@@ -94,6 +111,7 @@ track of things. The current use of it is to check if a PKGBUILD of a package
 was previously determined to be "OK" and will therefore skip checking the
 PKGBUILD depending on the per-package options.
 
+    :::toml
     temporary_files_dir = "/home/user/aur_helper_temp_files"
 
 The path for AnotherAURHelper to place temporary files. It is currently used to
