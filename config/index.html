@@ -204,6 +204,7 @@ it was before any build starts.</p>
 <span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;helix-git-package&quot;</span>
 <span class="na">pkg_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;helix-git&quot;</span>
 <span class="na">repo_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;https://aur.archlinux.org/helix-git&quot;</span>
+<span class="na">repo_branch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;master&quot;</span>
 <span class="na">skip_branch_up_to_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
 <span class="na">only_check_SRCINFO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
 <span class="na">only_check_PKGBUILD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
@@ -241,7 +242,13 @@ Defaults to "name" if unset.</p>
 
 <p>If set to <code>NO_REPO</code>, the software will not attempt to clone from
 aur.archlinux.org. If unset, the default path
-<code>https://aur.archlinux.org/{pkgname}.git</code> will be used.</p>
+<code>https://aur.archlinux.org/{pkgname}.git</code> will be used. If set, this path will
+be used when cloning the repo for the first time.</p>
+<div class="codehilite"><pre><span></span><code>repo_branch = &quot;master&quot;
+</code></pre></div>
+
+<p>If <code>repo_branch</code> is set, then it will be the target branch when cloning for the
+first time.</p>
 <div class="codehilite"><pre><span></span><code>skip_branch_up_to_date = false
 </code></pre></div>
 
