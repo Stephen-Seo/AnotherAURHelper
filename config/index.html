@@ -201,28 +201,28 @@ it was before any build starts.</p>
 <h2 id="per-package-settings">Per Package Settings</h2>
 <h3 id="per-package-example">Per Package Example</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">[[entry]]</span>
-<span class="na">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;helix-git-package&quot;</span>
-<span class="na">pkg_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;helix-git&quot;</span>
-<span class="na">repo_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;https://aur.archlinux.org/helix-git&quot;</span>
-<span class="na">repo_branch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;master&quot;</span>
-<span class="na">skip_branch_up_to_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-<span class="na">only_check_SRCINFO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-<span class="na">only_check_PKGBUILD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-<span class="na">hash_compare_PKGBUILD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-<span class="na">ccache_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/user/ccache_dirs/helix_git_does_not_use_ccache&quot;</span>
-<span class="na">sccache_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;/home/user/sccache_dirs/helix_may_use_sccache&quot;</span>
-<span class="na">sccache_cache_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;5G&quot;</span>
-<span class="na">sccache_rust_only</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-<span class="na">link_cargo_registry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">false</span>
-<span class="na">full_link_cargo_registry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">true</span>
-<span class="na">aur_deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span>
-<span class="w">    </span><span class="na">&quot;wlroots-git&quot;,</span>
-<span class="w">    </span><span class="na">&quot;sway-git&quot;</span>
-<span class="na">]</span>
-<span class="na">other_deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">[</span>
-<span class="w">    </span><span class="na">&quot;xorg-xwayland&quot;,</span>
-<span class="w">    </span><span class="na">&quot;stdman&quot;</span>
-<span class="na">]</span>
+<span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;helix-git&quot;</span>
+<span class="n">pkg_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;helix-git-package&quot;</span>
+<span class="n">repo_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://aur.archlinux.org/helix-git&quot;</span>
+<span class="n">repo_branch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;master&quot;</span>
+<span class="n">skip_branch_up_to_date</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">only_check_SRCINFO</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">only_check_PKGBUILD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">hash_compare_PKGBUILD</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">ccache_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/user/ccache_dirs/helix_git_does_not_use_ccache&quot;</span>
+<span class="n">sccache_dir</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;/home/user/sccache_dirs/helix_may_use_sccache&quot;</span>
+<span class="n">sccache_cache_size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;5G&quot;</span>
+<span class="n">sccache_rust_only</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">link_cargo_registry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span>
+<span class="n">full_link_cargo_registry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
+<span class="n">aur_deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;wlroots-git&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;sway-git&quot;</span>
+<span class="p">]</span>
+<span class="n">other_deps</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">&quot;xorg-xwayland&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">&quot;stdman&quot;</span>
+<span class="p">]</span>
 </code></pre></div>
 
 <h3 id="per-package-options-explanation">Per Package Options Explanation</h3>
