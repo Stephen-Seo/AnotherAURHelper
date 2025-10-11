@@ -123,9 +123,10 @@ it was before any build starts.
 
 ### Per Package Example
 
+    :::toml
     [[entry]]
-    name = "helix-git-package"
-    pkg_name = "helix-git"
+    name = "helix-git"
+    pkg_name = "helix-git-package"
     repo_path = "https://aur.archlinux.org/helix-git"
     repo_branch = "master"
     skip_branch_up_to_date = false
