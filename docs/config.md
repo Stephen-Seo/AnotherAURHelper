@@ -168,8 +168,8 @@ Defaults to "name" if unset.
 
 If set to `NO_REPO`, the software will not attempt to clone from
 aur.archlinux.org. If unset, the default path
-`https://aur.archlinux.org/{pkgname}.git` will be used. If set, this path will
-be used when cloning the repo for the first time.
+`https://aur.archlinux.org/{name}.git` will be used. If set, this path will be
+used when cloning the repo for the first time.
 
     :::toml
     repo_branch = "master"
