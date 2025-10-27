@@ -382,7 +382,7 @@ def ensure_pkg_dir_exists(
                     "/usr/bin/env",
                     "git",
                     "clone",
-                    "--single_branch",
+                    "--single-branch",
                     pkg_state[pkg]["repo_path"],
                     pkgdir,
                 ),
