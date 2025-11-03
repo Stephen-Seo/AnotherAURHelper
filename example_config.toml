@@ -20,6 +20,10 @@ is_log_timed = true
 log_limit = 1073741824
 # If true, then make the build fail if the limit is reached
 error_on_limit = false
+# If set, forces an hour-offset for timezone. Has higher priorty than "datetime_in_local_time"
+tz_force_offset_hours = 3
+# If set, forces a minute-offset for timezone and requires "tz_force_offset_hours". Has higher priorty than "datetime_in_local_time"
+#tz_force_offset_minutes = 0
 # If true, timestamps are in localtime. If false, timestamps are UTC.
 datetime_in_local_time = true
 # If true, all builds will be done in a tmpfs. Recommended to have a lot of RAM and/or swap.

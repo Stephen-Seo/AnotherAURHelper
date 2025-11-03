@@ -305,7 +305,14 @@ def get_datetime_timezone_now(other_state) -> str:
     If other_state["datetime_in_local_time"] is True, then the returned string
     is in localtime."""
 
-    if other_state["datetime_in_local_time"]:
+    if "tz_force_offset_hours" in other_state:
+        minutes = 0
+        if "tz_force_offset_minutes" in other_state:
+            minutes = other_state["tz_force_offset_minutes"]
+        tz = datetime.timezone(datetime.timedelta(hours=other_state["tz_force_offset_hours"], minutes=minutes))
+        lt = datetime.datetime.now(tz)
+        return lt.strftime(STRFTIME_LOCAL_FORMAT) + timedelta_to_offset_string(tz.utcoffset(None))
+    elif other_state["datetime_in_local_time"]:
         lt = datetime.datetime.now(datetime.timezone.utc).astimezone()
         return lt.strftime(STRFTIME_LOCAL_FORMAT) + timedelta_to_offset_string(
             lt.tzinfo.utcoffset(None)
@@ -2690,6 +2697,10 @@ def main():
                 other_state["print_state_info_only_building_sigusr1"]
             )
         )
+        if "tz_force_offset_hours" in d:
+            other_state["tz_force_offset_hours"] = d["tz_force_offset_hours"]
+        if "tz_force_offset_minutes" in d:
+            other_state["tz_force_offset_minutes"] = d["tz_force_offset_minutes"]
     else:
         log_print(
             'ERROR: At least "--config" or "--pkg" must be specified',
