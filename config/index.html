@@ -177,6 +177,12 @@ aborted if its log file exceeds the size limit set by "log_limit".</p>
 </code></pre></div>
 
 <p>If true, timestamps will be in localtime instead of UTC</p>
+<div class="codehilite"><pre><span></span><code><span class="n">tz_force_offset_hours</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">-7</span>
+<span class="n">tz_force_offset_minutes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span>
+</code></pre></div>
+
+<p>If set, forces the specified time offset when printing logs, regardless of the
+option <code>datetime_in_local_time</code>.</p>
 <div class="codehilite"><pre><span></span><code><span class="n">print_state_info_only_building_sigusr1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span>
 </code></pre></div>
 
