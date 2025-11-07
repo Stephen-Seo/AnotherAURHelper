@@ -96,6 +96,13 @@ aborted if its log file exceeds the size limit set by "log\_limit".
 If true, timestamps will be in localtime instead of UTC
 
     :::toml
+    tz_force_offset_hours = -7
+    tz_force_offset_minutes = 0
+
+If set, forces the specified time offset when printing logs, regardless of the
+option `datetime_in_local_time`.
+
+    :::toml
     print_state_info_only_building_sigusr1 = true
 
 If this option is set to "true", then only the packages that are to be built
