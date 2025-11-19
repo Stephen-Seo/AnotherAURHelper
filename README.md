@@ -1,5 +1,8 @@
 # Another AUR Helper (incomplete)
 
+[Note, AnotherAURHelper2 exists and probably supersedes
+this](https://github.com/Stephen-Seo/AnotherAURHelper2)
+
 AUR is the Arch User Repository, where anyone can upload a PKGBUILD and
 supplementary sources to allow others to build their own packages for use in the
 Arch Linux distribution.
